@@ -12,14 +12,15 @@ void task_create_fail(uint8_t taskid)
 
 void gpio_init()
 {
-    enc_gpio_init();
+    
 }
 
 void app_main(void)
 {
-    gpio_init();   
+    //gpio_init();   
+    enc_gpio_init();
     enc_pnct_init();
-
+    vis_connect_init();
 
 
 
