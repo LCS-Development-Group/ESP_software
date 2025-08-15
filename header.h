@@ -11,34 +11,45 @@
 
 /*mine*/
 #include "driver/gpio.h"
+
 /*======================================================================================*/
 /* GENERAL                                                                              */
 /*======================================================================================*/
-#define TASK_NUM 1
+#define TASK_NUM 3
 #define ENC_TASKID 0
-
-
+#define CON_TASKID 1
+#define VIS_TASKID 2
 
 #define ENC_EVBIT (1<<ENC_TASKID)
+#define CON_EVBIT (1<<CON_TASKID)
+#define VIS_EVBIT (1<<VIS_TASKID)
+
 #define TASK_START_SYNCBIT (1<<23)
 #define APP_MAIN_EVBIT (1<<22)
 
 extern EventGroupHandle_t main_event_group;
 extern TaskHandle_t task_handle_list[TASK_NUM];
 
+/*======================================================================================*/
+/* Controller                                                                           */
+/*======================================================================================*/
+void task_controller_main(void *args);
 
-
+/*======================================================================================*/
+/* Visual                                                                               */
+/*======================================================================================*/
+void task_visual_main(void *args);
 
 /*======================================================================================*/
 /* UI ROTATIONAL ENCODER                                                                */
 /*======================================================================================*/
+void task_encoder_main(void *args);
 #define ENC_CLK_PIN 1
 #define ENC_DT_PIN 2
 #define ENC_SW_PIN 42
 #define ENC_PCNT_HIGH 1      //after reaching that many steps a one "big step" is registered
 #define ENC_PCNT_LOW (-1)*ENC_PCNT_HIGH
 extern uint8_t enc_pos;
-void task_encoder_main(void *args);
 void enc_gpio_init();
 void enc_pnct_init();
 
@@ -46,9 +57,6 @@ void enc_pnct_init();
 #define ENC_NTCODE_ROT 1
 #define ENC_NTCODE_SW 2
 
-
-
-void task_test(void *args);
 
 
 /*======================================================================================*/

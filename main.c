@@ -31,6 +31,8 @@ void app_main(void)
     }
 
     if(xTaskCreate(task_encoder_main, "task_encoder", 2048, NULL, 1, &task_handle_list[ENC_TASKID])!=pdPASS) task_create_fail(ENC_TASKID);
+    if(xTaskCreate(task_controller_main, "task_controller", 2048, NULL, 1, &task_handle_list[CON_TASKID])!=pdPASS) task_create_fail(VIS_TASKID);
+    if(xTaskCreate(task_visual_main, "task_visual", 8192, NULL, 1, &task_handle_list[VIS_TASKID])!=pdPASS) task_create_fail(VIS_TASKID);
     
     vTaskDelay(pdMS_TO_TICKS(100));
     xEventGroupSetBits(main_event_group, TASK_START_SYNCBIT);//start the tasks
