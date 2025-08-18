@@ -1,5 +1,6 @@
 #include "header.h"
 #include "driver/pulse_cnt.h"
+#include "button.h"
 
 pcnt_unit_handle_t count;
 pcnt_unit_config_t count_cfg;
@@ -7,6 +8,7 @@ pcnt_channel_handle_t count_channel;
 pcnt_chan_config_t count_channel_cfg;
 pcnt_glitch_filter_config_t glitch_config;
 pcnt_event_callbacks_t count_callback;
+button_t enc_sw;
 
 uint8_t enc_pos=0, enc_temp_pin;
 
@@ -18,12 +20,19 @@ static bool counter_isr(pcnt_unit_handle_t unit, const pcnt_watch_event_data_t *
     return true;
 }
 
-void /*IRAM_ATTR*/ enc_sw_isr(void *args) 
+// void /*IRAM_ATTR*/ enc_sw_isr(void *args) 
+// {
+//     //enc_temp_pin=(uint8_t)(intptr_t)args;
+//     BaseType_t awoken_task=pdFALSE;
+//     //if(xEventGroupSetBitsFromISR(main_event_group, ENC_EVBIT, &awoken_task)==pdPASS) portYIELD_FROM_ISR(awoken_task);
+//     //ESP_LOGI("Encoder", "SWEVG");
+//     if(xTaskNotifyIndexedFromISR(task_handle_list[ENC_TASKID], 0, ENC_NTCODE_SW, eSetValueWithoutOverwrite, &awoken_task)==pdPASS) portYIELD_FROM_ISR(awoken_task);
+//     //if(xTaskNotifyIndexedFromISR(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_SW, eSetValueWithoutOverwrite, &awoken_task)==pdPASS) portYIELD_FROM_ISR(awoken_task);
+// }
+
+void enc_sw_cb(button_t *btn, button_state_t state)
 {
-    enc_temp_pin=(uint8_t)(intptr_t)args;
-    BaseType_t awoken_task=pdFALSE;
-    //if(xEventGroupSetBitsFromISR(main_event_group, ENC_EVBIT, &awoken_task)==pdPASS) portYIELD_FROM_ISR(awoken_task);
-    if(xTaskNotifyIndexedFromISR(task_handle_list[ENC_TASKID], 0, ENC_NTCODE_SW, eSetValueWithoutOverwrite, &awoken_task)==pdPASS) portYIELD_FROM_ISR(awoken_task);
+    if(state==BUTTON_CLICKED) xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, ENC_NTCODE_SW, eSetValueWithOverwrite);
 }
 
 void task_encoder_main(void *args)
@@ -48,10 +57,14 @@ void task_encoder_main(void *args)
                 {
                 case ENC_PCNT_HIGH:
                     enc_pos++;
+                    //ESP_LOGI("Encoder", "POS++");
+                    xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_POS, eSetValueWithoutOverwrite);
                     break;
 
                 case ENC_PCNT_LOW://wciśnięcie przycisku
                     enc_pos--;
+                    //ESP_LOGI("Encoder", "POS--");
+                    xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_NEG, eSetValueWithoutOverwrite);
                     break;
 
                 default:
@@ -64,6 +77,8 @@ void task_encoder_main(void *args)
 
             case ENC_NTCODE_SW:
                 //stuff
+                //ESP_LOGI("Encoder", "SW");
+                xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_SW, eSetValueWithoutOverwrite);
                 break;
                 
             default:
@@ -94,14 +109,24 @@ void enc_gpio_init()
     gpio_config(&cfg);
 
     /*SW*/
-    cfg.pin_bit_mask=(1ULL<<ENC_SW_PIN);
-    cfg.intr_type=GPIO_INTR_NEGEDGE;
-    gpio_config(&cfg);
+    // cfg.pin_bit_mask=(1ULL<<ENC_SW_PIN);
+    // cfg.intr_type=GPIO_INTR_NEGEDGE;
+    // gpio_config(&cfg);
     
-    gpio_install_isr_service(ESP_INTR_FLAG_LEVEL1);
+    //gpio_install_isr_service(ESP_INTR_FLAG_LEVEL1);
 
     //gpio_isr_handler_add(ENC_CLK_PIN, enc_isr, (void*)ENC_CLK_PIN);
-    gpio_isr_handler_add(ENC_SW_PIN, enc_sw_isr, (void*)ENC_SW_PIN);
+    //gpio_isr_handler_add(ENC_SW_PIN, enc_sw_isr, (void*)ENC_SW_PIN);
+
+    /*SW button.h*/
+    enc_sw.gpio=ENC_SW_PIN;
+    enc_sw.internal_pull=true;
+    enc_sw.pressed_level=0;
+    enc_sw.autorepeat=false;
+    enc_sw.callback=NULL;
+    enc_sw.ctx=NULL;
+    ESP_ERROR_CHECK(button_init(&enc_sw));
+    enc_sw.callback=enc_sw_cb;
 }
 void enc_pnct_init()
 {

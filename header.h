@@ -12,7 +12,6 @@
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
 
-
 /*======================================================================================*/
 /* GENERAL                                                                              */
 /*======================================================================================*/
@@ -36,28 +35,6 @@ extern TaskHandle_t task_handle_list[TASK_NUM];
 /*======================================================================================*/
 void task_controller_main(void *args);
 
-#define FIELD_PER_PAGE 10
-#define PRE_TEXT_LEN 5
-#define POST_TEXT_LEM 5
-typedef enum {FT_OUTPUT, FT_TEXT, FT_INPUT, FT_TOGGLE, FT_DISABLE, FT_RETURN} t_field_type;
-typedef struct 
-{
-    char* pre_text;
-    char* post_text;
-    t_field_type field_type;
-}t_field;
-
-
-#define PAGE_NUM 4
-#define NAME_LEN 10
-typedef struct 
-{
-    char name[NAME_LEN+1];
-    t_field field_list[FIELD_PER_PAGE];
-} t_page;
-extern t_page page_list[PAGE_NUM];
-void init_pages();
-#define PAGE_INFO_NUMBER 0
 
 /*======================================================================================*/
 /* Visual                                                                               */
@@ -86,6 +63,10 @@ void task_visual_main(void *args);
 #define EXAMPLE_LVGL_TASK_MIN_DELAY_MS 1000 / CONFIG_FREERTOS_HZ
 #define EXAMPLE_LVGL_TASK_STACK_SIZE   (4 * 1024)
 #define EXAMPLE_LVGL_TASK_PRIORITY     2
+
+#define TEMP_VIS_NTCODE_CUR_POS 0
+#define TEMP_VIS_NTCODE_CUR_NEG 1
+#define TEMP_VIS_NTCODE_CUR_SW 2
 
 void vis_connect_init();
 
