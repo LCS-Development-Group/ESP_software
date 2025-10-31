@@ -52,8 +52,8 @@ void task_visual_main(void *args)
     fill_bitmask(0x0000);
     esp_lcd_panel_draw_bitmap(lcd_handle, 0, 0, LCD_VRES, LCD_HRES, bitmask);
     vTaskDelay(pdMS_TO_TICKS(100));
-    draw_text("TEST 19.08.2025",0, 0);
-    draw_text("K. PACH 275442",1, 0);
+    draw_text((char*)"TEST 19.08.2025",0, 0);
+    draw_text((char*)"K. PACH 275442",1, 0);
 
     //vTaskDelay(pdMS_TO_TICKS(000));
     vTaskDelay(portMAX_DELAY); //temporary
@@ -66,7 +66,7 @@ void vis_connect_init()
     lcd_bl_cfg.mode=GPIO_MODE_OUTPUT;
     lcd_bl_cfg.pin_bit_mask=1ULL<<LCD_BL_PIN;
     lcd_bl_cfg.pull_down_en=GPIO_PULLDOWN_DISABLE;
-    lcd_bl_cfg.pull_up_en=GPIO_PULLDOWN_DISABLE;
+    lcd_bl_cfg.pull_up_en=GPIO_PULLUP_DISABLE;
     lcd_bl_cfg.intr_type=GPIO_INTR_DISABLE;
     ESP_ERROR_CHECK(gpio_config(&lcd_bl_cfg));
 

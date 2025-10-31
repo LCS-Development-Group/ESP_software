@@ -39,12 +39,12 @@ void task_visual_main(void *args);
 #define LCD_CLOCK_HZ            (10 * 1000 * 1000) //10MHz
 #define LCD_BL_ON_LVL           1
 #define LCD_BL_OFF_LVL          !LCD_BL_ON_LVL //necessery?
-#define LCD_DIN_PIN             10 //din
-#define LCD_CLK_PIN             9 //clk
-#define LCD_CS_PIN              8 //cs
-#define LCD_DC_PIN              18 //dc
-#define LCD_RST_PIN             17 //rst
-#define LCD_BL_PIN              16 //bl
+#define LCD_DIN_PIN             GPIO_NUM_10 //din
+#define LCD_CLK_PIN             GPIO_NUM_9 //clk
+#define LCD_CS_PIN              GPIO_NUM_8 //cs
+#define LCD_DC_PIN              GPIO_NUM_18 //dc
+#define LCD_RST_PIN             GPIO_NUM_17 //rst
+#define LCD_BL_PIN              GPIO_NUM_16 //bl
 #define LCD_HRES                240 
 #define LCD_VRES                320
 #define LCD_BITS_PX             16
@@ -69,9 +69,9 @@ void vis_connect_init();
 /* UI ROTATIONAL ENCODER                                                                */
 /*======================================================================================*/
 void task_encoder_main(void *args);
-#define ENC_CLK_PIN 14
-#define ENC_DT_PIN 13
-#define ENC_SW_PIN 12
+#define ENC_CLK_PIN GPIO_NUM_14
+#define ENC_DT_PIN GPIO_NUM_13
+#define ENC_SW_PIN GPIO_NUM_12
 #define ENC_PCNT_HIGH 1      //after reaching that many steps a one "big step" is registered
 #define ENC_PCNT_LOW (-1)*ENC_PCNT_HIGH
 extern uint8_t enc_pos;

@@ -10,7 +10,7 @@ void task_create_fail(uint8_t taskid)
     exit(-1);
 }
 
-void app_main(void)
+extern "C" void app_main(void)
 {
     enc_gpio_init();
     enc_pnct_init();
