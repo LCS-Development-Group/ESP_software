@@ -20,16 +20,6 @@ static bool counter_isr(pcnt_unit_handle_t unit, const pcnt_watch_event_data_t *
     return true;
 }
 
-// void /*IRAM_ATTR*/ enc_sw_isr(void *args) 
-// {
-//     //enc_temp_pin=(uint8_t)(intptr_t)args;
-//     BaseType_t awoken_task=pdFALSE;
-//     //if(xEventGroupSetBitsFromISR(main_event_group, ENC_EVBIT, &awoken_task)==pdPASS) portYIELD_FROM_ISR(awoken_task);
-//     //ESP_LOGI("Encoder", "SWEVG");
-//     if(xTaskNotifyIndexedFromISR(task_handle_list[ENC_TASKID], 0, ENC_NTCODE_SW, eSetValueWithoutOverwrite, &awoken_task)==pdPASS) portYIELD_FROM_ISR(awoken_task);
-//     //if(xTaskNotifyIndexedFromISR(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_SW, eSetValueWithoutOverwrite, &awoken_task)==pdPASS) portYIELD_FROM_ISR(awoken_task);
-// }
-
 void enc_sw_cb(button_t *btn, button_state_t state)
 {
     if(state==BUTTON_CLICKED) xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, ENC_NTCODE_SW, eSetValueWithOverwrite);
@@ -76,7 +66,6 @@ void task_encoder_main(void *args)
                 break;
 
             case ENC_NTCODE_SW:
-                //stuff
                 //ESP_LOGI("Encoder", "SW");
                 xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_SW, eSetValueWithoutOverwrite);
                 break;
@@ -108,16 +97,6 @@ void enc_gpio_init()
     cfg.intr_type=GPIO_INTR_DISABLE;
     gpio_config(&cfg);
 
-    /*SW*/
-    // cfg.pin_bit_mask=(1ULL<<ENC_SW_PIN);
-    // cfg.intr_type=GPIO_INTR_NEGEDGE;
-    // gpio_config(&cfg);
-    
-    //gpio_install_isr_service(ESP_INTR_FLAG_LEVEL1);
-
-    //gpio_isr_handler_add(ENC_CLK_PIN, enc_isr, (void*)ENC_CLK_PIN);
-    //gpio_isr_handler_add(ENC_SW_PIN, enc_sw_isr, (void*)ENC_SW_PIN);
-
     /*SW button.h*/
     enc_sw.gpio=ENC_SW_PIN;
     enc_sw.internal_pull=true;
@@ -144,7 +123,7 @@ void enc_pnct_init()
     pcnt_channel_set_edge_action(count_channel, PCNT_CHANNEL_EDGE_ACTION_DECREASE, PCNT_CHANNEL_EDGE_ACTION_INCREASE);
     pcnt_channel_set_level_action(count_channel, PCNT_CHANNEL_LEVEL_ACTION_KEEP, PCNT_CHANNEL_LEVEL_ACTION_INVERSE);
 
-    glitch_config.max_glitch_ns=1000;
+    glitch_config.max_glitch_ns=10000;
     pcnt_unit_set_glitch_filter(count, &glitch_config);
     
     count_callback.on_reach=counter_isr;//register callback function

@@ -50,22 +50,7 @@
 #define GUI_FONT_INDEX_PERCENT 36
 #define GUI_FONT_INDEX_DOT 37
 #define GUI_FONT_INDEX_DEGC 38
-//#define GUI_FONT_INDEX_SPACE 40
+#define GUI_FONT_INDEX_SPACE 39
 
 extern uint16_t font[][GUI_FONT_PX];
 #endif
-
-/*======================================================================================*/
-/* PAGES                                                                                */
-/*======================================================================================*/
-
-#define GUI_PAGE_H 48
-#define GUI_PAGE_W 72
-#define GUI_PAGE_PX (GUI_PAGE_H*GUI_PAGE_W)
-
-#define GUI_PAGE_INDEX_INFO 0
-#define GUI_PAGE_INDEX_UAR 1
-#define GUI_PAGE_INDEX_WIFI 2
-#define GUI_PAGE_INDEX_BLANK 3
-
-extern uint16_t pages[][GUI_PAGE_PX];

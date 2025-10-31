@@ -17,11 +17,12 @@
 /*======================================================================================*/
 #define TASK_NUM 3
 #define ENC_TASKID 0
-#define CON_TASKID 1
+#define GUI_TASKID 1
 #define VIS_TASKID 2
 
+
 #define ENC_EVBIT (1<<ENC_TASKID)
-#define CON_EVBIT (1<<CON_TASKID)
+#define GUI_EVBIT (1<<GUI_TASKID)
 #define VIS_EVBIT (1<<VIS_TASKID)
 
 #define TASK_START_SYNCBIT (1<<23)
@@ -31,12 +32,6 @@ extern EventGroupHandle_t main_event_group;
 extern TaskHandle_t task_handle_list[TASK_NUM];
 
 /*======================================================================================*/
-/* Controller                                                                           */
-/*======================================================================================*/
-void task_controller_main(void *args);
-
-
-/*======================================================================================*/
 /* Visual                                                                               */
 /*======================================================================================*/
 void task_visual_main(void *args);
@@ -44,12 +39,12 @@ void task_visual_main(void *args);
 #define LCD_CLOCK_HZ            (10 * 1000 * 1000) //10MHz
 #define LCD_BL_ON_LVL           1
 #define LCD_BL_OFF_LVL          !LCD_BL_ON_LVL //necessery?
-#define LCD_DIN_PIN             9 //din
-#define LCD_CLK_PIN             10 //clk
-#define LCD_CS_PIN              11 //cs
-#define LCD_DC_PIN              12 //dc
-#define LCD_RST_PIN             13 //rst
-#define LCD_BL_PIN              14 //bl
+#define LCD_DIN_PIN             10 //din
+#define LCD_CLK_PIN             9 //clk
+#define LCD_CS_PIN              8 //cs
+#define LCD_DC_PIN              18 //dc
+#define LCD_RST_PIN             17 //rst
+#define LCD_BL_PIN              16 //bl
 #define LCD_HRES                240 
 #define LCD_VRES                320
 #define LCD_BITS_PX             16
@@ -74,9 +69,9 @@ void vis_connect_init();
 /* UI ROTATIONAL ENCODER                                                                */
 /*======================================================================================*/
 void task_encoder_main(void *args);
-#define ENC_CLK_PIN 1
-#define ENC_DT_PIN 2
-#define ENC_SW_PIN 42
+#define ENC_CLK_PIN 14
+#define ENC_DT_PIN 13
+#define ENC_SW_PIN 12
 #define ENC_PCNT_HIGH 1      //after reaching that many steps a one "big step" is registered
 #define ENC_PCNT_LOW (-1)*ENC_PCNT_HIGH
 extern uint8_t enc_pos;
@@ -87,6 +82,18 @@ void enc_pnct_init();
 #define ENC_NTCODE_ROT 1
 #define ENC_NTCODE_SW 2
 
+/*======================================================================================*/
+/* GUI                                                                                  */
+/*======================================================================================*/
+void task_gui_main(void *args);
+// enum t_field_type{subpage, input_onoff, input_float, output_float, output_text};
+// typedef struct t_gui_field
+// {
+//     t_field_type field_type;
+//     char text[18];
+//     void *link;
+// };
+// extern t_gui_field gui_main_menu[];
 
 
 /*======================================================================================*/
