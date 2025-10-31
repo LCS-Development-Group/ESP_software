@@ -11,7 +11,7 @@
 ## Promotor
 **Promotor:** Dr Maciej Kowalczyk
 **Konsultant:** Mgr inż. Michał Pietrzak
-Praca wykonana w współpracy z Katedrą Teorii Pola, Układów Elektronicznych i Optoelektroniki
+Praca wykonana we współpracy z Katedrą Teorii Pola, Układów Elektronicznych i Optoelektroniki
 
 ## Readme
 Niniejsze repozytorium zawiera kod programu do układu, którego stworzenie było celem pracy inżynierskiej. Zamieszczone pliki należy umieścić w folderze *main/* projektu
@@ -34,11 +34,10 @@ Projekt został zrealizowany przy użyciu rozszerzenia **ESP-IDF** (v5.5) do pro
     - W sekcji *get-started* powinna być opcja **Simple Project**. Jeżeli jest to wybrać ją i pominąć następny krok. Jeżeli nie ma to wybrać **hello_world**
     - Usunąć z folderu projektu pliki: *pytest_hello_world.py* oraz README.md.
 1. Wyczyścić zawartość folderu `main/`
-1. Skopiować do do folderu `main/` zawartość tego repozytorium (clone/zip - dowolnie)
-1. W konsoli poleceń 
+1. Skopiować do folderu `main/` zawartość tego repozytorium (clone/zip - dowolnie)
 1. W terminalu (*ctrl+j*) wpisać `idf.py add-dependency "espressif/esp_lcd_ili9341^2.0.0`.
 
-Projekt został pomyślniepobrany i jest gotowy do dalszej pracy.
+Projekt został pomyślnie pobrany i jest gotowy do dalszej pracy.
 ## Edycja Kodu
 Wszelkie pliki `.c` i `.h` znajdujące się w `main/` można edytować. Odradzam edycję plików z np. `managed_components/`. Autor projektu nie odpowiada za niepoprawne działanie programu wynikające z jego edycji przez osoby trzecie.
 
@@ -56,7 +55,7 @@ Nie wyjęte komendy można wywołać klikając na ich nazwy w tej zakładce (nie
 1. Kliknąć **Build Project**. Spowoduje to utworzenie folderu `build/` oraz kompilację programu. Pierwszy Build zajmuje trochę, ale późniejsze już nie bo środowisko rekompiluje tylko to co musi (więc tylko ew. zmiany).
     - Można wyczyścić builda komendą **Full Clean**. Min. usunie to `build/`. Czasami przydatne przy dziwnych błędach.
 1. Po udanej kompilacji (pokaże się okno ze stanem pamięci) kliknąć **Flash Device**. Spowoduje to wgranie kodu na mikrokontroller. Od razu po tym nastąpi jego reset i uruchomienie programu.
-1. Program można śledzić za pomocą komendy **Monitor Device**. Jest to de facto serial port znanny z innych środowisk embedded. Normalnie nie pojawia się tam za dużo (ograniczyłem komunikaty), ale przydatne przy ew. ddebuggowaniu. Oczywiśćie działa tylko przy podłączonym kablu usb-c.
+1. Program można śledzić za pomocą komendy **Monitor Device**. Jest to de facto serial port znanny z innych środowisk embeded. Normalnie nie pojawia się tam za dużo (ograniczyłem komunikaty), ale przydatne przy ew. debuggowaniu. Oczywiśćie działa tylko przy podłączonym kablu usb-c.
 1. kroki 6-8 można wykonać automatycznie klikając **ESP-IDF: Build, Flash and Monitor**. Wywoła to powyższe komendy jedna po drugiej.
 
-O ile nie byłożadnych błędów program powinien być wgrany i uruchomiony na mikrokontrolerze.
+O ile nie było żadnych błędów program powinien być wgrany i uruchomiony na mikrokontrolerze.
