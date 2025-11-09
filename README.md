@@ -35,7 +35,7 @@ Projekt został zrealizowany przy użyciu rozszerzenia **ESP-IDF** (v5.5) do pro
     - Usunąć z folderu projektu pliki: *pytest_hello_world.py* oraz README.md.
 1. Wyczyścić zawartość folderu `main/`
 1. Skopiować do folderu `main/` zawartość tego repozytorium (clone/zip - dowolnie)
-1. W terminalu (*ctrl+j*) wpisać `idf.py add-dependency "espressif/esp_lcd_ili9341^2.0.0`.
+
 
 Projekt został pomyślnie pobrany i jest gotowy do dalszej pracy.
 ## Edycja Kodu

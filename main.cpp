@@ -9,7 +9,6 @@ float DEBUG_FLOAT=420.2137;
 
 
 TaskHandle_t task_handle_list[TASK_NUM];
-//uint8_t task_signal_flag=0;
 EventGroupHandle_t main_event_group;
 
 void task_create_fail(uint8_t taskid)
@@ -23,8 +22,7 @@ extern "C" void app_main(void)
     enc_gpio_init();
     enc_pnct_init();
     vis_connect_init();
-
-
+    gui_init();
 
     main_event_group=xEventGroupCreate();
     if(main_event_group==NULL)
