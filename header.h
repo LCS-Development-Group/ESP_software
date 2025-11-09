@@ -1,3 +1,6 @@
+#ifndef HEADER_H
+#define HEADER_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "sdkconfig.h"
@@ -11,6 +14,9 @@
 /*mine*/
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
+#include <vector>
+#include <string>
+#include "freertos/semphr.h"
 
 /*======================================================================================*/
 /* GENERAL                                                                              */
@@ -59,11 +65,13 @@ void task_visual_main(void *args);
 #define EXAMPLE_LVGL_TASK_STACK_SIZE   (4 * 1024)
 #define EXAMPLE_LVGL_TASK_PRIORITY     2
 
-#define TEMP_VIS_NTCODE_CUR_POS 0
-#define TEMP_VIS_NTCODE_CUR_NEG 1
-#define TEMP_VIS_NTCODE_CUR_SW 2
+#define DISPLAYED_FIELDS_PER_PAGE 9 //+page name
+
+/*Notification Codes*/
+#define VIS_NTCODE_REDRAW 0
 
 void vis_connect_init();
+void draw_page();
 
 /*======================================================================================*/
 /* UI ROTATIONAL ENCODER                                                                */
@@ -86,19 +94,27 @@ void enc_pnct_init();
 /* GUI                                                                                  */
 /*======================================================================================*/
 void task_gui_main(void *args);
-// enum t_field_type{subpage, input_onoff, input_float, output_float, output_text};
-// typedef struct t_gui_field
-// {
-//     t_field_type field_type;
-//     char text[18];
-//     void *link;
-// };
-// extern t_gui_field gui_main_menu[];
 
+extern gui_controller *gui;
+extern SemaphoreHandle_t gui__mutex;
+
+void gui_init();
+
+/*Notification Codes*/
+#define GUI_NTCODE_CUR_POS 0
+#define GUI_NTCODE_CUR_NEG 1
+#define GUI_NTCODE_CUR_ENT 2
 
 /*======================================================================================*/
 /* MISC                                                                                 */
 /*======================================================================================*/
+
+extern bool DEBUG_BOOL;
+extern SemaphoreHandle_t DEBUG_BOOL_MUT;
+
+extern float DEBUG_FLOAT;
+extern SemaphoreHandle_t DEBUG_FLOAT_MUT;
+
 // #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
 // #define BYTE_TO_BINARY(byte) 
 //     ((byte) & 0x80 ? '1' : '0'), 
@@ -109,3 +125,5 @@ void task_gui_main(void *args);
 //     ((byte) & 0x04 ? '1' : '0'), 
 //     ((byte) & 0x02 ? '1' : '0'), 
 //     ((byte) & 0x01 ? '1' : '0')
+
+#endif

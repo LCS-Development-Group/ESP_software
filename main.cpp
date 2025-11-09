@@ -1,7 +1,15 @@
 #include "header.h"
 
+//DEBUG
+bool DEBUG_BOOL=false;
+SemaphoreHandle_t DEBUG_BOOL_MUT=xSemaphoreCreateMutex();
+float DEBUG_FLOAT=420.2137;
+ SemaphoreHandle_t DEBUG_FLOAT_MUT=xSemaphoreCreateMutex();
+
+
+
 TaskHandle_t task_handle_list[TASK_NUM];
-uint8_t task_signal_flag=0;
+//uint8_t task_signal_flag=0;
 EventGroupHandle_t main_event_group;
 
 void task_create_fail(uint8_t taskid)
