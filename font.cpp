@@ -1,5 +1,86 @@
 #include "graphics.h"
 
+uint8_t char_to_font_index(char c)
+{
+    switch(c)
+    {
+    /*Uppercase Letters*/
+    case 'A': return GUI_FONT_INDEX_UP_A;
+    case 'B': return GUI_FONT_INDEX_UP_B;
+    case 'C': return GUI_FONT_INDEX_UP_C;
+    case 'D': return GUI_FONT_INDEX_UP_D;
+    case 'E': return GUI_FONT_INDEX_UP_E;
+    case 'F': return GUI_FONT_INDEX_UP_F;
+    case 'G': return GUI_FONT_INDEX_UP_G;
+    case 'H': return GUI_FONT_INDEX_UP_H;
+    case 'I': return GUI_FONT_INDEX_UP_I;
+    case 'J': return GUI_FONT_INDEX_UP_J;
+    case 'K': return GUI_FONT_INDEX_UP_K;
+    case 'L': return GUI_FONT_INDEX_UP_L;
+    case 'M': return GUI_FONT_INDEX_UP_M;
+    case 'N': return GUI_FONT_INDEX_UP_N;
+    case 'O': return GUI_FONT_INDEX_UP_O;
+    case 'P': return GUI_FONT_INDEX_UP_P;
+    case 'Q': return GUI_FONT_INDEX_UP_Q;
+    case 'R': return GUI_FONT_INDEX_UP_R;
+    case 'S': return GUI_FONT_INDEX_UP_S;
+    case 'T': return GUI_FONT_INDEX_UP_T;
+    case 'U': return GUI_FONT_INDEX_UP_U;
+    case 'V': return GUI_FONT_INDEX_UP_V;
+    case 'W': return GUI_FONT_INDEX_UP_W;
+    case 'X': return GUI_FONT_INDEX_UP_X;
+    case 'Y': return GUI_FONT_INDEX_UP_Y;
+    case 'Z': return GUI_FONT_INDEX_UP_Z;
+    
+    /*Uppercase Letters*/
+    case 'a': return GUI_FONT_INDEX_UP_A;
+    case 'b': return GUI_FONT_INDEX_UP_B;
+    case 'c': return GUI_FONT_INDEX_UP_C;
+    case 'd': return GUI_FONT_INDEX_UP_D;
+    case 'e': return GUI_FONT_INDEX_UP_E;
+    case 'f': return GUI_FONT_INDEX_UP_F;
+    case 'g': return GUI_FONT_INDEX_UP_G;
+    case 'h': return GUI_FONT_INDEX_UP_H;
+    case 'i': return GUI_FONT_INDEX_UP_I;
+    case 'j': return GUI_FONT_INDEX_UP_J;
+    case 'k': return GUI_FONT_INDEX_UP_K;
+    case 'l': return GUI_FONT_INDEX_UP_L;
+    case 'm': return GUI_FONT_INDEX_UP_M;
+    case 'n': return GUI_FONT_INDEX_UP_N;
+    case 'o': return GUI_FONT_INDEX_UP_O;
+    case 'p': return GUI_FONT_INDEX_UP_P;
+    case 'q': return GUI_FONT_INDEX_UP_Q;
+    case 'r': return GUI_FONT_INDEX_UP_R;
+    case 's': return GUI_FONT_INDEX_UP_S;
+    case 't': return GUI_FONT_INDEX_UP_T;
+    case 'u': return GUI_FONT_INDEX_UP_U;
+    case 'v': return GUI_FONT_INDEX_UP_V;
+    case 'w': return GUI_FONT_INDEX_UP_W;
+    case 'x': return GUI_FONT_INDEX_UP_X;
+    case 'y': return GUI_FONT_INDEX_UP_Y;
+    case 'z': return GUI_FONT_INDEX_UP_Z;
+
+    /*Numbers*/
+    case '0': return GUI_FONT_INDEX_0;
+    case '1': return GUI_FONT_INDEX_1;
+    case '2': return GUI_FONT_INDEX_2;
+    case '3': return GUI_FONT_INDEX_3;
+    case '4': return GUI_FONT_INDEX_4;
+    case '5': return GUI_FONT_INDEX_5;
+    case '6': return GUI_FONT_INDEX_6;
+    case '7': return GUI_FONT_INDEX_7;
+    case '8': return GUI_FONT_INDEX_8;
+    case '9': return GUI_FONT_INDEX_9;
+
+    /*Special characters*/
+    case '%': return GUI_FONT_INDEX_PERCENT;
+    case '.': return GUI_FONT_INDEX_DOT;
+    case '^': return GUI_FONT_INDEX_DEGC;
+    case ' ': return GUI_FONT_INDEX_SPACE;
+    
+    default: return 255;
+    }
+}
 
 uint16_t font[][GUI_FONT_PX]={
 

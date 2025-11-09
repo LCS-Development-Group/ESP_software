@@ -50,12 +50,13 @@ void task_visual_main(void *args);
 #define EXAMPLE_LVGL_TASK_PRIORITY     2
 
 #define DISPLAYED_FIELDS_PER_PAGE 9 //+page name
+#define LCD_MAX_LINES 10
+#define LCD_MAX_CHARS_PER_LINE 17
 
 /*Notification Codes*/
 #define VIS_NTCODE_REDRAW 0
 
 void vis_connect_init();
-void draw_page();
 
 /*======================================================================================*/
 /* UI ROTATIONAL ENCODER                                                                */

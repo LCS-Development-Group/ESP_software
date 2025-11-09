@@ -12,10 +12,6 @@ esp_lcd_panel_io_spi_config_t lcd_io_cfg;
 esp_lcd_panel_handle_t lcd_handle;
 esp_lcd_panel_dev_config_t lcd_dev_config;
 
-
-
-
-
 #define NUM_PX (LCD_HRES*LCD_VRES)
 uint16_t bitmask[NUM_PX];
 void fill_bitmask(uint16_t color) {for(int i=0; i<NUM_PX; i++) bitmask[i]=color;}
@@ -25,37 +21,91 @@ void fill_letter_bitmask(uint8_t letter){for(int i=0; i<GUI_FONT_PX; i++) letter
 
 uint8_t char_to_font_index(char c);
 
-
-void draw_text(char* text, uint8_t line, uint8_t pos)
+void draw_text(std::string text, uint8_t line, uint8_t pos)
 {
-    int i=0, index;
-    while(text[i]!='\0' && i<17)
+    uint8_t index;
+    ESP_LOGI("drawtext", "printing: %s", text.c_str());
+    for(uint8_t i=0; i<text.size(); i++)
     {
+        ESP_LOGI("drawtext", "%c",  text[i]);
+        if(pos+i>16) return; //not enough space for the rest;
         index=char_to_font_index(text[i]);
         if(index!=255)  esp_lcd_panel_draw_bitmap(lcd_handle, (pos+i)*GUI_FONT_W, line*GUI_FONT_H, (pos+i+1)*GUI_FONT_W, (line+1)*GUI_FONT_H, font[index]);
         else            esp_lcd_panel_draw_bitmap(lcd_handle, (pos+i)*GUI_FONT_W, line*GUI_FONT_H, (pos+i+1)*GUI_FONT_W, (line+1)*GUI_FONT_H, font[GUI_FONT_INDEX_SPACE]);
-        i++;
     }
 }
 
+void draw_page()
+{
+    xSemaphoreTake(gui_mutex, portMAX_DELAY);
+
+    page* page=gui->get_current_page();
+    uint8_t numof_fields=page->get_numof_fields();
+    uint8_t first_line=1;
+
+    draw_text(page->get_page_name(), 0, 0);//Page name
+    if(page->get_uppage_ptr()!=nullptr)//return (if exists)
+    {
+        draw_text("BACK", 1, 1);
+        first_line=2;
+    }
+    
+    for(int i=0; i<numof_fields; i++)
+    {
+        if(i+first_line>DISPLAYED_FIELDS_PER_PAGE) return;
+        draw_text(page->get_field_ptr(i)->get_name(), first_line+i, 1);
+        //ESP_LOGI("visual", "%s", page->get_field_ptr(i)->get_name().c_str());
+    }
+    xSemaphoreGive(gui_mutex);
+}
+
+void lcd_init()
+{
+    esp_lcd_panel_disp_on_off(lcd_handle, true);
+    esp_lcd_panel_swap_xy(lcd_handle, true);
+    esp_lcd_panel_mirror(lcd_handle, true, true);
+
+    gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL);
+
+    //clear
+    fill_bitmask(0x0000);
+    esp_lcd_panel_draw_bitmap(lcd_handle, 0, 0, LCD_VRES, LCD_HRES, bitmask);
+    vTaskDelay(pdMS_TO_TICKS(100));
+}
 
 void task_visual_main(void *args)
 {
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
     ESP_LOGI("Visual", "task_visual started");
-    esp_lcd_panel_disp_on_off(lcd_handle, true);
-    esp_lcd_panel_swap_xy(lcd_handle, true);
-    esp_lcd_panel_mirror(lcd_handle, true, true);
+
+    lcd_init();
+
+    //draw_text("TEST 19.08.2025",8, 0);
+    //draw_text("K. PACH 275442",1, 0);
+   
+
+    draw_page();
+    vTaskDelay(portMAX_DELAY); //temporary
     
-    gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL);
+    uint32_t ntcode=0x00;
+    while(true)
+    {
+        if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
+        {
+            switch(ntcode)
+            {
+                case VIS_NTCODE_REDRAW:
+                    draw_page();
+                    break;
 
-    fill_bitmask(0x0000);
-    esp_lcd_panel_draw_bitmap(lcd_handle, 0, 0, LCD_VRES, LCD_HRES, bitmask);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    draw_text((char*)"TEST 19.08.2025",0, 0);
-    draw_text((char*)"K. PACH 275442",1, 0);
+                default:
+                    ESP_LOGW("Visual", "Woken by unknown ntcode: %d", ntcode);
+            }
+        }
+    }
 
-    //vTaskDelay(pdMS_TO_TICKS(000));
+
+
     vTaskDelay(portMAX_DELAY); //temporary
 }
 
@@ -104,56 +154,3 @@ void vis_connect_init()
     esp_lcd_panel_init(lcd_handle);
 }
 
-uint8_t char_to_font_index(char c)
-{
-    switch(c)
-    {
-    /*Numbers*/
-    case '0': return GUI_FONT_INDEX_0;
-    case '1': return GUI_FONT_INDEX_1;
-    case '2': return GUI_FONT_INDEX_2;
-    case '3': return GUI_FONT_INDEX_3;
-    case '4': return GUI_FONT_INDEX_4;
-    case '5': return GUI_FONT_INDEX_5;
-    case '6': return GUI_FONT_INDEX_6;
-    case '7': return GUI_FONT_INDEX_7;
-    case '8': return GUI_FONT_INDEX_8;
-    case '9': return GUI_FONT_INDEX_9;
-    
-    /*Uppercase Letters*/
-    case 'A': return GUI_FONT_INDEX_UP_A;
-    case 'B': return GUI_FONT_INDEX_UP_B;
-    case 'C': return GUI_FONT_INDEX_UP_C;
-    case 'D': return GUI_FONT_INDEX_UP_D;
-    case 'E': return GUI_FONT_INDEX_UP_E;
-    case 'F': return GUI_FONT_INDEX_UP_F;
-    case 'G': return GUI_FONT_INDEX_UP_G;
-    case 'H': return GUI_FONT_INDEX_UP_H;
-    case 'I': return GUI_FONT_INDEX_UP_I;
-    case 'J': return GUI_FONT_INDEX_UP_J;
-    case 'K': return GUI_FONT_INDEX_UP_K;
-    case 'L': return GUI_FONT_INDEX_UP_L;
-    case 'M': return GUI_FONT_INDEX_UP_M;
-    case 'N': return GUI_FONT_INDEX_UP_N;
-    case 'O': return GUI_FONT_INDEX_UP_O;
-    case 'P': return GUI_FONT_INDEX_UP_P;
-    case 'Q': return GUI_FONT_INDEX_UP_Q;
-    case 'R': return GUI_FONT_INDEX_UP_R;
-    case 'S': return GUI_FONT_INDEX_UP_S;
-    case 'T': return GUI_FONT_INDEX_UP_T;
-    case 'U': return GUI_FONT_INDEX_UP_U;
-    case 'V': return GUI_FONT_INDEX_UP_V;
-    case 'W': return GUI_FONT_INDEX_UP_W;
-    case 'X': return GUI_FONT_INDEX_UP_X;
-    case 'Y': return GUI_FONT_INDEX_UP_Y;
-    case 'Z': return GUI_FONT_INDEX_UP_Z;
-
-    /*Special characters*/
-    case '%': return GUI_FONT_INDEX_PERCENT;
-    case '.': return GUI_FONT_INDEX_DOT;
-    case '^': return GUI_FONT_INDEX_DEGC;
-    case ' ': return GUI_FONT_INDEX_SPACE;
-    
-    default: return 255;
-    }
-}

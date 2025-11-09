@@ -5,7 +5,6 @@
 /* FONT                                                                                 */
 /*======================================================================================*/
 
-
 #define GUI_FONT_W 18
 #define GUI_FONT_H 24
 #define GUI_FONT_PX (GUI_FONT_W*GUI_FONT_H)
@@ -51,4 +50,6 @@
 #define GUI_FONT_INDEX_DEGC 38
 #define GUI_FONT_INDEX_SPACE 39
 
+
+uint8_t char_to_font_index(char c);
 extern uint16_t font[][GUI_FONT_PX];
