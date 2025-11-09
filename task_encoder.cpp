@@ -48,13 +48,13 @@ void task_encoder_main(void *args)
                 case ENC_PCNT_HIGH:
                     enc_pos++;
                     //ESP_LOGI("Encoder", "POS++");
-                    xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_POS, eSetValueWithoutOverwrite);
+                    //xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_POS, eSetValueWithoutOverwrite);
                     break;
 
                 case ENC_PCNT_LOW://wciśnięcie przycisku
                     enc_pos--;
                     //ESP_LOGI("Encoder", "POS--");
-                    xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_NEG, eSetValueWithoutOverwrite);
+                    //xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_NEG, eSetValueWithoutOverwrite);
                     break;
 
                 default:
@@ -67,7 +67,7 @@ void task_encoder_main(void *args)
 
             case ENC_NTCODE_SW:
                 //ESP_LOGI("Encoder", "SW");
-                xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_SW, eSetValueWithoutOverwrite);
+                //xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_SW, eSetValueWithoutOverwrite);
                 break;
                 
             default:

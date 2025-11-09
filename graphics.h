@@ -1,11 +1,10 @@
+#pragma once
 #include <stdint.h>
 
 /*======================================================================================*/
 /* FONT                                                                                 */
 /*======================================================================================*/
 
-#ifndef FONT_H
-#define FONT_H
 
 #define GUI_FONT_W 18
 #define GUI_FONT_H 24
@@ -53,4 +52,3 @@
 #define GUI_FONT_INDEX_SPACE 39
 
 extern uint16_t font[][GUI_FONT_PX];
-#endif

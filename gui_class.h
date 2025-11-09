@@ -1,7 +1,5 @@
-#include "header.h"
-
-#ifndef GUI_CLASS_H
-#define GUI_CLASS_H
+#pragma once
+#include "common_includes.h"
 
 enum t_field_type{TEXT, SUBPAGE_LINK, ONOFF_SWITCH, FLOAT_IO, BOOL_IO};
 enum t_field_io_type{FIELD_IN, FIELD_OUT};
@@ -23,8 +21,8 @@ class basic_field
 class page
 {
     std::vector <basic_field*> page_list;
-    page *uppage;
     std::string name;
+    page *uppage;
 
     public:
     
@@ -127,5 +125,3 @@ public:
 private:
     void jump_pages(page* newpage);
 };
-
-#endif

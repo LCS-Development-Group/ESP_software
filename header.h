@@ -1,22 +1,6 @@
-#ifndef HEADER_H
-#define HEADER_H
-
-#include <stdio.h>
-#include <stdlib.h>
-#include "sdkconfig.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_chip_info.h"
-//#include "esp_flash.h"
-#include "esp_system.h"
-#include "esp_log.h" // makra do sygnalizacji LOGx
-
-/*mine*/
-#include "driver/gpio.h"
-#include "driver/spi_master.h"
-#include <vector>
-#include <string>
-#include "freertos/semphr.h"
+#pragma once
+#include "common_includes.h"
+#include "gui_class.h"
 
 /*======================================================================================*/
 /* GENERAL                                                                              */
@@ -96,7 +80,7 @@ void enc_pnct_init();
 void task_gui_main(void *args);
 
 extern gui_controller *gui;
-extern SemaphoreHandle_t gui__mutex;
+extern SemaphoreHandle_t gui_mutex;
 
 void gui_init();
 
@@ -125,5 +109,3 @@ extern SemaphoreHandle_t DEBUG_FLOAT_MUT;
 //     ((byte) & 0x04 ? '1' : '0'), 
 //     ((byte) & 0x02 ? '1' : '0'), 
 //     ((byte) & 0x01 ? '1' : '0')
-
-#endif

@@ -158,7 +158,7 @@ void gui_controller::move_cursor_up()
 {
     if(prim_lock)
     {
-        float_io_field_ptr=dynamic_cast<float_io_field*>(current_page->get_field_ptr(prim_idx));
+        float_io_field_ptr=static_cast<float_io_field*>(current_page->get_field_ptr(prim_idx));
         if(sec_lock)//edycja liczby
         {
 
@@ -191,7 +191,7 @@ void gui_controller::move_cursor_down()
 {
     if(prim_lock)
     {
-        float_io_field_ptr=dynamic_cast<float_io_field*>(current_page->get_field_ptr(prim_idx));
+        float_io_field_ptr=static_cast<float_io_field*>(current_page->get_field_ptr(prim_idx));
         if(sec_lock)//edycja liczby
         {
 
@@ -236,13 +236,13 @@ void gui_controller::enter()
             break;
 
         case SUBPAGE_LINK:
-            link_field_ptr=dynamic_cast<page_link_field*>(current_page->get_field_ptr(prim_idx));
+            link_field_ptr=static_cast<page_link_field*>(current_page->get_field_ptr(prim_idx));
             jump_pages(link_field_ptr->get_page_ptr());
             //redraw=1;
             break;
 
         case BOOL_IO:
-            bool_io_field_ptr=dynamic_cast<bool_io_field*>(current_page->get_field_ptr(prim_idx));
+            bool_io_field_ptr=static_cast<bool_io_field*>(current_page->get_field_ptr(prim_idx));
             if(bool_io_field_ptr->get_io()==FIELD_IN)
             {
                 bool_io_field_ptr->switch_bool();
@@ -251,7 +251,7 @@ void gui_controller::enter()
             break;
 
         case FLOAT_IO:
-            float_io_field_ptr=dynamic_cast<float_io_field*>(current_page->get_field_ptr(prim_idx));
+            float_io_field_ptr=static_cast<float_io_field*>(current_page->get_field_ptr(prim_idx));
             if(float_io_field_ptr->get_io()==FIELD_IN)
             {
                 if(prim_lock)
