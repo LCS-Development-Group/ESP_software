@@ -55,7 +55,7 @@ Nie wyjęte komendy można wywołać klikając na ich nazwy w tej zakładce (nie
 1. Kliknąć **Build Project**. Spowoduje to utworzenie folderu `build/` oraz kompilację programu. Pierwszy Build zajmuje trochę, ale późniejsze już nie bo środowisko rekompiluje tylko to co musi (więc tylko ew. zmiany).
     - Można wyczyścić builda komendą **Full Clean**. Min. usunie to `build/`. Czasami przydatne przy dziwnych błędach.
 1. Po udanej kompilacji (pokaże się okno ze stanem pamięci) kliknąć **Flash Device**. Spowoduje to wgranie kodu na mikrokontroller. Od razu po tym nastąpi jego reset i uruchomienie programu.
-1. Program można śledzić za pomocą komendy **Monitor Device**. Jest to de facto serial port znanny z innych środowisk embeded. Normalnie nie pojawia się tam za dużo (ograniczyłem komunikaty), ale przydatne przy ew. debuggowaniu. Oczywiśćie działa tylko przy podłączonym kablu usb-c.
+1. Program można śledzić za pomocą komendy **Monitor Device**. Jest to de facto serial port znanny z innych środowisk embedded. Normalnie nie pojawia się tam za dużo (ograniczyłem komunikaty), ale przydatne przy ew. debuggowaniu. Oczywiśćie działa tylko przy podłączonym kablu usb-c. Uwaga: uruchomienie monitorowania resetuje mikrokontroler.
 1. kroki 6-8 można wykonać automatycznie klikając **ESP-IDF: Build, Flash and Monitor**. Wywoła to powyższe komendy jedna po drugiej.
 
 O ile nie było żadnych błędów program powinien być wgrany i uruchomiony na mikrokontrolerze.

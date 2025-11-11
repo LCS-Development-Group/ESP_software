@@ -1,7 +1,7 @@
 #pragma once
 #include "common_includes.h"
 
-enum t_field_type{TEXT, SUBPAGE_LINK, ONOFF_SWITCH, FLOAT_IO, BOOL_IO};
+enum t_field_type{TEXT, SUBPAGE_LINK, FLOAT_IO, BOOL_IO};
 enum t_field_io_type{FIELD_IN, FIELD_OUT};
 
 class basic_field
@@ -64,6 +64,7 @@ class bool_io_field: public basic_field
     bool_io_field(std::string _name, t_field_io_type _io, bool* _var, SemaphoreHandle_t *_mutex);
     t_field_io_type get_io() const;
     bool get_val() const; //value at call
+
     void switch_bool();
 };
 
@@ -80,10 +81,12 @@ class float_io_field: public basic_field
     
     t_field_io_type get_io() const;
     float get_val() const;
+
     std::string get_unit() const;
     uint8_t get_prec_pref() const;
     uint8_t get_prec_pos() const;
     uint8_t get_total_num_digits() const;
+    
 
     void set_val(float new_val);
 };
@@ -102,8 +105,8 @@ class gui_controller
     //temp. variables (to avoid repeated allocations)
     bool_io_field* bool_io_field_ptr;
     float_io_field* float_io_field_ptr;
-
     page_link_field* link_field_ptr;
+
     int temp_int, temp_int2;
     float *float_ptr; 
 
@@ -111,7 +114,6 @@ public:
     gui_controller();
     ~gui_controller();
     void fill_fields();
-    void display_curr_list();
     void move_cursor_up();
     void move_cursor_down();
     void enter();

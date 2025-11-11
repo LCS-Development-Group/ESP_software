@@ -18,57 +18,16 @@ void fill_bitmask(uint16_t color) {for(int i=0; i<NUM_PX; i++) bitmask[i]=color;
 
 uint8_t char_to_font_index(char c);
 
-void draw_text(std::string text, uint8_t line, uint8_t pos)
-{
-    uint8_t index;
-    ESP_LOGI("drawtext", "printing: %s", text.c_str());
-    for(uint8_t i=0; i<text.size(); i++)
-    {
-        ESP_LOGI("drawtext", "%c",  text[i]);
-        if(pos+i>16) return; //not enough space for the rest;
-        index=char_to_font_index(text[i]);
-        /*if(index!=255)*/  esp_lcd_panel_draw_bitmap(lcd_handle, (pos+i)*GUI_FONT_W, line*GUI_FONT_H, (pos+i+1)*GUI_FONT_W, (line+1)*GUI_FONT_H, font[index]);
-        //else            esp_lcd_panel_draw_bitmap(lcd_handle, (pos+i)*GUI_FONT_W, line*GUI_FONT_H, (pos+i+1)*GUI_FONT_W, (line+1)*GUI_FONT_H, font[GUI_FONT_INDEX_SPACE]);
-    }
-}
+// basic_field* field_ptr;
+// bool_io_field* bool_io_field_ptr;
+// float_io_field* float_io_field_ptr;
+// page_link_field* link_field_ptr;
 
-void draw_page()
-{
-    xSemaphoreTake(gui_mutex, portMAX_DELAY);
-
-    page* page=gui->get_current_page();
-    uint8_t numof_fields=page->get_numof_fields();
-    uint8_t first_line=1;
-
-    draw_text(page->get_page_name(), 0, 0);//Page name
-    if(page->get_uppage_ptr()!=nullptr)//return (if exists)
-    {
-        draw_text("BACK", 1, 1);
-        first_line=2;
-    }
-    
-    for(int i=0; i<numof_fields; i++)
-    {
-        if(i+first_line>DISPLAYED_FIELDS_PER_PAGE) return;
-        draw_text(page->get_field_ptr(i)->get_name(), first_line+i, 1);
-        //ESP_LOGI("visual", "%s", page->get_field_ptr(i)->get_name().c_str());
-    }
-    xSemaphoreGive(gui_mutex);
-}
-
-void lcd_init()
-{
-    esp_lcd_panel_disp_on_off(lcd_handle, true);
-    esp_lcd_panel_swap_xy(lcd_handle, true);
-    esp_lcd_panel_mirror(lcd_handle, true, true);
-
-    gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL);
-
-    //clear
-    fill_bitmask(0x0000);
-    esp_lcd_panel_draw_bitmap(lcd_handle, 0, 0, LCD_VRES, LCD_HRES, bitmask);
-    vTaskDelay(pdMS_TO_TICKS(100));
-}
+void draw_text(std::string text, uint8_t line, uint8_t pos);
+void draw_page();
+void draw_bool_io_field(bool_io_field* bool_io_field_ptr, uint8_t line);
+void draw_float_io_field(float_io_field *float_io_field_ptr, uint8_t line);
+void lcd_init();
 
 void task_visual_main(void *args)
 {
@@ -100,10 +59,96 @@ void task_visual_main(void *args)
             }
         }
     }
-
-
-
     vTaskDelay(portMAX_DELAY); //temporary
+}
+
+
+
+void draw_page()
+{
+    xSemaphoreTake(gui_mutex, portMAX_DELAY);
+
+    page* page=gui->get_current_page();
+    uint8_t numof_fields=page->get_numof_fields();
+    uint8_t first_line=1;
+
+    draw_text(page->get_page_name(), 0, 0);//Page name
+    if(page->get_uppage_ptr()!=nullptr)//return (if exists)
+    {
+        draw_text("<BACK", 1, 1);
+        first_line=2;
+    }
+    
+    t_field_type field_type;
+    for(uint8_t i=0; i<numof_fields; i++)
+    {
+        if(i+first_line>LCD_DISPLAYED_FIELDS_PER_PAGE) return;
+        field_type=page->get_field_ptr(i)->get_field_type();
+        switch(field_type)
+        {
+        case t_field_type::TEXT:
+            draw_text(page->get_field_ptr(i)->get_name(), first_line+i, 1);
+            break;
+
+        case t_field_type::FLOAT_IO:
+            draw_text(page->get_field_ptr(i)->get_name(), first_line+i, 1);
+            
+            break;
+
+        case t_field_type::BOOL_IO:
+            draw_bool_io_field(static_cast<bool_io_field*>(page->get_field_ptr(i)), first_line+1);
+            break;
+
+        case t_field_type::SUBPAGE_LINK:
+            draw_text(page->get_field_ptr(i)->get_name()+">", first_line+i, 1);
+            break;
+        
+        default: break;
+        }
+    }
+    xSemaphoreGive(gui_mutex);
+}
+
+void draw_bool_io_field(bool_io_field* bool_io_field_ptr, uint8_t line)
+{
+    draw_text(bool_io_field_ptr->get_name(), line, 1);
+    bool val=bool_io_field_ptr->get_val();
+
+    if(val==true) draw_text("ON", line, LCD_FIELD_CONTENT_START);
+    else draw_text("OFF", line, LCD_FIELD_CONTENT_START);    
+}
+void draw_float_io_field(float_io_field *float_io_field_ptr, uint8_t line);
+
+
+void draw_text(std::string text, uint8_t line, uint8_t pos)
+{
+    uint8_t index;
+    for(uint8_t i=0; i<text.size(); i++)
+    {
+        if(pos+i>16) return; //not enough space for the rest;
+        index=char_to_font_index(text[i]);
+        esp_lcd_panel_draw_bitmap(lcd_handle, (pos+i)*GUI_FONT_W, line*GUI_FONT_H, (pos+i+1)*GUI_FONT_W, (line+1)*GUI_FONT_H, font[index]);
+    }
+}
+
+void lcd_init()
+{
+    esp_lcd_panel_disp_on_off(lcd_handle, true);
+    esp_lcd_panel_swap_xy(lcd_handle, true);
+    esp_lcd_panel_mirror(lcd_handle, true, true);
+
+    gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL);
+
+    //clear
+    fill_bitmask(0x0000);
+    esp_lcd_panel_draw_bitmap(lcd_handle, 0, 0, LCD_VRES, LCD_HRES, bitmask);
+    vTaskDelay(pdMS_TO_TICKS(100));
+
+    // //reset temp. variables
+    // field_ptr=nullptr;
+    // bool_io_field_ptr=nullptr;
+    // float_io_field_ptr=nullptr;
+    // link_field_ptr=nullptr;
 }
 
 

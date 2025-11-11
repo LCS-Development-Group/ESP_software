@@ -35,9 +35,9 @@ void gui_controller::fill_fields()
     /*Menu (root)*/
     root->add_field_to_page(new text_field("test"));
     root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
-    root->add_field_to_page(new text_field("field 3"));
+    root->add_field_to_page(new text_field("field3"));
     // root->add_field_to_page(new float_io_field("float_in ", FIELD_IN, &f_var, "mm", 2, 3));
-    root->add_field_to_page(new float_io_field("float_out", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "mA", 2, 3));
+    root->add_field_to_page(new float_io_field("floatout", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "mA", 2, 3));
     page* subpage_1=root->add_new_page("link");
 
     /*subpage test*/
@@ -89,9 +89,14 @@ bool_io_field::bool_io_field(std::string _name, t_field_io_type _io, bool* _var,
 t_field_io_type bool_io_field::get_io() const {return io;}
 bool bool_io_field::get_val() const
 {
-    xSemaphoreTake(*mutex, portMAX_DELAY);
-    bool copy=*var;
-    xSemaphoreGive(*mutex);
+    bool copy;
+    if(mutex!=nullptr)
+    {
+        xSemaphoreTake(*mutex, portMAX_DELAY);
+        copy=*var;
+        xSemaphoreGive(*mutex);
+    }
+    else copy=*var;
     return copy;
 }
 
@@ -111,11 +116,17 @@ float_io_field::float_io_field(std::string _name, t_field_io_type _io, float* _v
 t_field_io_type float_io_field::get_io() const {return io;}
 float float_io_field::get_val() const
 {
-    xSemaphoreTake(*mutex, portMAX_DELAY);
-    float copy=*var;
-    xSemaphoreGive(*mutex);
+    float copy;
+    if(mutex!=nullptr)
+    {
+        xSemaphoreTake(*mutex, portMAX_DELAY);
+        copy=*var;
+        xSemaphoreGive(*mutex);
+    }
+    else copy=*var;
     return copy;
 }
+
 std::string float_io_field::get_unit() const
 {
     return unit;

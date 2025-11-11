@@ -49,9 +49,11 @@ void task_visual_main(void *args);
 #define EXAMPLE_LVGL_TASK_STACK_SIZE   (4 * 1024)
 #define EXAMPLE_LVGL_TASK_PRIORITY     2
 
-#define DISPLAYED_FIELDS_PER_PAGE 9 //+page name
+/*Content stuff*/
+#define LCD_DISPLAYED_FIELDS_PER_PAGE 9 //+page name
 #define LCD_MAX_LINES 10
-#define LCD_MAX_CHARS_PER_LINE 17
+#define LCD_MAX_CHARS_PER_LINE 20
+#define LCD_FIELD_CONTENT_START 12
 
 /*Notification Codes*/
 #define VIS_NTCODE_REDRAW 0
