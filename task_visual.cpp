@@ -16,9 +16,6 @@ esp_lcd_panel_dev_config_t lcd_dev_config;
 uint16_t bitmask[NUM_PX];
 void fill_bitmask(uint16_t color) {for(int i=0; i<NUM_PX; i++) bitmask[i]=color;}
 
-uint16_t letter_bitmask[GUI_FONT_PX];
-void fill_letter_bitmask(uint8_t letter){for(int i=0; i<GUI_FONT_PX; i++) letter_bitmask[i]=font[letter][i];}
-
 uint8_t char_to_font_index(char c);
 
 void draw_text(std::string text, uint8_t line, uint8_t pos)
@@ -30,8 +27,8 @@ void draw_text(std::string text, uint8_t line, uint8_t pos)
         ESP_LOGI("drawtext", "%c",  text[i]);
         if(pos+i>16) return; //not enough space for the rest;
         index=char_to_font_index(text[i]);
-        if(index!=255)  esp_lcd_panel_draw_bitmap(lcd_handle, (pos+i)*GUI_FONT_W, line*GUI_FONT_H, (pos+i+1)*GUI_FONT_W, (line+1)*GUI_FONT_H, font[index]);
-        else            esp_lcd_panel_draw_bitmap(lcd_handle, (pos+i)*GUI_FONT_W, line*GUI_FONT_H, (pos+i+1)*GUI_FONT_W, (line+1)*GUI_FONT_H, font[GUI_FONT_INDEX_SPACE]);
+        /*if(index!=255)*/  esp_lcd_panel_draw_bitmap(lcd_handle, (pos+i)*GUI_FONT_W, line*GUI_FONT_H, (pos+i+1)*GUI_FONT_W, (line+1)*GUI_FONT_H, font[index]);
+        //else            esp_lcd_panel_draw_bitmap(lcd_handle, (pos+i)*GUI_FONT_W, line*GUI_FONT_H, (pos+i+1)*GUI_FONT_W, (line+1)*GUI_FONT_H, font[GUI_FONT_INDEX_SPACE]);
     }
 }
 
