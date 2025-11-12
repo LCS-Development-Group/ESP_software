@@ -19,22 +19,24 @@ void task_gui_main(void *args)
             xSemaphoreTake(gui_mutex, portMAX_DELAY);
             switch(ntcode)
             {
-                case GUI_NTCODE_CUR_POS:
-                    ESP_LOGI("GUI", "UP");
+                case GUI_NTCODE_CUR_NEG:
+                    //ESP_LOGI("GUI", "UP");
                     retcode=gui->move_cursor_up();
                     break;
 
-                case GUI_NTCODE_CUR_NEG:
-                    ESP_LOGI("GUI", "DOWN");
+                case GUI_NTCODE_CUR_POS:
+                    //ESP_LOGI("GUI", "DOWN");
                     retcode=gui->move_cursor_down();
                     break;
 
                 case GUI_NTCODE_CUR_ENT:
-                    ESP_LOGI("GUI", "ENTER");
+                    //ESP_LOGI("GUI", "ENTER");
+                    retcode=gui->enter();
                     break;
 
                 case GUI_NTCODE_CUR_BCK:
-                    ESP_LOGI("GUI", "BACK");
+                    retcode=gui->go_back();
+                    //ESP_LOGI("GUI", "BACK");
                     break;
 
                 default:
@@ -57,6 +59,11 @@ void gui_init()
     if(gui==nullptr)
     {
         gui=new gui_controller;
+        if(gui==nullptr)
+        {
+            ESP_LOGE("GUI", "vis_controller creation failed");
+            exit(-1);
+        }
         gui->fill_fields();
     }
 

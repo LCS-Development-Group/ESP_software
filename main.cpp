@@ -21,8 +21,8 @@ extern "C" void app_main(void)
 {
     enc_gpio_init();
     enc_pnct_init();
-    vis_connect_init();
     gui_init();
+    vis_init();
 
     main_event_group=xEventGroupCreate();
     if(main_event_group==NULL)

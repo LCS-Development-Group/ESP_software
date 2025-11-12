@@ -5,10 +5,33 @@
 #include "esp_lcd_panel_ops.h"
 #include "esp_lcd_ili9341.h"
 #include "graphics.h"
+#include "gui_class.h"
+
+#define LCD_MAX_LINES                   10 //including page name
+#define LCD_MAX_CHARS_PER_LINE          20
+#define LCD_FIELD_VALUE_START           12
+#define LCD_R_MARGIN                    1
 
 class vis_controller
 {
+    esp_lcd_panel_handle_t* lcd_handle;
+
+    uint16_t *fullscreen_bitmask;
 
     public:
     vis_controller(esp_lcd_panel_handle_t* _lcd_handle);
+    ~vis_controller();
+
+    void draw_page();
+    void draw_only_value(uint8_t line);
+    void draw_select();
+    void draw_selectbar();
+    void start();
+
+    private:
+    void clear();
+    void draw_value(uint8_t line);
+    void draw_bool_io_field(bool_io_field* bool_io_field_ptr, uint8_t line);
+    void draw_float_io_field(float_io_field *float_io_field_ptr, uint8_t line);
+    void draw_text(std::string text, uint8_t line, uint8_t pos);
 };

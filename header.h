@@ -1,6 +1,7 @@
 #pragma once
 #include "common_includes.h"
 #include "gui_class.h"
+#include "vis_class.h"
 
 /*======================================================================================*/
 /* GENERAL                                                                              */
@@ -24,6 +25,9 @@ extern TaskHandle_t task_handle_list[TASK_NUM];
 /* Visual                                                                               */
 /*======================================================================================*/
 void task_visual_main(void *args);
+
+void vis_init();
+
 #define LCD_HOST                SPI2_HOST
 #define LCD_CLOCK_HZ            (10 * 1000 * 1000) //10MHz
 #define LCD_BL_ON_LVL           1
@@ -36,49 +40,37 @@ void task_visual_main(void *args);
 #define LCD_BL_PIN              GPIO_NUM_16 //bl
 #define LCD_HRES                240 
 #define LCD_VRES                320
+#define LCD_NUM_PX              (LCD_HRES*LCD_VRES)
 #define LCD_BITS_PX             16
-
-#define EXAMPLE_LCD_CMD_BITS           8
-#define EXAMPLE_LCD_PARAM_BITS         8
-
-#define EXAMPLE_LVGL_DRAW_BUF_LINES    20 // number of display lines in each draw buffer
-#define EXAMPLE_LVGL_TICK_PERIOD_MS    2
-#define EXAMPLE_LVGL_TASK_MAX_DELAY_MS 500
-#define EXAMPLE_LVGL_TASK_MIN_DELAY_MS 1000 / CONFIG_FREERTOS_HZ
-#define EXAMPLE_LVGL_TASK_STACK_SIZE   (4 * 1024)
-#define EXAMPLE_LVGL_TASK_PRIORITY     2
+#define LCD_CMD_BITS            8
+#define LCD_PARAM_BITS          8
 
 /*Content stuff*/
-#define LCD_DISPLAYED_FIELDS_PER_PAGE 9 //+page name
-#define LCD_MAX_LINES 10
-#define LCD_MAX_CHARS_PER_LINE 20
-#define LCD_FIELD_CONTENT_START 12
+//in vis_class.h
 
 /*Notification Codes*/
-#define VIS_NTCODE_REDRAW_ALL 0
-#define VIS_NTCODE_REDRAW_SELECT 1
-#define VIS_NTCODE_REDRAW_BAR 2
-#define VIS_NTCODE_REDRAW_VALUE 3
-#define VIS_NTCODE_REDRAW_VALUE_BAR 4
-
-void vis_connect_init();
+#define VIS_NTCODE_REDRAW_ALL           0
+#define VIS_NTCODE_REDRAW_SELECT        1
+#define VIS_NTCODE_REDRAW_BAR           2
+#define VIS_NTCODE_REDRAW_VALUE         3
+#define VIS_NTCODE_REDRAW_VALUE_BAR     4
 
 /*======================================================================================*/
 /* UI ROTATIONAL ENCODER                                                                */
 /*======================================================================================*/
 void task_encoder_main(void *args);
-#define ENC_CLK_PIN GPIO_NUM_14
-#define ENC_DT_PIN GPIO_NUM_13
-#define ENC_SW_PIN GPIO_NUM_12
-#define ENC_PCNT_HIGH 1      //after reaching that many steps a one "big step" is registered
-#define ENC_PCNT_LOW (-1)*ENC_PCNT_HIGH
+#define ENC_CLK_PIN                 GPIO_NUM_14
+#define ENC_DT_PIN                  GPIO_NUM_13
+#define ENC_SW_PIN                  GPIO_NUM_12
+#define ENC_PCNT_HIGH               1      //after reaching that many steps a one "big step" is registered
+#define ENC_PCNT_LOW                (-1)*ENC_PCNT_HIGH
 void enc_gpio_init();
 void enc_pnct_init();
 
 /*Notification Codes*/
-#define ENC_NTCODE_ROT 0
-#define ENC_NTCODE_SW_CLICK 1
-#define ENC_NTCODE_SW_PRESSED 2
+#define ENC_NTCODE_ROT              0
+#define ENC_NTCODE_SW_CLICK         1
+#define ENC_NTCODE_SW_PRESSED       2
 
 /*======================================================================================*/
 /* GUI                                                                                  */
@@ -91,12 +83,12 @@ extern SemaphoreHandle_t gui_mutex;
 void gui_init();
 
 /*Notification Codes*/
-#define GUI_NTCODE_CUR_POS 0
-#define GUI_NTCODE_CUR_NEG 1
-#define GUI_NTCODE_CUR_ENT 2
-#define GUI_NTCODE_CUR_BCK 3
+#define GUI_NTCODE_CUR_POS      0
+#define GUI_NTCODE_CUR_NEG      1
+#define GUI_NTCODE_CUR_ENT      2
+#define GUI_NTCODE_CUR_BCK      3
 
-#define GUI_CURSOR_MAX_INDEX 255
+#define GUI_CURSOR_MAX_INDEX    255
 
 /*======================================================================================*/
 /* MISC                                                                                 */

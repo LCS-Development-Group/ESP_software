@@ -5,95 +5,95 @@ uint8_t char_to_font_index(char c)
     switch(c)
     {
     /*Special characters*/
-    case ' ': return GUI_FONT_INDEX_SPACE;
-    case '}': return GUI_FONT_INDEX_SELECT;
-    case '%': return GUI_FONT_INDEX_PERCENT;
-    case '.': return GUI_FONT_INDEX_DOT;
-    case '^': return GUI_FONT_INDEX_DEGC;
-    case '>': return GUI_FONT_INDEX_ARROW_R;
-    case '<': return GUI_FONT_INDEX_ARROW_L;
-    case ':': return GUI_FONT_INDEX_COLON;
-    case '/': return GUI_FONT_INDEX_SLASH;
-    case '\\': return GUI_FONT_INDEX_BACKSLASH;
-    case '_': return GUI_FONT_INDEX_UNDERSCORE;
-    case '+': return GUI_FONT_INDEX_PLUS;
-    case '-': return GUI_FONT_INDEX_MINUS;
-    case '*': return GUI_FONT_INDEX_MULTIPLY;
-    case '=': return GUI_FONT_INDEX_EQUALS;
+    case ' ': return VIS_FONT_INDEX_SPACE;
+    case '}': return VIS_FONT_INDEX_SELECT;
+    case '%': return VIS_FONT_INDEX_PERCENT;
+    case '.': return VIS_FONT_INDEX_DOT;
+    case '^': return VIS_FONT_INDEX_DEGC;
+    case '>': return VIS_FONT_INDEX_ARROW_R;
+    case '<': return VIS_FONT_INDEX_ARROW_L;
+    case ':': return VIS_FONT_INDEX_COLON;
+    case '/': return VIS_FONT_INDEX_SLASH;
+    case '\\': return VIS_FONT_INDEX_BACKSLASH;
+    case '_': return VIS_FONT_INDEX_UNDERSCORE;
+    case '+': return VIS_FONT_INDEX_PLUS;
+    case '-': return VIS_FONT_INDEX_MINUS;
+    case '*': return VIS_FONT_INDEX_MULTIPLY;
+    case '=': return VIS_FONT_INDEX_EQUALS;
 
     /*Numbers*/
-    case '0': return GUI_FONT_INDEX_0;
-    case '1': return GUI_FONT_INDEX_1;
-    case '2': return GUI_FONT_INDEX_2;
-    case '3': return GUI_FONT_INDEX_3;
-    case '4': return GUI_FONT_INDEX_4;
-    case '5': return GUI_FONT_INDEX_5;
-    case '6': return GUI_FONT_INDEX_6;
-    case '7': return GUI_FONT_INDEX_7;
-    case '8': return GUI_FONT_INDEX_8;
-    case '9': return GUI_FONT_INDEX_9;
+    case '0': return VIS_FONT_INDEX_0;
+    case '1': return VIS_FONT_INDEX_1;
+    case '2': return VIS_FONT_INDEX_2;
+    case '3': return VIS_FONT_INDEX_3;
+    case '4': return VIS_FONT_INDEX_4;
+    case '5': return VIS_FONT_INDEX_5;
+    case '6': return VIS_FONT_INDEX_6;
+    case '7': return VIS_FONT_INDEX_7;
+    case '8': return VIS_FONT_INDEX_8;
+    case '9': return VIS_FONT_INDEX_9;
     
     /*Lowercase Letters*/
-    case 'a': return GUI_FONT_INDEX_UP_A;
-    case 'b': return GUI_FONT_INDEX_UP_B;
-    case 'c': return GUI_FONT_INDEX_UP_C;
-    case 'd': return GUI_FONT_INDEX_UP_D;
-    case 'e': return GUI_FONT_INDEX_UP_E;
-    case 'f': return GUI_FONT_INDEX_UP_F;
-    case 'g': return GUI_FONT_INDEX_UP_G;
-    case 'h': return GUI_FONT_INDEX_UP_H;
-    case 'i': return GUI_FONT_INDEX_UP_I;
-    case 'j': return GUI_FONT_INDEX_UP_J;
-    case 'k': return GUI_FONT_INDEX_UP_K;
-    case 'l': return GUI_FONT_INDEX_UP_L;
-    case 'm': return GUI_FONT_INDEX_UP_M;
-    case 'n': return GUI_FONT_INDEX_UP_N;
-    case 'o': return GUI_FONT_INDEX_UP_O;
-    case 'p': return GUI_FONT_INDEX_UP_P;
-    case 'q': return GUI_FONT_INDEX_UP_Q;
-    case 'r': return GUI_FONT_INDEX_UP_R;
-    case 's': return GUI_FONT_INDEX_UP_S;
-    case 't': return GUI_FONT_INDEX_UP_T;
-    case 'u': return GUI_FONT_INDEX_UP_U;
-    case 'v': return GUI_FONT_INDEX_UP_V;
-    case 'w': return GUI_FONT_INDEX_UP_W;
-    case 'x': return GUI_FONT_INDEX_UP_X;
-    case 'y': return GUI_FONT_INDEX_UP_Y;
-    case 'z': return GUI_FONT_INDEX_UP_Z;
+    case 'a': return VIS_FONT_INDEX_UP_A;
+    case 'b': return VIS_FONT_INDEX_UP_B;
+    case 'c': return VIS_FONT_INDEX_UP_C;
+    case 'd': return VIS_FONT_INDEX_UP_D;
+    case 'e': return VIS_FONT_INDEX_UP_E;
+    case 'f': return VIS_FONT_INDEX_UP_F;
+    case 'g': return VIS_FONT_INDEX_UP_G;
+    case 'h': return VIS_FONT_INDEX_UP_H;
+    case 'i': return VIS_FONT_INDEX_UP_I;
+    case 'j': return VIS_FONT_INDEX_UP_J;
+    case 'k': return VIS_FONT_INDEX_UP_K;
+    case 'l': return VIS_FONT_INDEX_UP_L;
+    case 'm': return VIS_FONT_INDEX_UP_M;
+    case 'n': return VIS_FONT_INDEX_UP_N;
+    case 'o': return VIS_FONT_INDEX_UP_O;
+    case 'p': return VIS_FONT_INDEX_UP_P;
+    case 'q': return VIS_FONT_INDEX_UP_Q;
+    case 'r': return VIS_FONT_INDEX_UP_R;
+    case 's': return VIS_FONT_INDEX_UP_S;
+    case 't': return VIS_FONT_INDEX_UP_T;
+    case 'u': return VIS_FONT_INDEX_UP_U;
+    case 'v': return VIS_FONT_INDEX_UP_V;
+    case 'w': return VIS_FONT_INDEX_UP_W;
+    case 'x': return VIS_FONT_INDEX_UP_X;
+    case 'y': return VIS_FONT_INDEX_UP_Y;
+    case 'z': return VIS_FONT_INDEX_UP_Z;
     
     /*Uppercase Letters*/
-    case 'A': return GUI_FONT_INDEX_UP_A;
-    case 'B': return GUI_FONT_INDEX_UP_B;
-    case 'C': return GUI_FONT_INDEX_UP_C;
-    case 'D': return GUI_FONT_INDEX_UP_D;
-    case 'E': return GUI_FONT_INDEX_UP_E;
-    case 'F': return GUI_FONT_INDEX_UP_F;
-    case 'G': return GUI_FONT_INDEX_UP_G;
-    case 'H': return GUI_FONT_INDEX_UP_H;
-    case 'I': return GUI_FONT_INDEX_UP_I;
-    case 'J': return GUI_FONT_INDEX_UP_J;
-    case 'K': return GUI_FONT_INDEX_UP_K;
-    case 'L': return GUI_FONT_INDEX_UP_L;
-    case 'M': return GUI_FONT_INDEX_UP_M;
-    case 'N': return GUI_FONT_INDEX_UP_N;
-    case 'O': return GUI_FONT_INDEX_UP_O;
-    case 'P': return GUI_FONT_INDEX_UP_P;
-    case 'Q': return GUI_FONT_INDEX_UP_Q;
-    case 'R': return GUI_FONT_INDEX_UP_R;
-    case 'S': return GUI_FONT_INDEX_UP_S;
-    case 'T': return GUI_FONT_INDEX_UP_T;
-    case 'U': return GUI_FONT_INDEX_UP_U;
-    case 'V': return GUI_FONT_INDEX_UP_V;
-    case 'W': return GUI_FONT_INDEX_UP_W;
-    case 'X': return GUI_FONT_INDEX_UP_X;
-    case 'Y': return GUI_FONT_INDEX_UP_Y;
-    case 'Z': return GUI_FONT_INDEX_UP_Z;
+    case 'A': return VIS_FONT_INDEX_UP_A;
+    case 'B': return VIS_FONT_INDEX_UP_B;
+    case 'C': return VIS_FONT_INDEX_UP_C;
+    case 'D': return VIS_FONT_INDEX_UP_D;
+    case 'E': return VIS_FONT_INDEX_UP_E;
+    case 'F': return VIS_FONT_INDEX_UP_F;
+    case 'G': return VIS_FONT_INDEX_UP_G;
+    case 'H': return VIS_FONT_INDEX_UP_H;
+    case 'I': return VIS_FONT_INDEX_UP_I;
+    case 'J': return VIS_FONT_INDEX_UP_J;
+    case 'K': return VIS_FONT_INDEX_UP_K;
+    case 'L': return VIS_FONT_INDEX_UP_L;
+    case 'M': return VIS_FONT_INDEX_UP_M;
+    case 'N': return VIS_FONT_INDEX_UP_N;
+    case 'O': return VIS_FONT_INDEX_UP_O;
+    case 'P': return VIS_FONT_INDEX_UP_P;
+    case 'Q': return VIS_FONT_INDEX_UP_Q;
+    case 'R': return VIS_FONT_INDEX_UP_R;
+    case 'S': return VIS_FONT_INDEX_UP_S;
+    case 'T': return VIS_FONT_INDEX_UP_T;
+    case 'U': return VIS_FONT_INDEX_UP_U;
+    case 'V': return VIS_FONT_INDEX_UP_V;
+    case 'W': return VIS_FONT_INDEX_UP_W;
+    case 'X': return VIS_FONT_INDEX_UP_X;
+    case 'Y': return VIS_FONT_INDEX_UP_Y;
+    case 'Z': return VIS_FONT_INDEX_UP_Z;
 
-    default: return GUI_FONT_INDEX_UNKNOWN;
+    default: return VIS_FONT_INDEX_UNKNOWN;
     }
 }
 
-uint16_t select_bar[2][GUI_SELECTBAR_PX]={
+uint16_t select_bar[2][VIS_SELECTBAR_PX]={
 /*Normal*/
 {
 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 
@@ -106,7 +106,7 @@ uint16_t select_bar[2][GUI_SELECTBAR_PX]={
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
 }};
 
-uint16_t font[][GUI_FONT_PX]={
+uint16_t font[][VIS_FONT_PX]={
 
 /*0*/
 {
