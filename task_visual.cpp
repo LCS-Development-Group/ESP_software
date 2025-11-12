@@ -25,9 +25,13 @@ uint8_t char_to_font_index(char c);
 
 void draw_text(std::string text, uint8_t line, uint8_t pos);
 void draw_page();
+void draw_field_value(uint8_t i);
 void draw_bool_io_field(bool_io_field* bool_io_field_ptr, uint8_t line);
 void draw_float_io_field(float_io_field *float_io_field_ptr, uint8_t line);
+void draw_select();
+void draw_selectbar();
 void lcd_init();
+
 
 void task_visual_main(void *args)
 {
@@ -38,10 +42,7 @@ void task_visual_main(void *args)
 
     //draw_text("TEST 19.08.2025",8, 0);
     //draw_text("K. PACH 275442",1, 0);
-   
-
-    draw_page();
-    vTaskDelay(portMAX_DELAY); //temporary
+    //vTaskDelay(portMAX_DELAY); //temporary
     
     uint32_t ntcode=0x00;
     while(true)
@@ -49,13 +50,31 @@ void task_visual_main(void *args)
         if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
         {
             switch(ntcode)
-            {
-                case VIS_NTCODE_REDRAW:
+            {   
+                case VIS_NTCODE_REDRAW_VALUE_BAR:
+                    
+                    draw_selectbar();
+                    break;
+                
+                case VIS_NTCODE_REDRAW_SELECT:
+                    draw_select();
+                    break;
+
+                case VIS_NTCODE_REDRAW_BAR://is it ever called?
+                    draw_selectbar();
+                    break;
+
+                case VIS_NTCODE_REDRAW_VALUE:
+                    break;
+
+                case VIS_NTCODE_REDRAW_ALL:
                     draw_page();
+                    draw_select();
                     break;
 
                 default:
                     ESP_LOGW("Visual", "Woken by unknown ntcode: %d", ntcode);
+                    break;
             }
         }
     }
@@ -72,7 +91,7 @@ void draw_page()
     uint8_t numof_fields=page->get_numof_fields();
     uint8_t first_line=1;
 
-    draw_text(page->get_page_name(), 0, 0);//Page name
+    draw_text(page->get_page_name()+":", 0, 0);//Page name
     if(page->get_uppage_ptr()!=nullptr)//return (if exists)
     {
         draw_text("<BACK", 1, 1);
@@ -83,30 +102,30 @@ void draw_page()
     for(uint8_t i=0; i<numof_fields; i++)
     {
         if(i+first_line>LCD_DISPLAYED_FIELDS_PER_PAGE) return;
-        field_type=page->get_field_ptr(i)->get_field_type();
-        switch(field_type)
-        {
-        case t_field_type::TEXT:
-            draw_text(page->get_field_ptr(i)->get_name(), first_line+i, 1);
-            break;
-
-        case t_field_type::FLOAT_IO:
-            draw_text(page->get_field_ptr(i)->get_name(), first_line+i, 1);
-            
-            break;
-
-        case t_field_type::BOOL_IO:
-            draw_bool_io_field(static_cast<bool_io_field*>(page->get_field_ptr(i)), first_line+1);
-            break;
-
-        case t_field_type::SUBPAGE_LINK:
-            draw_text(page->get_field_ptr(i)->get_name()+">", first_line+i, 1);
-            break;
         
-        default: break;
-        }
     }
     xSemaphoreGive(gui_mutex);
+}
+
+void draw_field_value(uint8_t i)
+{
+
+}
+
+void draw_select()
+{
+    uint8_t pos=gui->get_prev_prim_idx();
+
+    if(pos!=GUI_CURSOR_MAX_INDEX)
+    esp_lcd_panel_draw_bitmap(lcd_handle, 0, (pos+1)*GUI_FONT_H, GUI_FONT_W, (pos+2)*GUI_FONT_H, font[GUI_FONT_INDEX_SPACE]);
+
+    pos=gui->get_prim_idx();
+    esp_lcd_panel_draw_bitmap(lcd_handle, 0, (pos+1)*GUI_FONT_H, GUI_FONT_W, (pos+2)*GUI_FONT_H, font[GUI_FONT_INDEX_SELECT]);
+}
+
+void draw_selectbar()
+{
+    if(gui->get_prim_lock()==false) return;
 }
 
 void draw_bool_io_field(bool_io_field* bool_io_field_ptr, uint8_t line)
@@ -142,6 +161,11 @@ void lcd_init()
     //clear
     fill_bitmask(0x0000);
     esp_lcd_panel_draw_bitmap(lcd_handle, 0, 0, LCD_VRES, LCD_HRES, bitmask);
+    vTaskDelay(pdMS_TO_TICKS(100));
+
+    draw_page();
+    draw_select();
+    draw_selectbar();
     vTaskDelay(pdMS_TO_TICKS(100));
 
     // //reset temp. variables

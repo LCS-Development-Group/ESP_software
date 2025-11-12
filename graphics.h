@@ -65,3 +65,12 @@
 
 uint8_t char_to_font_index(char c);
 extern uint16_t font[][GUI_FONT_PX];
+
+#define GUI_SELECTBAR_W GUI_FONT_W
+#define GUI_SELECTBAR_H 2
+#define GUI_SELECTBAR_PX (GUI_SELECTBAR_H*GUI_SELECTBAR_W)
+#define GUI_SELECTBAR_VOFFSET 2
+#define GUI_SELECTBAR_NORM 0
+#define GUI_SELECTBAR_NEG 1
+
+extern uint16_t selectbar[2][GUI_SELECTBAR_PX];

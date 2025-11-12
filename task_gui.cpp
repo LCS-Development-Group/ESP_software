@@ -8,8 +8,48 @@ void task_gui_main(void *args)
 {
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
     ESP_LOGI("Gui", "task_gui started");
-    
-    vTaskDelay(portMAX_DELAY); //temporary
+
+
+    uint32_t ntcode=0x00;
+    uint8_t retcode=GUI_RETCODE_DEFAULT;
+    while(true)
+    {
+        if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
+        {
+            xSemaphoreTake(gui_mutex, portMAX_DELAY);
+            switch(ntcode)
+            {
+                case GUI_NTCODE_CUR_POS:
+                    ESP_LOGI("GUI", "UP");
+                    retcode=gui->move_cursor_up();
+                    break;
+
+                case GUI_NTCODE_CUR_NEG:
+                    ESP_LOGI("GUI", "DOWN");
+                    retcode=gui->move_cursor_down();
+                    break;
+
+                case GUI_NTCODE_CUR_ENT:
+                    ESP_LOGI("GUI", "ENTER");
+                    break;
+
+                case GUI_NTCODE_CUR_BCK:
+                    ESP_LOGI("GUI", "BACK");
+                    break;
+
+                default:
+                    ESP_LOGW("GUI", "Woken by unknown ntcode: %d", ntcode);
+                    break;
+            }
+            xSemaphoreGive(gui_mutex);
+
+            if(retcode!=GUI_RETCODE_DEFAULT)
+            {
+                xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, retcode, eSetValueWithoutOverwrite);
+                retcode=GUI_RETCODE_DEFAULT;
+            }
+        }
+    }
 }
 
 void gui_init()
@@ -102,9 +142,13 @@ bool bool_io_field::get_val() const
 
 void bool_io_field::switch_bool()
 {
-    xSemaphoreTake(*mutex, portMAX_DELAY);
-    *var=!(*var);
-    xSemaphoreGive(*mutex);
+    if(mutex!=nullptr)
+    {
+        xSemaphoreTake(*mutex, portMAX_DELAY);
+        *var=!(*var);
+        xSemaphoreGive(*mutex);
+    }
+    else *var=!(*var);
 }
 
 //==================================================================================================================
@@ -152,8 +196,11 @@ gui_controller::gui_controller()
     current_page=root;
     prim_idx=0;
     prim_lock=false;
-    sec_idx=-1;
+    prev_prim_idx=GUI_CURSOR_MAX_INDEX;
+
+    sec_idx=0;
     sec_lock=false;
+    prev_sec_idx=GUI_CURSOR_MAX_INDEX;
 
     bool_io_field_ptr=nullptr;
     float_io_field_ptr=nullptr;
@@ -165,129 +212,154 @@ gui_controller::~gui_controller()
     delete root;
 }
 
-void gui_controller::move_cursor_up()
+uint8_t gui_controller::move_cursor_up()
 {
-    if(prim_lock)
+    if(prim_lock==true)
     {
-        float_io_field_ptr=static_cast<float_io_field*>(current_page->get_field_ptr(prim_idx));
-        if(sec_lock)//edycja liczby
-        {
-
+        if(sec_lock==true)
+        {//field varaible edition
+            //redraw specific field
         }
         else
-        {
-            if(sec_idx<float_io_field_ptr->get_total_num_digits()-1) 
-            {   
-                sec_idx++;
-                //redraw=1;
-            }
+        {//move secondary cursor left
+
         }
     }
     else
+    {//move primary cursor up (decrement)
+        if(prim_idx>0)
         {
-        if(prim_idx>0) 
-        {
+            prev_prim_idx=prim_idx;
             prim_idx--;
-            //redraw=1;
-        }
-        else if(current_page->get_uppage_ptr()!=nullptr && prim_idx==0)
-        {
-            prim_idx=-1;
-            //redraw=1;
+            return GUI_RETCODE_REDRAW_SELECT;
         }
     }
+    return GUI_RETCODE_DEFAULT;//for safety
 }
 
-void gui_controller::move_cursor_down()
+uint8_t gui_controller::move_cursor_down()
 {
-    if(prim_lock)
+    if(prim_lock==true)
     {
-        float_io_field_ptr=static_cast<float_io_field*>(current_page->get_field_ptr(prim_idx));
-        if(sec_lock)//edycja liczby
-        {
-
+        if(sec_lock==true)
+        {//field varaible edition
+            //redraw specific field
         }
         else
-        {
-            if(sec_idx>-1) 
-            {   
-                sec_idx--;
-                // redraw=1;
-            }
+        {//move secondary cursor right
+
         }
     }
     else
-    {
-        if(prim_idx<current_page->get_numof_fields()-1) 
+    {//move primary cursor down (increment)
+        if(prim_idx<(current_page->get_numof_fields()-1))
         {
+            prev_prim_idx=prim_idx;
             prim_idx++;
-            //redraw=1;
+            return GUI_RETCODE_REDRAW_SELECT;
         }
     }
+    return GUI_RETCODE_DEFAULT;//for safety
 }
-void gui_controller::enter()
+
+uint8_t gui_controller::enter()
 {
-    if(prim_idx==-1)
-    {//wracamy poziom wyżej
-        if(current_page->get_uppage_ptr()==nullptr) /*std::cerr<<"no uppage yet \"Back\" exists"<<std::endl*/;
-        else
+    if(prim_lock==true)
+    {//switching digit edition
+
+        //return GUI_RETCODE_REDRAW_VALUE_AND_BAR;
+
+    }
+    else
+    {//entering field edition
+        switch(current_page->get_field_ptr(prim_idx)->get_field_type())
         {
-            jump_pages(current_page->get_uppage_ptr());
-            //redraw=1;
+            case t_field_type::TEXT:
+                return GUI_RETCODE_DEFAULT;
+
+            case t_field_type::SUBPAGE_LINK:
+                link_field_ptr=static_cast<page_link_field*>(current_page->get_field_ptr(prim_idx));
+                if(link_field_ptr->get_page_ptr()!=nullptr)
+                {
+                    jump_pages(link_field_ptr->get_page_ptr());
+                    return GUI_RETCODE_REDRAW_ALL;
+                }
+                break;
+
+            case t_field_type::BOOL_IO:
+                bool_io_field_ptr=static_cast<bool_io_field*>(current_page->get_field_ptr(prim_idx));
+                if(bool_io_field_ptr->get_io()==t_field_io_type::FIELD_OUT)
+                {//output - editting disallowed
+                    return GUI_RETCODE_DEFAULT;
+                }
+                else
+                {//input - editting allowed (bool so no entering to secondary cursor level)
+                    bool_io_field_ptr->switch_bool();
+                    return GUI_RETCODE_REDRAW_VALUE;
+                }
+                break;
+
+            case t_field_type::FLOAT_IO:
+                float_io_field_ptr=static_cast<float_io_field*>(current_page->get_field_ptr(prim_idx));
+                if(float_io_field_ptr->get_io()==t_field_io_type::FIELD_OUT)
+                {//output - editting disallowed
+                    return GUI_RETCODE_DEFAULT;
+                }
+                else
+                {//input - editting allowed
+                    prim_lock=true;
+                    sec_idx=0;
+                    prev_sec_idx=GUI_CURSOR_MAX_INDEX;
+                    return GUI_RETCODE_REDRAW_BAR;
+                }
+                break;
+        }
+    }
+
+    return GUI_RETCODE_DEFAULT;//for safety
+}
+
+uint8_t gui_controller::go_back()
+{
+    if(prim_lock==true)
+    {
+        if(sec_lock==true)
+        {//leaving digit edition
+            //redraw specific field
+        }
+        else
+        {//leaving field editing
+            prim_lock=false;
+            sec_idx=0;
+            prev_sec_idx=0;
+            return GUI_RETCODE_REDRAW_BAR;
         }
     }
     else
     {
-        t_field_type field_type=current_page->get_field_ptr(prim_idx)->get_field_type();
-        
-    
-        switch(field_type)
-        {
-        case TEXT:
-            break;
-
-        case SUBPAGE_LINK:
-            link_field_ptr=static_cast<page_link_field*>(current_page->get_field_ptr(prim_idx));
-            jump_pages(link_field_ptr->get_page_ptr());
-            //redraw=1;
-            break;
-
-        case BOOL_IO:
-            bool_io_field_ptr=static_cast<bool_io_field*>(current_page->get_field_ptr(prim_idx));
-            if(bool_io_field_ptr->get_io()==FIELD_IN)
-            {
-                bool_io_field_ptr->switch_bool();
-                //redraw=1;
-            }
-            break;
-
-        case FLOAT_IO:
-            float_io_field_ptr=static_cast<float_io_field*>(current_page->get_field_ptr(prim_idx));
-            if(float_io_field_ptr->get_io()==FIELD_IN)
-            {
-                if(prim_lock)
-                {//edycja
-                    //std::cout<<"CL";
-                    if(sec_idx==-1) 
-                    {//wyjście
-                        prim_lock=false;
-                    }
-                    else
-                    {//edycja cyfry
-                        sec_lock=!sec_lock;
-                    }
-                    //redraw=1;
-                }
-                else prim_lock=true;
-            }
-            break;
-        
-        default:
-            //std::cerr<<"Enter: field type with undefined behaviour"<<std::endl;
-            break;
+        if(current_page->get_uppage_ptr()!=nullptr)
+        {//return to previous page
+            jump_pages(current_page->get_uppage_ptr());
+            return GUI_RETCODE_REDRAW_ALL;
         }
     }
+    return GUI_RETCODE_DEFAULT;//for safety
 }
+
+void gui_controller::jump_pages(page* newpage)
+{
+    current_page=newpage;
+    prim_idx=0;
+    prev_prim_idx=GUI_CURSOR_MAX_INDEX;
+}
+
+page* gui_controller::get_current_page() const {return current_page;};
+bool gui_controller::get_prim_lock() const {return prim_lock;}
+bool gui_controller::get_sec_lock() const {return sec_idx;}
+uint8_t gui_controller::get_prim_idx() const {return prim_idx;}
+uint8_t gui_controller::get_sec_idx() const {return sec_idx;}
+uint8_t gui_controller::get_prev_prim_idx() const {return prev_prim_idx;}
+uint8_t gui_controller::get_prev_sec_idx() const {return prev_sec_idx;}
 
 //==================================================================================================================
 // Page                                                                                                  
@@ -325,16 +397,3 @@ basic_field* page::get_field_ptr(int index) const
 page* page::get_uppage_ptr() const {return uppage;}
 
 std::string page::get_page_name() const {return name;}
-
-void gui_controller::jump_pages(page* newpage)
-{
-    current_page=newpage;
-    if(current_page->get_uppage_ptr()==nullptr) prim_idx=0;
-    else prim_idx=-1;
-}
-
-page* gui_controller::get_current_page() const {return current_page;};
-bool gui_controller::get_prim_lock() const {return prim_lock;}
-bool gui_controller::get_sec_lock() const {return sec_idx;}
-int8_t gui_controller::get_prim_idx() const {return prim_idx;}
-int8_t gui_controller::get_sec_idx() const {return sec_idx;}

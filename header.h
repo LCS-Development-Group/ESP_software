@@ -10,7 +10,6 @@
 #define GUI_TASKID 1
 #define VIS_TASKID 2
 
-
 #define ENC_EVBIT (1<<ENC_TASKID)
 #define GUI_EVBIT (1<<GUI_TASKID)
 #define VIS_EVBIT (1<<VIS_TASKID)
@@ -56,7 +55,11 @@ void task_visual_main(void *args);
 #define LCD_FIELD_CONTENT_START 12
 
 /*Notification Codes*/
-#define VIS_NTCODE_REDRAW 0
+#define VIS_NTCODE_REDRAW_ALL 0
+#define VIS_NTCODE_REDRAW_SELECT 1
+#define VIS_NTCODE_REDRAW_BAR 2
+#define VIS_NTCODE_REDRAW_VALUE 3
+#define VIS_NTCODE_REDRAW_VALUE_BAR 4
 
 void vis_connect_init();
 
@@ -69,13 +72,13 @@ void task_encoder_main(void *args);
 #define ENC_SW_PIN GPIO_NUM_12
 #define ENC_PCNT_HIGH 1      //after reaching that many steps a one "big step" is registered
 #define ENC_PCNT_LOW (-1)*ENC_PCNT_HIGH
-extern uint8_t enc_pos;
 void enc_gpio_init();
 void enc_pnct_init();
 
 /*Notification Codes*/
-#define ENC_NTCODE_ROT 1
-#define ENC_NTCODE_SW 2
+#define ENC_NTCODE_ROT 0
+#define ENC_NTCODE_SW_CLICK 1
+#define ENC_NTCODE_SW_PRESSED 2
 
 /*======================================================================================*/
 /* GUI                                                                                  */
@@ -91,6 +94,9 @@ void gui_init();
 #define GUI_NTCODE_CUR_POS 0
 #define GUI_NTCODE_CUR_NEG 1
 #define GUI_NTCODE_CUR_ENT 2
+#define GUI_NTCODE_CUR_BCK 3
+
+#define GUI_CURSOR_MAX_INDEX 255
 
 /*======================================================================================*/
 /* MISC                                                                                 */

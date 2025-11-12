@@ -4,6 +4,13 @@
 enum t_field_type{TEXT, SUBPAGE_LINK, FLOAT_IO, BOOL_IO};
 enum t_field_io_type{FIELD_IN, FIELD_OUT};
 
+#define GUI_RETCODE_REDRAW_ALL              VIS_NTCODE_REDRAW_ALL
+#define GUI_RETCODE_REDRAW_SELECT           VIS_NTCODE_REDRAW_SELECT
+#define GUI_RETCODE_REDRAW_BAR              VIS_NTCODE_REDRAW_BAR
+#define GUI_RETCODE_REDRAW_VALUE            VIS_NTCODE_REDRAW_VALUE
+#define GUI_RETCODE_REDRAW_VALUE_BAR        VIS_NTCODE_REDRAW_VALUE_BAR
+#define GUI_RETCODE_DEFAULT 255
+
 class basic_field
 {
     protected:
@@ -71,9 +78,10 @@ class bool_io_field: public basic_field
 class float_io_field: public basic_field
 {
     t_field_io_type io;
-    float *var;//pointer to assioted variable
+    float *var;//pointer to associated variable
     SemaphoreHandle_t *mutex; //value at call
     std::string unit;
+    
     int8_t prec_pref, prec_pos;
 
     public:
@@ -97,9 +105,9 @@ class gui_controller
     page *current_page;
 
     //cursors
-    int8_t prim_idx;
+    uint8_t prim_idx, prev_prim_idx;
     bool prim_lock;
-    int8_t sec_idx;
+    uint8_t sec_idx, prev_sec_idx;
     bool sec_lock;
 
     //temp. variables (to avoid repeated allocations)
@@ -114,15 +122,18 @@ public:
     gui_controller();
     ~gui_controller();
     void fill_fields();
-    void move_cursor_up();
-    void move_cursor_down();
-    void enter();
+    uint8_t move_cursor_up();
+    uint8_t move_cursor_down();
+    uint8_t enter();
+    uint8_t go_back();
 
     page* get_current_page() const;
     bool get_prim_lock() const;
     bool get_sec_lock() const;
-    int8_t get_prim_idx() const;
-    int8_t get_sec_idx() const;
+    uint8_t get_prim_idx() const;
+    uint8_t get_sec_idx() const;
+    uint8_t get_prev_prim_idx() const;
+    uint8_t get_prev_sec_idx() const;
     
 private:
     void jump_pages(page* newpage);

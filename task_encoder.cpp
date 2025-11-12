@@ -10,8 +10,6 @@ pcnt_glitch_filter_config_t glitch_config;
 pcnt_event_callbacks_t count_callback;
 button_t enc_sw;
 
-uint8_t enc_pos=0, enc_temp_pin;
-
 static bool counter_isr(pcnt_unit_handle_t unit, const pcnt_watch_event_data_t *edata, void *user_ctx)
 {
     BaseType_t awoken_task=pdFALSE;
@@ -22,7 +20,8 @@ static bool counter_isr(pcnt_unit_handle_t unit, const pcnt_watch_event_data_t *
 
 void enc_sw_cb(button_t *btn, button_state_t state)
 {
-    if(state==BUTTON_CLICKED) xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, ENC_NTCODE_SW, eSetValueWithOverwrite);
+    if(state==BUTTON_CLICKED) xTaskNotifyIndexed(task_handle_list[ENC_TASKID], 0, ENC_NTCODE_SW_CLICK, eSetValueWithOverwrite);
+    else if(state==BUTTON_PRESSED_LONG) xTaskNotifyIndexed(task_handle_list[ENC_TASKID], 0, ENC_NTCODE_SW_PRESSED, eSetValueWithOverwrite);
 }
 
 void task_encoder_main(void *args)
@@ -33,12 +32,11 @@ void task_encoder_main(void *args)
     pcnt_unit_enable(count);
     pcnt_unit_start(count);
     uint32_t ntcode=0x0;
+    int pos=0;
     while(true)
     {
         if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
         {
-            //ESP_LOGW("enc", "Notified with code %d", ntcode);
-            int pos=0;
             switch(ntcode)
             {
             case ENC_NTCODE_ROT://rotacja
@@ -46,15 +44,11 @@ void task_encoder_main(void *args)
                 switch(pos)
                 {
                 case ENC_PCNT_HIGH:
-                    enc_pos++;
-                    //ESP_LOGI("Encoder", "POS++");
-                    //xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_POS, eSetValueWithoutOverwrite);
+                    xTaskNotifyIndexed(task_handle_list[GUI_TASKID], 0, GUI_NTCODE_CUR_POS, eSetValueWithoutOverwrite);
                     break;
 
-                case ENC_PCNT_LOW://wciśnięcie przycisku
-                    enc_pos--;
-                    //ESP_LOGI("Encoder", "POS--");
-                    //xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_NEG, eSetValueWithoutOverwrite);
+                case ENC_PCNT_LOW:
+                    xTaskNotifyIndexed(task_handle_list[GUI_TASKID], 0, GUI_NTCODE_CUR_NEG, eSetValueWithoutOverwrite);
                     break;
 
                 default:
@@ -65,9 +59,12 @@ void task_encoder_main(void *args)
                 pcnt_unit_start(count);
                 break;
 
-            case ENC_NTCODE_SW:
-                //ESP_LOGI("Encoder", "SW");
-                //xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, TEMP_VIS_NTCODE_CUR_SW, eSetValueWithoutOverwrite);
+            case ENC_NTCODE_SW_CLICK:
+                xTaskNotifyIndexed(task_handle_list[GUI_TASKID], 0, GUI_NTCODE_CUR_ENT, eSetValueWithoutOverwrite);
+                break;
+
+            case ENC_NTCODE_SW_PRESSED:
+                xTaskNotifyIndexed(task_handle_list[GUI_TASKID], 0, GUI_NTCODE_CUR_BCK, eSetValueWithoutOverwrite);
                 break;
                 
             default:
