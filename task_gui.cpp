@@ -37,7 +37,7 @@ void gui_controller::fill_fields()
     root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
     root->add_field_to_page(new text_field("field3"));
     // root->add_field_to_page(new float_io_field("float_in ", FIELD_IN, &f_var, "mm", 2, 3));
-    root->add_field_to_page(new float_io_field("floatout", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "mA", 2, 3));
+    root->add_field_to_page(new float_io_field("float_out", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "mA", 2, 3));
     page* subpage_1=root->add_new_page("link");
 
     /*subpage test*/
