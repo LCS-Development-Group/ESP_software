@@ -156,8 +156,8 @@ void vis_controller::draw_text(std::string text, uint8_t line, uint8_t pos)
 void vis_controller::start()
 {
     esp_lcd_panel_disp_on_off(*lcd_handle, true);
-    esp_lcd_panel_swap_xy(*lcd_handle, true);
-    esp_lcd_panel_mirror(*lcd_handle, true, true);
+    //esp_lcd_panel_swap_xy(*lcd_handle, true);
+    //esp_lcd_panel_mirror(*lcd_handle, true, true);
 
     gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL);
 
