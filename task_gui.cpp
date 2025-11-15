@@ -84,17 +84,15 @@ void gui_controller::fill_fields()
     root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
     root->add_field_to_page(new text_field("field3"));
     // root->add_field_to_page(new float_io_field("float_in ", FIELD_IN, &f_var, "mm", 2, 3));
-    root->add_field_to_page(new float_io_field("float_out", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "mA", 2, 3));
+    root->add_field_to_page(new float_io_field("float_out", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "mA"));
     page* subpage_1=root->add_new_page("link");
 
     /*subpage test*/
     subpage_1->add_field_to_page(new text_field("test"));
+    subpage_1->add_field_to_page(new bool_io_field("State_1", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
+    subpage_1->add_field_to_page(new bool_io_field("State", FIELD_OUT, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
     // subpage_1->add_field_to_page(new bool_io_field("State_i", FIELD_IN, &debug_bool));
     // subpage_1->add_field_to_page(new bool_io_field("State_o", FIELD_OUT, &debug_bool));
-
-
-
-
 
     prim_idx=find_next_editable(GUI_CURSOR_MAX_INDEX);//cursor starting position
 }
@@ -129,65 +127,43 @@ page* page_link_field::get_page_ptr(){return linked_page;}
 // BOOL_IO FIELD                                                                                                    
 //==================================================================================================================
 
-bool_io_field::bool_io_field(std::string _name, t_field_io_type _io, bool* _var, SemaphoreHandle_t *_mutex)
-:basic_field(BOOL_IO, _name, _io), var(_var), mutex(_mutex){}
-t_field_io_type bool_io_field::get_io() const {return io;}
-bool bool_io_field::get_val() const
-{
-    bool copy;
-    if(mutex!=nullptr)
-    {
-        xSemaphoreTake(*mutex, portMAX_DELAY);
-        copy=*var;
-        xSemaphoreGive(*mutex);
-    }
-    else copy=*var;
-    return copy;
-}
+bool_io_field::bool_io_field(
+    std::string _name, 
+    t_field_io_type _io, 
+    bool *_var,
+    SemaphoreHandle_t *_var_mutex)
+    :io_field<bool>(t_field_type::BOOL_IO , _name, _io, _var, _var_mutex){}
 
 void bool_io_field::switch_bool()
 {
-    if(mutex!=nullptr)
-    {
-        xSemaphoreTake(*mutex, portMAX_DELAY);
-        *var=!(*var);
-        xSemaphoreGive(*mutex);
-    }
-    else *var=!(*var);
+    xSemaphoreTake(*var_mutex, portMAX_DELAY);
+    *var=!(*var);
+    xSemaphoreGive(*var_mutex);
 }
 
 //==================================================================================================================
 // FLOAT_IO FIELD                                                                                                   
 //==================================================================================================================
-
-float_io_field::float_io_field(std::string _name, t_field_io_type _io, float* _var, SemaphoreHandle_t *_mutex, std::string _unit, uint8_t _prec_pref, uint8_t _prec_pos)
-:basic_field(FLOAT_IO, _name, _io), var(_var), mutex(_mutex), unit(_unit), prec_pref(_prec_pref), prec_pos(_prec_pos){}
-t_field_io_type float_io_field::get_io() const {return io;}
-float float_io_field::get_val() const
-{
-    float copy;
-    if(mutex!=nullptr)
-    {
-        xSemaphoreTake(*mutex, portMAX_DELAY);
-        copy=*var;
-        xSemaphoreGive(*mutex);
-    }
-    else copy=*var;
-    return copy;
-}
+float_io_field::float_io_field( 
+    std::string _name, 
+    t_field_io_type _io, 
+    float *_var,
+    SemaphoreHandle_t *_var_mutex,
+    /*derived class arguments*/
+    std::string _unit)
+    :io_field<float>(t_field_type::FLOAT_IO, _name, _io, _var, _var_mutex),
+    unit(_unit){}
 
 std::string float_io_field::get_unit() const
 {
     return unit;
 }
-uint8_t float_io_field::get_prec_pref() const {return prec_pref;}
-uint8_t float_io_field::get_prec_pos() const {return prec_pos;}
-uint8_t float_io_field::get_total_num_digits() const {return prec_pref+prec_pos;}
+
 void float_io_field::set_val(float new_val)
 {
-    xSemaphoreTake(*mutex, portMAX_DELAY);
+    xSemaphoreTake(*var_mutex, portMAX_DELAY);
     *var=new_val;
-    xSemaphoreGive(*mutex);
+    xSemaphoreGive(*var_mutex);
 }
 
 

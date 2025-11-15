@@ -62,39 +62,72 @@ class page_link_field :public basic_field
     page* get_page_ptr();
 };
 
-
-class bool_io_field: public basic_field
+template <typename var_type>
+class io_field : public basic_field
 {
-    bool *var;//pointer to assioted variable
-    SemaphoreHandle_t *mutex;
+    protected:
+    var_type *var;                  //field variable
+    SemaphoreHandle_t *var_mutex;   //variable mutex
 
     public:
-    bool_io_field(std::string _name, t_field_io_type _io, bool* _var, SemaphoreHandle_t *_mutex);
-    t_field_io_type get_io() const;
-    bool get_val() const; //value at call
+    io_field(
+        t_field_type _field_type, 
+        std::string _name, 
+        t_field_io_type _io, 
+        var_type *_var,
+        SemaphoreHandle_t *_var_mutex)
+        :basic_field(_field_type, _name, _io),
+        var(_var), var_mutex(_var_mutex)
+    {
+        if(var==nullptr || var_mutex==nullptr)
+        {
+            ESP_LOGE("GUI", "io_field initialized with nullptr pointer");
+            exit(-1);
+        }
+    }
+    virtual ~io_field(){}
+
+    var_type get_val() const
+    {
+        var_type copy;
+        xSemaphoreTake(*var_mutex, portMAX_DELAY);
+        copy=*var;
+        xSemaphoreGive(*var_mutex);
+        return copy;
+    }
+    SemaphoreHandle_t *get_var_mutex() const {return var_mutex;}
+};
+
+
+class bool_io_field: public io_field<bool>
+{
+    public:
+    bool_io_field(
+        std::string _name, 
+        t_field_io_type _io, 
+        bool *_var,
+        SemaphoreHandle_t *_var_mutex);
 
     void switch_bool();
 };
 
-class float_io_field: public basic_field
+class float_io_field: public io_field<float>
 {
-    float *var;//pointer to associated variable
-    SemaphoreHandle_t *mutex; //value at call
+    
     std::string unit;
     
-    int8_t prec_pref, prec_pos;
+    //int8_t prec_pref, prec_pos;
 
     public:
-    float_io_field(std::string _name, t_field_io_type _io, float* _var, SemaphoreHandle_t *_mutex, std::string _unit, uint8_t _prec_pref, uint8_t _prec_pos);
-    
-    t_field_io_type get_io() const;
-    float get_val() const;
+    float_io_field(
+        std::string _name, 
+        t_field_io_type _io, 
+        float *_var,
+        SemaphoreHandle_t *_var_mutex,
+        /*derived class arguments*/
+        std::string _unit);
 
     std::string get_unit() const;
-    uint8_t get_prec_pref() const;
-    uint8_t get_prec_pos() const;
-    uint8_t get_total_num_digits() const;
-    
 
     void set_val(float new_val);
 };

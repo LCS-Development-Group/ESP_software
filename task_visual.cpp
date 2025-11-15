@@ -62,7 +62,14 @@ void task_visual_main(void *args)
 
 /*vis_class methods definitions*/
 vis_controller::vis_controller(esp_lcd_panel_handle_t* _lcd_handle)
-:lcd_handle(_lcd_handle){}
+:lcd_handle(_lcd_handle)
+{
+    if(lcd_handle==nullptr)
+    {
+        ESP_LOGE("VIS", "vis_controller initialized with nullptr pointer");
+        exit(-1);
+    }
+}
 
 void vis_controller::draw_page()
 {

@@ -100,6 +100,7 @@ extern SemaphoreHandle_t DEBUG_BOOL_MUT;
 extern float DEBUG_FLOAT;
 extern SemaphoreHandle_t DEBUG_FLOAT_MUT;
 
+
 // #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
 // #define BYTE_TO_BINARY(byte) 
 //     ((byte) & 0x80 ? '1' : '0'), 

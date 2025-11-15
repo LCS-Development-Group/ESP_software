@@ -3,8 +3,10 @@
 //DEBUG
 bool DEBUG_BOOL=false;
 SemaphoreHandle_t DEBUG_BOOL_MUT=xSemaphoreCreateMutex();
+
 float DEBUG_FLOAT=420.2137;
- SemaphoreHandle_t DEBUG_FLOAT_MUT=xSemaphoreCreateMutex();
+SemaphoreHandle_t DEBUG_FLOAT_MUT=xSemaphoreCreateMutex();
+
 
 
 
