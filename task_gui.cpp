@@ -96,7 +96,7 @@ void gui_controller::fill_fields()
 
 
 
-    prim_idx=find_next_editable(0);//cursor starting position
+    prim_idx=find_next_editable(GUI_CURSOR_MAX_INDEX);//cursor starting position
 }
 
 //==================================================================================================================
@@ -234,7 +234,7 @@ uint8_t gui_controller::move_cursor_up()
     {//move primary cursor up (decrement)
         if(prim_idx>0)
         {
-            uint8_t prev=find_prev_editable(prim_idx-1);
+            uint8_t prev=find_prev_editable(prim_idx);
             if(prev!=GUI_CURSOR_MAX_INDEX)
             {
                 prev_prim_idx=prim_idx;
@@ -264,7 +264,7 @@ uint8_t gui_controller::move_cursor_down()
     {//move primary cursor down (increment)
         if(prim_idx<(current_page->get_numof_fields()-1))
         {
-            uint8_t next=find_next_editable(prim_idx+1);
+            uint8_t next=find_next_editable(prim_idx);
             if(next!=GUI_CURSOR_MAX_INDEX)
             {
                 prev_prim_idx=prim_idx;
@@ -364,7 +364,7 @@ uint8_t gui_controller::go_back()
 void gui_controller::jump_pages(page* newpage)
 {
     current_page=newpage;
-    prim_idx=find_next_editable(0);
+    prim_idx=find_next_editable(GUI_CURSOR_MAX_INDEX);
     prev_prim_idx=GUI_CURSOR_MAX_INDEX;
 }
 
@@ -375,15 +375,16 @@ uint8_t gui_controller::get_prim_idx() const {return prim_idx;}
 uint8_t gui_controller::get_sec_idx() const {return sec_idx;}
 uint8_t gui_controller::get_prev_prim_idx() const {return prev_prim_idx;}
 uint8_t gui_controller::get_prev_sec_idx() const {return prev_sec_idx;}
-uint8_t  gui_controller::find_next_editable(uint8_t start) const
+uint8_t gui_controller::find_next_editable(uint8_t current) const
 {
-    for(uint8_t idx=start; idx<current_page->get_numof_fields(); idx++)
+    for(uint8_t idx=current+1; idx<current_page->get_numof_fields(); idx++)
         if(current_page->get_field_ptr(idx)->get_io()==t_field_io_type::FIELD_IN) return idx;
     return GUI_CURSOR_MAX_INDEX;
 }
-uint8_t  gui_controller::find_prev_editable(uint8_t start) const
+uint8_t  gui_controller::find_prev_editable(uint8_t current) const
 {
-    for(uint8_t idx=start;; idx--)
+    if(current==GUI_CURSOR_MAX_INDEX) return GUI_CURSOR_MAX_INDEX;
+    for(uint8_t idx=current-1;; idx--)
     {
         if(current_page->get_field_ptr(idx)->get_io()==t_field_io_type::FIELD_IN) return idx;
         if(idx==0) break;//compiler had problem with uint8_t condition being always true (I it's mean correct) even though overflow is a thing

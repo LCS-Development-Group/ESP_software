@@ -141,6 +141,6 @@ public:
     
 private:
     void jump_pages(page* newpage);
-    uint8_t find_next_editable(uint8_t start) const;
-    uint8_t find_prev_editable(uint8_t start) const;
+    uint8_t find_next_editable(uint8_t current) const;
+    uint8_t find_prev_editable(uint8_t current) const;
 };
