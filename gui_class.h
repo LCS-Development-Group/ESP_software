@@ -95,6 +95,8 @@ class io_field : public basic_field
         xSemaphoreGive(*var_mutex);
         return copy;
     }
+
+    var_type* get_var_ptr() const {return var;}
     SemaphoreHandle_t *get_var_mutex() const {return var_mutex;}
 };
 
@@ -171,8 +173,13 @@ public:
     bool_io_field* cast_to_bool_io(basic_field* field) const;
     float_io_field* cast_to_float_io(basic_field* field) const;
     page_link_field* cast_to_page_link(basic_field* field) const;
-    
+
+    bool check_if_displayed(bool* _var) const;
+    bool check_if_displayed(float* _var) const;
 private:
+    bool check_if_displayed_excluding(bool* _var, uint8_t excluded) const;
+    bool check_if_displayed_excluding(float* _var, uint8_t excluded) const;
+
     void jump_pages(page* newpage);
     uint8_t find_next_editable(uint8_t current) const;
     uint8_t find_prev_editable(uint8_t current) const;

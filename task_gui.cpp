@@ -375,6 +375,28 @@ float_io_field* gui_controller::cast_to_float_io(basic_field* field) const
 page_link_field* gui_controller::cast_to_page_link(basic_field* field) const
 {return static_cast<page_link_field*>(field);}
 
+bool gui_controller::check_if_displayed(bool* _var) const {check_if_displayed_excluding(_var, GUI_CURSOR_MAX_INDEX);}
+bool gui_controller::check_if_displayed(float* _var) const {check_if_displayed_excluding(_var, GUI_CURSOR_MAX_INDEX);}
+
+bool gui_controller::check_if_displayed_excluding(bool* _var, uint8_t excluded) const
+{
+    for(uint8_t idx=0; idx<current_page->get_numof_fields(); idx++)
+    {
+        if(idx==excluded) continue;
+        if(cast_to_bool_io(current_page->get_field_ptr(idx))->get_var_ptr()==_var) return true;
+    }
+    return false;
+}
+bool gui_controller::check_if_displayed_excluding(float* _var, uint8_t excluded) const
+{
+    for(uint8_t idx=0; idx<current_page->get_numof_fields(); idx++)
+    {
+        if(idx==excluded) continue;
+        if(cast_to_float_io(current_page->get_field_ptr(idx))->get_var_ptr()==_var) return true;
+    }
+    return false;
+}
+
 //==================================================================================================================
 // Page                                                                                                  
 //==================================================================================================================
