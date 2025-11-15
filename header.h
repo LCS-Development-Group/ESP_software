@@ -49,11 +49,26 @@ void vis_init();
 //in vis_class.h
 
 /*Notification Codes*/
-#define VIS_NTCODE_REDRAW_ALL           0
-#define VIS_NTCODE_REDRAW_SELECT        1
-#define VIS_NTCODE_REDRAW_BAR           2
-#define VIS_NTCODE_REDRAW_VALUE         3
-#define VIS_NTCODE_REDRAW_VALUE_BAR     4
+#define VIS_NTCODE_REDRAW_ALL               0
+#define VIS_NTCODE_REDRAW_SELECT            1
+#define VIS_NTCODE_REDRAW_BAR               2
+#define VIS_NTCODE_REDRAW_VALUE             3
+#define VIS_NTCODE_REDRAW_ALL_VALUES        4
+
+/*
+signals:
+draw page 125
+redraw current field value
+
+functions:
+1 redraw select
+2 redraw all names
+3 clear field value
+4 print field value
+5 print all values
+6 print bar
+
+*/
 
 /*======================================================================================*/
 /* UI ROTATIONAL ENCODER                                                                */

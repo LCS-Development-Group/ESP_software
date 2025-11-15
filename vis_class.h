@@ -23,14 +23,17 @@ class vis_controller
     ~vis_controller();
 
     void draw_page();
-    void draw_only_value(uint8_t line);
+    void draw_current_value();
+    void draw_all_values();
     void draw_select();
-    void draw_selectbar();
+    void draw_bar();
     void start();
 
     private:
     void clear();
+    void clear_field(uint8_t line);
     void draw_value(uint8_t line);
+    void draw_names();
     void draw_bool_io_field(bool_io_field* bool_io_field_ptr, uint8_t line);
     void draw_float_io_field(float_io_field *float_io_field_ptr, uint8_t line);
     void draw_text(std::string text, uint8_t line, uint8_t pos);

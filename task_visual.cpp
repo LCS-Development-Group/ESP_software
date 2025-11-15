@@ -1,10 +1,5 @@
 #include "header.h"
 #include "vis_class.h"
-// #include "esp_lcd_panel_io.h"
-// #include "esp_lcd_panel_vendor.h"
-// #include "esp_lcd_panel_ops.h"
-// #include "esp_lcd_ili9341.h"
-// #include "graphics.h"
 
 gpio_config_t lcd_bl_cfg;
 spi_bus_config_t spi_bus_cfg;
@@ -29,26 +24,27 @@ void task_visual_main(void *args)
         {
             switch(ntcode)
             {   
-                case VIS_NTCODE_REDRAW_VALUE_BAR:
-                    
-                    vis->draw_selectbar();
+                case VIS_NTCODE_REDRAW_BAR:
+                    vis->draw_bar();
                     break;
                 
                 case VIS_NTCODE_REDRAW_SELECT:
                     vis->draw_select();
                     break;
 
-                case VIS_NTCODE_REDRAW_BAR://is it ever called?
-                    vis->draw_selectbar();
+                case VIS_NTCODE_REDRAW_VALUE:
+                    vis->draw_current_value();
                     break;
 
-                case VIS_NTCODE_REDRAW_VALUE:
-                    vis->draw_only_value(gui->get_prim_idx());
+                case VIS_NTCODE_REDRAW_ALL_VALUES:
+                    vis->draw_all_values();
+                    vis->draw_bar();
                     break;
 
                 case VIS_NTCODE_REDRAW_ALL:
                     vis->draw_page();
                     vis->draw_select();
+                    vis->draw_all_values();
                     break;
 
                 default:
@@ -75,23 +71,81 @@ void vis_controller::draw_page()
 {
     clear();
     xSemaphoreTake(gui_mutex, portMAX_DELAY);
-
-    page* page=gui->get_current_page();
-    uint8_t numof_fields=page->get_numof_fields();
-
-    draw_text(page->get_page_name()+":", 0, 0);//Page name
-
-    for(uint8_t i=0; i<numof_fields; i++)
-    {
-        if(i>=LCD_MAX_LINES) return;
-        draw_text(page->get_field_ptr(i)->get_name(), i+1, LCD_R_MARGIN);
-        draw_value(i);
-    }
+    draw_text(gui->get_current_page()->get_page_name()+":", 0, 0);//Page name    
+    vis->draw_names(); //field names
     xSemaphoreGive(gui_mutex);
+}
+
+void vis_controller::draw_current_value()
+{
+    xSemaphoreTake(gui_mutex, portMAX_DELAY);
+    bool idx=gui->get_prim_idx();
+    clear_field(idx);
+
+    draw_value(gui->get_prim_idx());
+    xSemaphoreGive(gui_mutex);
+}   
+
+void vis_controller::draw_all_values()
+{
+    xSemaphoreTake(gui_mutex, portMAX_DELAY);
+
+    for(uint8_t idx=0; idx<gui->get_current_page()->get_numof_fields(); idx++)
+        draw_value(idx);
+
+    xSemaphoreGive(gui_mutex);
+}
+
+void vis_controller::draw_select()
+{
+    xSemaphoreTake(gui_mutex, portMAX_DELAY);
+    uint8_t idx=gui->get_prim_idx();
+    uint8_t prev_idx=gui->get_prev_prim_idx();
+    xSemaphoreGive(gui_mutex);
+
+    if(idx==GUI_CURSOR_MAX_INDEX) return;
+
+    if(prev_idx!=GUI_CURSOR_MAX_INDEX) draw_text(" ", prev_idx+1, 0);
+    draw_text("}", idx+1, 0);
+}
+
+void vis_controller::draw_bar(){}
+
+void vis_controller::start()
+{
+    esp_lcd_panel_disp_on_off(*lcd_handle, true);
+    esp_lcd_panel_swap_xy(*lcd_handle, true);
+    //esp_lcd_panel_mirror(*lcd_handle, true, true);
+
+    gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL);
+
+    clear();
+    vTaskDelay(pdMS_TO_TICKS(100));
+
+    draw_page();
+    draw_select();
+    vTaskDelay(pdMS_TO_TICKS(100));
+}
+
+void vis_controller::clear() 
+{
+    for(uint16_t row=0; row<LCD_MAX_LINES; row++)
+    for(uint16_t col=0; col<LCD_MAX_CHARS_PER_LINE; col++)
+    {
+        //higher processor usage but saving like 150kB
+        esp_lcd_panel_draw_bitmap(*lcd_handle, col*VIS_FONT_W, row*VIS_FONT_H, (col+1)*VIS_FONT_W, (row+1)*VIS_FONT_H, font[VIS_FONT_INDEX_SPACE]);
+    }
+}
+
+void vis_controller::clear_field(uint8_t line)
+{
+    for(uint16_t col=LCD_FIELD_VALUE_START; col<LCD_MAX_CHARS_PER_LINE; col++)
+        esp_lcd_panel_draw_bitmap(*lcd_handle, col*VIS_FONT_W, line*VIS_FONT_H, (col+1)*VIS_FONT_W, (line+1)*VIS_FONT_H, font[VIS_FONT_INDEX_SPACE]);
 }
 
 void vis_controller::draw_value(uint8_t line)
 {
+    /*Expecting mutex already taken*/
     switch(gui->get_current_page()->get_field_ptr(line)->get_field_type())
     {
     case t_field_type::FLOAT_IO:
@@ -111,27 +165,13 @@ void vis_controller::draw_value(uint8_t line)
     }
 }
 
-void vis_controller::draw_only_value(uint8_t line)
+void vis_controller::draw_names()
 {
-    xSemaphoreTake(gui_mutex, portMAX_DELAY);
-    draw_value(line);
-    xSemaphoreGive(gui_mutex);
-}
-
-void vis_controller::draw_select()
-{
-    uint8_t pos=gui->get_prev_prim_idx();
-    if(pos!=GUI_CURSOR_MAX_INDEX)
-        esp_lcd_panel_draw_bitmap(*lcd_handle, 0, (pos+1)*VIS_FONT_H, VIS_FONT_W, (pos+2)*VIS_FONT_H, font[VIS_FONT_INDEX_SPACE]);
-
-    pos=gui->get_prim_idx();
-    if(pos!=GUI_CURSOR_MAX_INDEX)
-        esp_lcd_panel_draw_bitmap(*lcd_handle, 0, (pos+1)*VIS_FONT_H, VIS_FONT_W, (pos+2)*VIS_FONT_H, font[VIS_FONT_INDEX_SELECT]);
-}
-
-void vis_controller::draw_selectbar()
-{
-    if(gui->get_prim_lock()==false) return;
+    /*Expecting mutex already taken*/
+    for(uint8_t idx=0; idx<gui->get_current_page()->get_numof_fields(); idx++)
+    {
+        draw_text(gui->get_current_page()->get_field_ptr(idx)->get_name(), idx+1, LCD_R_MARGIN);
+    }
 }
 
 void vis_controller::draw_bool_io_field(bool_io_field* bool_io_field_ptr, uint8_t line)
@@ -148,7 +188,6 @@ void vis_controller::draw_float_io_field(float_io_field *float_io_field_ptr, uin
     draw_text(float_io_field_ptr->get_unit(), line+1, LCD_FIELD_VALUE_START);
 }
 
-
 void vis_controller::draw_text(std::string text, uint8_t line, uint8_t pos)
 {
     uint8_t index;
@@ -157,33 +196,6 @@ void vis_controller::draw_text(std::string text, uint8_t line, uint8_t pos)
         if(pos+i>16) return; //not enough space for the rest;
         index=char_to_font_index(text[i]);
         esp_lcd_panel_draw_bitmap(*lcd_handle, (pos+i)*VIS_FONT_W, line*VIS_FONT_H, (pos+i+1)*VIS_FONT_W, (line+1)*VIS_FONT_H, font[index]);
-    }
-}
-
-void vis_controller::start()
-{
-    esp_lcd_panel_disp_on_off(*lcd_handle, true);
-    esp_lcd_panel_swap_xy(*lcd_handle, true);
-    //esp_lcd_panel_mirror(*lcd_handle, true, true);
-
-    gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL);
-
-    clear();
-    vTaskDelay(pdMS_TO_TICKS(100));
-
-    draw_page();
-    draw_select();
-    draw_selectbar();
-    vTaskDelay(pdMS_TO_TICKS(100));
-}
-
-void vis_controller::clear() 
-{
-    for(uint16_t row=0; row<LCD_MAX_LINES; row++)
-    for(uint16_t col=0; col<LCD_MAX_CHARS_PER_LINE; col++)
-    {
-        //higher processor usage but saving like 150kB
-        esp_lcd_panel_draw_bitmap(*lcd_handle, col*VIS_FONT_W, row*VIS_FONT_H, (col+1)*VIS_FONT_W, (row+1)*VIS_FONT_H, font[VIS_FONT_INDEX_SPACE]);
     }
 }
 

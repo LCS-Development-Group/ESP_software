@@ -286,8 +286,10 @@ uint8_t gui_controller::enter()
                 }
                 else
                 {//input - editting allowed (bool so no entering to secondary cursor level)
-                    cast_to_bool_io(current_page->get_field_ptr(prim_idx))->switch_bool();
-                    return GUI_RETCODE_REDRAW_VALUE;
+                    bool_io_field_ptr=cast_to_bool_io(current_page->get_field_ptr(prim_idx));
+                    bool_io_field_ptr->switch_bool();
+                    if(check_if_displayed_excluding(bool_io_field_ptr->get_var_ptr(), prim_idx)==true) return GUI_RETCODE_REDRAW_ALL_VALUES;
+                    else return GUI_RETCODE_REDRAW_VALUE;
                 }
                 break;
 
@@ -375,8 +377,8 @@ float_io_field* gui_controller::cast_to_float_io(basic_field* field) const
 page_link_field* gui_controller::cast_to_page_link(basic_field* field) const
 {return static_cast<page_link_field*>(field);}
 
-bool gui_controller::check_if_displayed(bool* _var) const {check_if_displayed_excluding(_var, GUI_CURSOR_MAX_INDEX);}
-bool gui_controller::check_if_displayed(float* _var) const {check_if_displayed_excluding(_var, GUI_CURSOR_MAX_INDEX);}
+bool gui_controller::check_if_displayed(bool* _var) const {return check_if_displayed_excluding(_var, GUI_CURSOR_MAX_INDEX);}
+bool gui_controller::check_if_displayed(float* _var) const {return check_if_displayed_excluding(_var, GUI_CURSOR_MAX_INDEX);}
 
 bool gui_controller::check_if_displayed_excluding(bool* _var, uint8_t excluded) const
 {
