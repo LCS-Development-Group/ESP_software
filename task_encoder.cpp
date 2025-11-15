@@ -30,7 +30,9 @@ void task_encoder_main(void *args)
     ESP_LOGI("Encoder", "task_encoder started");
 
     pcnt_unit_enable(count);
+    pcnt_unit_clear_count(count);
     pcnt_unit_start(count);
+    
     uint32_t ntcode=0x0;
     int pos=0;
     while(true)
