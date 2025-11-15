@@ -16,13 +16,15 @@ class basic_field
     protected:
     t_field_type field_type;
     std::string name;
+    t_field_io_type io;
 
     public:
-    basic_field(t_field_type _field_type, std::string _name);
+    basic_field(t_field_type _field_type, std::string _name, t_field_io_type _io);
     virtual ~basic_field(){}
 
     t_field_type get_field_type() const;
     std::string get_name() const;
+    t_field_io_type get_io() const;
 };
 
 class page
@@ -47,7 +49,7 @@ class page
 class text_field: public basic_field
 {
     public:
-    text_field(std::string _name):basic_field(TEXT, _name){}
+    text_field(std::string _name):basic_field(TEXT, _name, t_field_io_type::FIELD_OUT){}
 };
 
 class page_link_field :public basic_field
@@ -63,7 +65,6 @@ class page_link_field :public basic_field
 
 class bool_io_field: public basic_field
 {
-    t_field_io_type io;
     bool *var;//pointer to assioted variable
     SemaphoreHandle_t *mutex;
 
@@ -77,7 +78,6 @@ class bool_io_field: public basic_field
 
 class float_io_field: public basic_field
 {
-    t_field_io_type io;
     float *var;//pointer to associated variable
     SemaphoreHandle_t *mutex; //value at call
     std::string unit;
@@ -137,4 +137,6 @@ public:
     
 private:
     void jump_pages(page* newpage);
+    uint8_t find_next_editable(uint8_t start) const;
+    uint8_t find_prev_editable(uint8_t start) const;
 };

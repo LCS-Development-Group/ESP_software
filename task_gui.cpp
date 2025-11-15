@@ -91,25 +91,24 @@ void gui_controller::fill_fields()
     subpage_1->add_field_to_page(new text_field("test"));
     // subpage_1->add_field_to_page(new bool_io_field("State_i", FIELD_IN, &debug_bool));
     // subpage_1->add_field_to_page(new bool_io_field("State_o", FIELD_OUT, &debug_bool));
+
+
+
+
+
+    prim_idx=find_next_editable(0);//cursor starting position
 }
 
 //==================================================================================================================
 // BASIC FIELD                                                                                             
 //==================================================================================================================
 
-basic_field::basic_field(t_field_type _field_type, std::string _name)
-:field_type(_field_type), name(_name){}
+basic_field::basic_field(t_field_type _field_type, std::string _name, t_field_io_type _io)
+:field_type(_field_type), name(_name), io(_io){}
 
-t_field_type basic_field::get_field_type() const
-{
-    return field_type;
-}
-
-std::string basic_field::get_name() const
-{
-    return name;
-}
-
+t_field_type basic_field::get_field_type() const{return field_type;}
+std::string basic_field::get_name() const {return name;}
+t_field_io_type basic_field::get_io() const {return io;}
 
 
 //==================================================================================================================
@@ -117,13 +116,12 @@ std::string basic_field::get_name() const
 //==================================================================================================================
 
 page_link_field::page_link_field(std::string _name, page* _linked_page)
-:basic_field(SUBPAGE_LINK, _name), linked_page(_linked_page){}
+:basic_field(SUBPAGE_LINK, _name, t_field_io_type::FIELD_IN), linked_page(_linked_page){}
 
 page_link_field::~page_link_field()
 {
     if(linked_page!=nullptr) delete linked_page;
 }
-
 page* page_link_field::get_page_ptr(){return linked_page;}
 
 
@@ -132,7 +130,7 @@ page* page_link_field::get_page_ptr(){return linked_page;}
 //==================================================================================================================
 
 bool_io_field::bool_io_field(std::string _name, t_field_io_type _io, bool* _var, SemaphoreHandle_t *_mutex)
-:basic_field(BOOL_IO, _name), io(_io), var(_var), mutex(_mutex){}
+:basic_field(BOOL_IO, _name, _io), var(_var), mutex(_mutex){}
 t_field_io_type bool_io_field::get_io() const {return io;}
 bool bool_io_field::get_val() const
 {
@@ -163,7 +161,7 @@ void bool_io_field::switch_bool()
 //==================================================================================================================
 
 float_io_field::float_io_field(std::string _name, t_field_io_type _io, float* _var, SemaphoreHandle_t *_mutex, std::string _unit, uint8_t _prec_pref, uint8_t _prec_pos)
-:basic_field(FLOAT_IO, _name), io(_io), var(_var), mutex(_mutex), unit(_unit), prec_pref(_prec_pref), prec_pos(_prec_pos){}
+:basic_field(FLOAT_IO, _name, _io), var(_var), mutex(_mutex), unit(_unit), prec_pref(_prec_pref), prec_pos(_prec_pos){}
 t_field_io_type float_io_field::get_io() const {return io;}
 float float_io_field::get_val() const
 {
@@ -236,9 +234,14 @@ uint8_t gui_controller::move_cursor_up()
     {//move primary cursor up (decrement)
         if(prim_idx>0)
         {
-            prev_prim_idx=prim_idx;
-            prim_idx--;
-            return GUI_RETCODE_REDRAW_SELECT;
+            uint8_t prev=find_prev_editable(prim_idx-1);
+            if(prev!=GUI_CURSOR_MAX_INDEX)
+            {
+                prev_prim_idx=prim_idx;
+                prim_idx=prev;
+                return GUI_RETCODE_REDRAW_SELECT;
+            }
+            else return GUI_RETCODE_DEFAULT;
         }
     }
     return GUI_RETCODE_DEFAULT;//for safety
@@ -261,9 +264,14 @@ uint8_t gui_controller::move_cursor_down()
     {//move primary cursor down (increment)
         if(prim_idx<(current_page->get_numof_fields()-1))
         {
-            prev_prim_idx=prim_idx;
-            prim_idx++;
-            return GUI_RETCODE_REDRAW_SELECT;
+            uint8_t next=find_next_editable(prim_idx+1);
+            if(next!=GUI_CURSOR_MAX_INDEX)
+            {
+                prev_prim_idx=prim_idx;
+                prim_idx=next;
+                return GUI_RETCODE_REDRAW_SELECT;
+            }
+            else return GUI_RETCODE_DEFAULT;
         }
     }
     return GUI_RETCODE_DEFAULT;//for safety
@@ -271,6 +279,8 @@ uint8_t gui_controller::move_cursor_down()
 
 uint8_t gui_controller::enter()
 {
+    if(prim_idx==GUI_CURSOR_MAX_INDEX) return GUI_RETCODE_DEFAULT;
+
     if(prim_lock==true)
     {//switching digit edition
 
@@ -356,7 +366,7 @@ uint8_t gui_controller::go_back()
 void gui_controller::jump_pages(page* newpage)
 {
     current_page=newpage;
-    prim_idx=0;
+    prim_idx=find_next_editable(0);
     prev_prim_idx=GUI_CURSOR_MAX_INDEX;
 }
 
@@ -367,6 +377,21 @@ uint8_t gui_controller::get_prim_idx() const {return prim_idx;}
 uint8_t gui_controller::get_sec_idx() const {return sec_idx;}
 uint8_t gui_controller::get_prev_prim_idx() const {return prev_prim_idx;}
 uint8_t gui_controller::get_prev_sec_idx() const {return prev_sec_idx;}
+uint8_t  gui_controller::find_next_editable(uint8_t start) const
+{
+    for(uint8_t idx=start; idx<current_page->get_numof_fields(); idx++)
+        if(current_page->get_field_ptr(idx)->get_io()==t_field_io_type::FIELD_IN) return idx;
+    return GUI_CURSOR_MAX_INDEX;
+}
+uint8_t  gui_controller::find_prev_editable(uint8_t start) const
+{
+    for(uint8_t idx=start;; idx--)
+    {
+        if(current_page->get_field_ptr(idx)->get_io()==t_field_io_type::FIELD_IN) return idx;
+        if(idx==0) break;//compiler had problem with uint8_t condition being always true (I it's mean correct) even though overflow is a thing
+    }
+    return GUI_CURSOR_MAX_INDEX;
+}
 
 //==================================================================================================================
 // Page                                                                                                  

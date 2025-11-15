@@ -114,12 +114,12 @@ void vis_controller::draw_only_value(uint8_t line)
 void vis_controller::draw_select()
 {
     uint8_t pos=gui->get_prev_prim_idx();
-
     if(pos!=GUI_CURSOR_MAX_INDEX)
-    esp_lcd_panel_draw_bitmap(*lcd_handle, 0, (pos+1)*VIS_FONT_H, VIS_FONT_W, (pos+2)*VIS_FONT_H, font[VIS_FONT_INDEX_SPACE]);
+        esp_lcd_panel_draw_bitmap(*lcd_handle, 0, (pos+1)*VIS_FONT_H, VIS_FONT_W, (pos+2)*VIS_FONT_H, font[VIS_FONT_INDEX_SPACE]);
 
     pos=gui->get_prim_idx();
-    esp_lcd_panel_draw_bitmap(*lcd_handle, 0, (pos+1)*VIS_FONT_H, VIS_FONT_W, (pos+2)*VIS_FONT_H, font[VIS_FONT_INDEX_SELECT]);
+    if(pos!=GUI_CURSOR_MAX_INDEX)
+        esp_lcd_panel_draw_bitmap(*lcd_handle, 0, (pos+1)*VIS_FONT_H, VIS_FONT_W, (pos+2)*VIS_FONT_H, font[VIS_FONT_INDEX_SELECT]);
 }
 
 void vis_controller::draw_selectbar()
