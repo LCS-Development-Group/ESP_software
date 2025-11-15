@@ -88,11 +88,11 @@ void vis_controller::draw_value(uint8_t line)
     switch(gui->get_current_page()->get_field_ptr(line)->get_field_type())
     {
     case t_field_type::FLOAT_IO:
-        draw_float_io_field(static_cast<float_io_field*>(gui->get_current_page()->get_field_ptr(line)), line);
+        draw_float_io_field(gui->cast_to_float_io(gui->get_current_page()->get_field_ptr(line)), line);
         break;
 
     case t_field_type::BOOL_IO:
-        draw_bool_io_field(static_cast<bool_io_field*>(gui->get_current_page()->get_field_ptr(line)), line);
+        draw_bool_io_field(gui->cast_to_bool_io(gui->get_current_page()->get_field_ptr(line)), line);
         break;
 
     case t_field_type::SUBPAGE_LINK:

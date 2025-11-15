@@ -295,7 +295,7 @@ uint8_t gui_controller::enter()
                 return GUI_RETCODE_DEFAULT;
 
             case t_field_type::SUBPAGE_LINK:
-                link_field_ptr=static_cast<page_link_field*>(current_page->get_field_ptr(prim_idx));
+                link_field_ptr=cast_to_page_link(current_page->get_field_ptr(prim_idx));
                 if(link_field_ptr->get_page_ptr()!=nullptr)
                 {
                     jump_pages(link_field_ptr->get_page_ptr());
@@ -304,21 +304,19 @@ uint8_t gui_controller::enter()
                 break;
 
             case t_field_type::BOOL_IO:
-                bool_io_field_ptr=static_cast<bool_io_field*>(current_page->get_field_ptr(prim_idx));
-                if(bool_io_field_ptr->get_io()==t_field_io_type::FIELD_OUT)
+                if(current_page->get_field_ptr(prim_idx)->get_io()==t_field_io_type::FIELD_OUT)
                 {//output - editting disallowed
                     return GUI_RETCODE_DEFAULT;
                 }
                 else
                 {//input - editting allowed (bool so no entering to secondary cursor level)
-                    bool_io_field_ptr->switch_bool();
+                    cast_to_bool_io(current_page->get_field_ptr(prim_idx))->switch_bool();
                     return GUI_RETCODE_REDRAW_VALUE;
                 }
                 break;
 
             case t_field_type::FLOAT_IO:
-                float_io_field_ptr=static_cast<float_io_field*>(current_page->get_field_ptr(prim_idx));
-                if(float_io_field_ptr->get_io()==t_field_io_type::FIELD_OUT)
+                if(current_page->get_field_ptr(prim_idx)->get_io()==t_field_io_type::FIELD_OUT)
                 {//output - editting disallowed
                     return GUI_RETCODE_DEFAULT;
                 }
@@ -392,6 +390,13 @@ uint8_t  gui_controller::find_prev_editable(uint8_t start) const
     }
     return GUI_CURSOR_MAX_INDEX;
 }
+
+bool_io_field* gui_controller::cast_to_bool_io(basic_field* field) const
+{return static_cast<bool_io_field*>(field);}
+float_io_field* gui_controller::cast_to_float_io(basic_field* field) const
+{return static_cast<float_io_field*>(field);}
+page_link_field* gui_controller::cast_to_page_link(basic_field* field) const
+{return static_cast<page_link_field*>(field);}
 
 //==================================================================================================================
 // Page                                                                                                  

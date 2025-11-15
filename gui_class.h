@@ -134,6 +134,10 @@ public:
     uint8_t get_sec_idx() const;
     uint8_t get_prev_prim_idx() const;
     uint8_t get_prev_sec_idx() const;
+
+    bool_io_field* cast_to_bool_io(basic_field* field) const;
+    float_io_field* cast_to_float_io(basic_field* field) const;
+    page_link_field* cast_to_page_link(basic_field* field) const;
     
 private:
     void jump_pages(page* newpage);
