@@ -7,10 +7,10 @@
 #include "graphics.h"
 #include "gui_class.h"
 
-#define LCD_MAX_LINES                   10 //including page name
-#define LCD_MAX_CHARS_PER_LINE          20
-#define LCD_FIELD_VALUE_START           12
-#define LCD_R_MARGIN                    1
+#define LCD_MAX_LINES                   (240/VIS_FONT_H) //including page name
+#define LCD_MAX_CHARS_PER_LINE          (320/VIS_FONT_W) //including margin
+#define LCD_FIELD_VALUE_START           10 //where field value is displayed
+#define LCD_L_MARGIN                    1   
 
 class vis_controller
 {

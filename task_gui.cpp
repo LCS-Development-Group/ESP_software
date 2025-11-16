@@ -84,7 +84,7 @@ void gui_controller::fill_fields()
     root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
     root->add_field_to_page(new text_field("field3"));
     // root->add_field_to_page(new float_io_field("float_in ", FIELD_IN, &f_var, "mm", 2, 3));
-    root->add_field_to_page(new float_io_field("float_out", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "mA"));
+    root->add_field_to_page(new float_io_field("float_o", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3));
     page* subpage_1=root->add_new_page("link");
 
     /*subpage test*/
@@ -150,13 +150,19 @@ float_io_field::float_io_field(
     float *_var,
     SemaphoreHandle_t *_var_mutex,
     /*derived class arguments*/
-    std::string _unit)
+    std::string _unit,
+    uint8_t _prec)
     :io_field<float>(t_field_type::FLOAT_IO, _name, _io, _var, _var_mutex),
-    unit(_unit){}
+    unit(_unit), prec(_prec){}
 
 std::string float_io_field::get_unit() const
 {
     return unit;
+}
+
+uint8_t float_io_field::get_prec() const
+{
+    return prec;
 }
 
 void float_io_field::set_val(float new_val)

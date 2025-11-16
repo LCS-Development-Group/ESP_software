@@ -1,5 +1,7 @@
 #include "header.h"
 #include "vis_class.h"
+#include <sstream>
+#include <iomanip>
 
 gpio_config_t lcd_bl_cfg;
 spi_bus_config_t spi_bus_cfg;
@@ -124,6 +126,7 @@ void vis_controller::start()
 
     draw_page();
     draw_select();
+    draw_all_values();
     vTaskDelay(pdMS_TO_TICKS(100));
 }
 
@@ -170,7 +173,7 @@ void vis_controller::draw_names()
     /*Expecting mutex already taken*/
     for(uint8_t idx=0; idx<gui->get_current_page()->get_numof_fields(); idx++)
     {
-        draw_text(gui->get_current_page()->get_field_ptr(idx)->get_name(), idx+1, LCD_R_MARGIN);
+        draw_text(gui->get_current_page()->get_field_ptr(idx)->get_name(), idx+1, LCD_L_MARGIN);
     }
 }
 
@@ -184,8 +187,10 @@ void vis_controller::draw_bool_io_field(bool_io_field* bool_io_field_ptr, uint8_
 
 void vis_controller::draw_float_io_field(float_io_field *float_io_field_ptr, uint8_t line)
 {
-    //insert advanced float formatting here
-    draw_text(float_io_field_ptr->get_unit(), line+1, LCD_FIELD_VALUE_START);
+    std::ostringstream oss;
+    oss<<std::fixed<<std::setprecision(float_io_field_ptr->get_prec())<<float_io_field_ptr->get_val();
+
+    draw_text(oss.str()+" "+float_io_field_ptr->get_unit(), line+1, LCD_FIELD_VALUE_START);
 }
 
 void vis_controller::draw_text(std::string text, uint8_t line, uint8_t pos)
@@ -193,7 +198,7 @@ void vis_controller::draw_text(std::string text, uint8_t line, uint8_t pos)
     uint8_t index;
     for(uint8_t i=0; i<text.size(); i++)
     {
-        if(pos+i>16) return; //not enough space for the rest;
+        if(pos+i>LCD_MAX_CHARS_PER_LINE) return; //not enough space for the rest;
         index=char_to_font_index(text[i]);
         esp_lcd_panel_draw_bitmap(*lcd_handle, (pos+i)*VIS_FONT_W, line*VIS_FONT_H, (pos+i+1)*VIS_FONT_W, (line+1)*VIS_FONT_H, font[index]);
     }

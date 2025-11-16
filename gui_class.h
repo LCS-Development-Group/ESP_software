@@ -118,7 +118,7 @@ class float_io_field: public io_field<float>
     
     std::string unit;
     
-    //int8_t prec_pref, prec_pos;
+    uint8_t prec;
 
     public:
     float_io_field(
@@ -127,9 +127,11 @@ class float_io_field: public io_field<float>
         float *_var,
         SemaphoreHandle_t *_var_mutex,
         /*derived class arguments*/
-        std::string _unit);
+        std::string _unit,
+        uint8_t _prec);
 
     std::string get_unit() const;
+    uint8_t get_prec() const;
 
     void set_val(float new_val);
 };
