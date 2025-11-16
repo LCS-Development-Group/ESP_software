@@ -21,12 +21,13 @@ void task_gui_main(void *args)
             {
                 case GUI_NTCODE_CUR_NEG:
                     //ESP_LOGI("GUI", "UP");
-                    retcode=gui->move_cursor_up();
+                    retcode=gui->move_cursor_down();
+                    
                     break;
 
                 case GUI_NTCODE_CUR_POS:
                     //ESP_LOGI("GUI", "DOWN");
-                    retcode=gui->move_cursor_down();
+                    retcode=gui->move_cursor_up();
                     break;
 
                 case GUI_NTCODE_CUR_ENT:
@@ -81,7 +82,10 @@ void gui_controller::fill_fields()
 {
     /*Menu (root)*/
     root->add_field_to_page(new text_field("test"));
+    root->add_field_to_page(new float_io_field("f_i", FIELD_IN, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3));
+    root->add_field_to_page(new float_io_field("f2", FIELD_IN, &DEBUG_FLOAT_2, &DEBUG_FLOAT_2_MUT, "Ab", 2));
     root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
+    //root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
     root->add_field_to_page(new text_field("field3"));
     // root->add_field_to_page(new float_io_field("float_in ", FIELD_IN, &f_var, "mm", 2, 3));
     root->add_field_to_page(new float_io_field("float_o", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3));
@@ -153,22 +157,67 @@ float_io_field::float_io_field(
     std::string _unit,
     uint8_t _prec)
     :io_field<float>(t_field_type::FLOAT_IO, _name, _io, _var, _var_mutex),
-    unit(_unit), prec(_prec){}
-
-std::string float_io_field::get_unit() const
+    unit(_unit), prec(_prec)
 {
-    return unit;
+    point_pos=0;
+    update_point_pos();
 }
 
-uint8_t float_io_field::get_prec() const
-{
-    return prec;
-}
+std::string float_io_field::get_unit() const {return unit;}
+
+uint8_t float_io_field::get_prec() const {return prec;}
 
 void float_io_field::set_val(float new_val)
 {
     xSemaphoreTake(*var_mutex, portMAX_DELAY);
     *var=new_val;
+    xSemaphoreGive(*var_mutex);
+}
+
+uint8_t float_io_field::get_point_pos() const {return point_pos;}
+uint8_t float_io_field::get_numof_digits() const
+{
+    return point_pos+prec;
+}
+
+bool float_io_field::update_point_pos()
+{
+    xSemaphoreTake(*var_mutex, portMAX_DELAY);
+    uint16_t float_var=(uint16_t)*var;
+    xSemaphoreGive(*var_mutex);
+
+    uint8_t old=point_pos;
+    
+    if(float_var==0) 
+    {
+        point_pos=1;
+    }
+    else
+    {
+        uint8_t order=0;
+        while(float_var!=0)
+        {
+            float_var/=10;
+            order++;
+        }
+        point_pos=order;
+    }
+    if(old==point_pos) return GUI_FLOAT_POINTPOS_NOCHANGE;
+    else return GUI_FLOAT_POINTPOS_CHANGE;
+}
+
+void float_io_field::increment(int8_t power)
+{
+    float temp=std::powf(10.0, power);
+    xSemaphoreTake(*var_mutex, portMAX_DELAY);
+    *var+=temp;
+    xSemaphoreGive(*var_mutex);
+}
+void float_io_field::decrement(int8_t power)
+{
+    float temp=std::powf(10.0, power);
+    xSemaphoreTake(*var_mutex, portMAX_DELAY);
+    *var-=temp;
     xSemaphoreGive(*var_mutex);
 }
 
@@ -185,7 +234,7 @@ gui_controller::gui_controller()
     prim_lock=false;
     prev_prim_idx=GUI_CURSOR_MAX_INDEX;
 
-    sec_idx=0;
+    sec_idx=GUI_CURSOR_MAX_INDEX;
     sec_lock=false;
     prev_sec_idx=GUI_CURSOR_MAX_INDEX;
 
@@ -203,13 +252,38 @@ uint8_t gui_controller::move_cursor_up()
 {
     if(prim_lock==true)
     {
-        if(sec_lock==true)
-        {//field varaible edition
-            //redraw specific field
-        }
-        else
-        {//move secondary cursor left
+        if(current_page->get_field_ptr(prim_idx)->get_field_type()==t_field_type::FLOAT_IO)//to be certain
+        {
+            float_io_field_ptr=cast_to_float_io(current_page->get_field_ptr(prim_idx));//i hope this is in fact a float_io_bool
+            if(sec_lock==true)
+            {//field varaible edition
+                if(float_io_field_ptr->update_point_pos()==GUI_FLOAT_POINTPOS_CHANGE) sec_idx--;
 
+                int8_t pos=float_io_field_ptr->get_point_pos()-sec_idx;
+                if(sec_idx<float_io_field_ptr->get_point_pos()) pos--;
+                float_io_field_ptr->increment(pos);
+                return GUI_RETCODE_REDRAW_VALUE;
+            }
+            else
+            {//move secondary cursor right
+                if(sec_idx<float_io_field_ptr->get_numof_digits())//temp
+                {
+                    
+                    if(sec_idx==float_io_field_ptr->get_point_pos()-1)//decimal point
+                    {
+                        if(float_io_field_ptr->get_prec()!=0)//there is something after it
+                        {
+                            prev_sec_idx=sec_idx;
+                            sec_idx+=2;
+                            return GUI_RETCODE_REDRAW_BAR;
+                        }
+                        else return GUI_RETCODE_DEFAULT;
+                    }
+                    prev_sec_idx=sec_idx;
+                    sec_idx++;
+                    return GUI_RETCODE_REDRAW_BAR;
+                }
+            }
         }
     }
     else
@@ -233,13 +307,34 @@ uint8_t gui_controller::move_cursor_down()
 {
     if(prim_lock==true)
     {
-        if(sec_lock==true)
-        {//field varaible edition
-            //redraw specific field
-        }
-        else
-        {//move secondary cursor right
+        if(current_page->get_field_ptr(prim_idx)->get_field_type()==t_field_type::FLOAT_IO)//to be certain
+        {
+            float_io_field_ptr=cast_to_float_io(current_page->get_field_ptr(prim_idx));
+            if(sec_lock==true)
+            {//field varaible edition
+                if(float_io_field_ptr->update_point_pos()==GUI_FLOAT_POINTPOS_CHANGE) sec_idx++;
 
+                int8_t pos=float_io_field_ptr->get_point_pos()-sec_idx;
+                if(sec_idx<float_io_field_ptr->get_point_pos()) pos--;
+                float_io_field_ptr->decrement(pos);
+                return GUI_RETCODE_REDRAW_VALUE;
+            }
+            else
+            {//move secondary cursor left
+                if(sec_idx>0) 
+                {
+                    
+                    if(sec_idx==float_io_field_ptr->get_point_pos()+1)//decimal point
+                    {
+                        prev_sec_idx=sec_idx;
+                        sec_idx-=2;
+                        return GUI_RETCODE_REDRAW_BAR;
+                    }
+                    prev_sec_idx=sec_idx;
+                    sec_idx--;
+                    return GUI_RETCODE_REDRAW_BAR;
+                }
+            }
         }
     }
     else
@@ -265,12 +360,11 @@ uint8_t gui_controller::enter()
 
     if(prim_lock==true)
     {//switching digit edition
-
-        //return GUI_RETCODE_REDRAW_VALUE_AND_BAR;
-
+        sec_lock=!sec_lock;
+        return GUI_RETCODE_REDRAW_BAR;
     }
     else
-    {//entering field edition
+    {//entering field
         switch(current_page->get_field_ptr(prim_idx)->get_field_type())
         {
             case t_field_type::TEXT:
@@ -309,7 +403,7 @@ uint8_t gui_controller::enter()
                     prim_lock=true;
                     sec_idx=0;
                     prev_sec_idx=GUI_CURSOR_MAX_INDEX;
-                    return GUI_RETCODE_REDRAW_BAR;
+                    return GUI_RETCODE_REDRAW_VALUE_EDITMODE;
                 }
                 break;
         }
@@ -325,13 +419,14 @@ uint8_t gui_controller::go_back()
         if(sec_lock==true)
         {//leaving digit edition
             //redraw specific field
+            
         }
         else
         {//leaving field editing
             prim_lock=false;
-            sec_idx=0;
-            prev_sec_idx=0;
-            return GUI_RETCODE_REDRAW_BAR;
+            prev_sec_idx=sec_idx;
+            sec_idx=GUI_CURSOR_MAX_INDEX;
+            return GUI_RETCODE_REDRAW_ALL_VALUES;
         }
     }
     else
@@ -354,7 +449,7 @@ void gui_controller::jump_pages(page* newpage)
 
 page* gui_controller::get_current_page() const {return current_page;};
 bool gui_controller::get_prim_lock() const {return prim_lock;}
-bool gui_controller::get_sec_lock() const {return sec_idx;}
+bool gui_controller::get_sec_lock() const {return sec_lock;}
 uint8_t gui_controller::get_prim_idx() const {return prim_idx;}
 uint8_t gui_controller::get_sec_idx() const {return sec_idx;}
 uint8_t gui_controller::get_prev_prim_idx() const {return prev_prim_idx;}

@@ -54,6 +54,7 @@ void vis_init();
 #define VIS_NTCODE_REDRAW_BAR               2
 #define VIS_NTCODE_REDRAW_VALUE             3
 #define VIS_NTCODE_REDRAW_ALL_VALUES        4
+#define VIS_NTCODE_REDRAW_VALUE_EDITMODE    5
 
 /*
 signals:
@@ -114,6 +115,9 @@ extern SemaphoreHandle_t DEBUG_BOOL_MUT;
 
 extern float DEBUG_FLOAT;
 extern SemaphoreHandle_t DEBUG_FLOAT_MUT;
+
+extern float DEBUG_FLOAT_2;
+extern SemaphoreHandle_t DEBUG_FLOAT_2_MUT;
 
 
 // #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"

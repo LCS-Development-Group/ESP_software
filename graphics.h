@@ -67,10 +67,11 @@ uint8_t char_to_font_index(char c);
 extern uint16_t font[][VIS_FONT_PX];
 
 #define VIS_SELECTBAR_W VIS_FONT_W
-#define VIS_SELECTBAR_H 2
+#define VIS_SELECTBAR_H 4
 #define VIS_SELECTBAR_PX (VIS_SELECTBAR_H*VIS_SELECTBAR_W)
-#define VIS_SELECTBAR_VOFFSET 2
+#define VIS_SELECTBAR_VOFFSET 4
 #define VIS_SELECTBAR_NORM 0
 #define VIS_SELECTBAR_NEG 1
+#define VIS_SELECTBAR_NSEL 2
 
-extern uint16_t selectbar[2][VIS_SELECTBAR_PX];
+extern uint16_t selectbar[3][VIS_SELECTBAR_PX];

@@ -24,6 +24,7 @@ class vis_controller
 
     void draw_page();
     void draw_current_value();
+    void draw_editmode();
     void draw_all_values();
     void draw_select();
     void draw_bar();
@@ -37,4 +38,5 @@ class vis_controller
     void draw_bool_io_field(bool_io_field* bool_io_field_ptr, uint8_t line);
     void draw_float_io_field(float_io_field *float_io_field_ptr, uint8_t line);
     void draw_text(std::string text, uint8_t line, uint8_t pos);
+    void draw_bar_at(uint8_t row, uint8_t col, uint8_t type);
 };

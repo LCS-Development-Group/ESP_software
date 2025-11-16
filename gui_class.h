@@ -4,12 +4,17 @@
 enum t_field_type{TEXT, SUBPAGE_LINK, FLOAT_IO, BOOL_IO};
 enum t_field_io_type{FIELD_IN, FIELD_OUT};
 
-#define GUI_RETCODE_REDRAW_ALL              VIS_NTCODE_REDRAW_ALL
-#define GUI_RETCODE_REDRAW_SELECT           VIS_NTCODE_REDRAW_SELECT
-#define GUI_RETCODE_REDRAW_BAR              VIS_NTCODE_REDRAW_BAR
-#define GUI_RETCODE_REDRAW_VALUE            VIS_NTCODE_REDRAW_VALUE
-#define GUI_RETCODE_REDRAW_ALL_VALUES       VIS_NTCODE_REDRAW_ALL_VALUES
+#define GUI_RETCODE_REDRAW_ALL                  VIS_NTCODE_REDRAW_ALL
+#define GUI_RETCODE_REDRAW_SELECT               VIS_NTCODE_REDRAW_SELECT
+#define GUI_RETCODE_REDRAW_BAR                  VIS_NTCODE_REDRAW_BAR
+#define GUI_RETCODE_REDRAW_VALUE                VIS_NTCODE_REDRAW_VALUE
+#define GUI_RETCODE_REDRAW_ALL_VALUES           VIS_NTCODE_REDRAW_ALL_VALUES
+#define GUI_RETCODE_REDRAW_VALUE_EDITMODE       VIS_NTCODE_REDRAW_VALUE_EDITMODE
 #define GUI_RETCODE_DEFAULT 255
+
+#define GUI_FLOAT_MAX_ORDER 5
+#define GUI_FLOAT_POINTPOS_NOCHANGE 0
+#define GUI_FLOAT_POINTPOS_CHANGE 1
 
 class basic_field
 {
@@ -117,8 +122,8 @@ class float_io_field: public io_field<float>
 {
     
     std::string unit;
-    
     uint8_t prec;
+    uint8_t point_pos;
 
     public:
     float_io_field(
@@ -132,8 +137,14 @@ class float_io_field: public io_field<float>
 
     std::string get_unit() const;
     uint8_t get_prec() const;
+    uint8_t get_point_pos() const;
+    uint8_t get_numof_digits() const;
 
     void set_val(float new_val);
+    bool update_point_pos();
+
+    void increment(int8_t power);
+    void decrement(int8_t power);
 };
 
 class gui_controller

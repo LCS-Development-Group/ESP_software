@@ -7,7 +7,8 @@ SemaphoreHandle_t DEBUG_BOOL_MUT=xSemaphoreCreateMutex();
 float DEBUG_FLOAT=420.2137;
 SemaphoreHandle_t DEBUG_FLOAT_MUT=xSemaphoreCreateMutex();
 
-
+float DEBUG_FLOAT_2=15.3;
+SemaphoreHandle_t DEBUG_FLOAT_2_MUT=xSemaphoreCreateMutex();
 
 
 TaskHandle_t task_handle_list[TASK_NUM];

@@ -26,21 +26,22 @@ void task_visual_main(void *args)
         {
             switch(ntcode)
             {   
-                case VIS_NTCODE_REDRAW_BAR:
-                    vis->draw_bar();
-                    break;
-                
                 case VIS_NTCODE_REDRAW_SELECT:
                     vis->draw_select();
                     break;
 
+                case VIS_NTCODE_REDRAW_BAR:
+                    vis->draw_bar();
+                    break;
+                
                 case VIS_NTCODE_REDRAW_VALUE:
+                    vis->draw_bar();
                     vis->draw_current_value();
                     break;
 
                 case VIS_NTCODE_REDRAW_ALL_VALUES:
-                    vis->draw_all_values();
                     vis->draw_bar();
+                    vis->draw_all_values();
                     break;
 
                 case VIS_NTCODE_REDRAW_ALL:
@@ -48,6 +49,12 @@ void task_visual_main(void *args)
                     vis->draw_select();
                     vis->draw_all_values();
                     break;
+                
+                case VIS_NTCODE_REDRAW_VALUE_EDITMODE:
+                    vis->draw_editmode();
+                    vis->draw_bar();
+                    break;
+
 
                 default:
                     ESP_LOGW("Visual", "Woken by unknown ntcode: %d", ntcode);
@@ -81,9 +88,7 @@ void vis_controller::draw_page()
 void vis_controller::draw_current_value()
 {
     xSemaphoreTake(gui_mutex, portMAX_DELAY);
-    bool idx=gui->get_prim_idx();
-    clear_field(idx);
-
+    clear_field(gui->get_prim_idx());
     draw_value(gui->get_prim_idx());
     xSemaphoreGive(gui_mutex);
 }   
@@ -91,9 +96,11 @@ void vis_controller::draw_current_value()
 void vis_controller::draw_all_values()
 {
     xSemaphoreTake(gui_mutex, portMAX_DELAY);
-
     for(uint8_t idx=0; idx<gui->get_current_page()->get_numof_fields(); idx++)
+    {
+        //clear_field(idx);
         draw_value(idx);
+    }
 
     xSemaphoreGive(gui_mutex);
 }
@@ -111,7 +118,24 @@ void vis_controller::draw_select()
     draw_text("}", idx+1, 0);
 }
 
-void vis_controller::draw_bar(){}
+void vis_controller::draw_bar()
+{
+    xSemaphoreTake(gui_mutex, portMAX_DELAY);
+
+    uint8_t row, col;
+
+    col=gui->get_prev_sec_idx();
+    row=gui->get_prim_idx();
+    if(col!=GUI_CURSOR_MAX_INDEX) draw_bar_at(row, col, VIS_SELECTBAR_NEG);
+
+    col=gui->get_sec_idx();
+    if(col!=GUI_CURSOR_MAX_INDEX)
+    {
+        if(gui->get_sec_lock()==true) draw_bar_at(row, col, VIS_SELECTBAR_NORM);
+        else draw_bar_at(row, col, VIS_SELECTBAR_NSEL);
+    }
+    xSemaphoreGive(gui_mutex);
+}
 
 void vis_controller::start()
 {
@@ -140,10 +164,22 @@ void vis_controller::clear()
     }
 }
 
+void vis_controller::draw_editmode()
+{
+    xSemaphoreTake(gui_mutex, portMAX_DELAY);
+    uint8_t current=gui->get_prim_idx();
+    for(uint8_t idx=0; idx<gui->get_current_page()->get_numof_fields(); idx++)
+    {
+        if(current==idx) draw_value(idx);
+        else clear_field(idx);
+    }
+    xSemaphoreGive(gui_mutex);
+}
+
 void vis_controller::clear_field(uint8_t line)
 {
     for(uint16_t col=LCD_FIELD_VALUE_START; col<LCD_MAX_CHARS_PER_LINE; col++)
-        esp_lcd_panel_draw_bitmap(*lcd_handle, col*VIS_FONT_W, line*VIS_FONT_H, (col+1)*VIS_FONT_W, (line+1)*VIS_FONT_H, font[VIS_FONT_INDEX_SPACE]);
+        esp_lcd_panel_draw_bitmap(*lcd_handle, col*VIS_FONT_W, (line+1)*VIS_FONT_H, (col+1)*VIS_FONT_W, (line+2)*VIS_FONT_H, font[VIS_FONT_INDEX_SPACE]);
 }
 
 void vis_controller::draw_value(uint8_t line)
@@ -202,6 +238,18 @@ void vis_controller::draw_text(std::string text, uint8_t line, uint8_t pos)
         index=char_to_font_index(text[i]);
         esp_lcd_panel_draw_bitmap(*lcd_handle, (pos+i)*VIS_FONT_W, line*VIS_FONT_H, (pos+i+1)*VIS_FONT_W, (line+1)*VIS_FONT_H, font[index]);
     }
+}
+
+void vis_controller::draw_bar_at(uint8_t row, uint8_t col, uint8_t type)
+{
+    esp_lcd_panel_draw_bitmap(
+        *lcd_handle, 
+        (LCD_FIELD_VALUE_START+col)*VIS_SELECTBAR_W,
+        (row+2)*VIS_FONT_H+VIS_SELECTBAR_VOFFSET,
+        (LCD_FIELD_VALUE_START+col+1)*VIS_SELECTBAR_W,
+        (row+2)*VIS_FONT_H+VIS_SELECTBAR_VOFFSET+VIS_SELECTBAR_H,
+        selectbar[type]
+    );
 }
 
 void vis_init()
