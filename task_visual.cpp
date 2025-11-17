@@ -226,7 +226,7 @@ void vis_controller::draw_float_io_field(float_io_field *float_io_field_ptr, uin
     std::ostringstream oss;
     oss<<std::fixed<<std::setprecision(float_io_field_ptr->get_prec())<<float_io_field_ptr->get_val();
 
-    draw_text(oss.str()+" "+float_io_field_ptr->get_unit(), line+1, LCD_FIELD_VALUE_START);
+    draw_text(oss.str()+float_io_field_ptr->get_unit(), line+1, LCD_FIELD_VALUE_START);
 }
 
 void vis_controller::draw_text(std::string text, uint8_t line, uint8_t pos)

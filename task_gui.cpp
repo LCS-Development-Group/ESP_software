@@ -79,25 +79,52 @@ void gui_init()
 
 void gui_controller::fill_fields()
 {
-    /*Menu (root)*/
-    root->add_field_to_page(new text_field("test"));
-    root->add_field_to_page(new float_io_field("f_i", FIELD_IN, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3, 500.0, 0.0));
-    root->add_field_to_page(new float_io_field("f2", FIELD_IN, &DEBUG_FLOAT_2, &DEBUG_FLOAT_2_MUT, "Ab", 2, 500.0, 0.0));
-    root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
-    //root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
-    root->add_field_to_page(new text_field("field3"));
-    // root->add_field_to_page(new float_io_field("float_in ", FIELD_IN, &f_var, "mm", 2, 3));
-    root->add_field_to_page(new float_io_field("float_o", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3, 500.0, 0.0));
-    page* subpage_1=root->add_new_page("link");
+    /*Menu (Root)*/
+    page* page_info=root->add_new_page("General");
+    page* page_regulator=root->add_new_page("Regulation");
+    page* page_servos=root->add_new_page("Servos");
+    page* page_display=root->add_new_page("Display");
+    page* page_about=root->add_new_page("About");
 
-    /*subpage test*/
-    subpage_1->add_field_to_page(new text_field("test"));
-    subpage_1->add_field_to_page(new bool_io_field("State_1", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
-    subpage_1->add_field_to_page(new bool_io_field("State", FIELD_OUT, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
-    // subpage_1->add_field_to_page(new bool_io_field("State_i", FIELD_IN, &debug_bool));
-    // subpage_1->add_field_to_page(new bool_io_field("State_o", FIELD_OUT, &debug_bool));
+    /*General*/
+    //data from sensors, state of membrane, etc
 
-    prim_idx=find_next_editable(GUI_CURSOR_MAX_INDEX);//cursor starting position
+    /*Regulation*/
+    //detailed settings and info about regulation
+
+    /*servos*/
+    //servomechanism control
+
+    /*Display*/
+    //brightness, timeout(?)
+
+    /*About*/
+    page_about->add_field_to_page(new text_field("Program by Karol Pach"));
+    page_about->add_field_to_page(new text_field("LCS 2025"));
+
+
+
+
+
+    // /*Menu (root)*/
+    // root->add_field_to_page(new text_field("test"));
+    // root->add_field_to_page(new float_io_field("f_i", FIELD_IN, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3, 500.0, 0.0));
+    // root->add_field_to_page(new float_io_field("f2", FIELD_IN, &DEBUG_FLOAT_2, &DEBUG_FLOAT_2_MUT, "Ab", 2, 500.0, 0.0));
+    // root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
+    // //root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
+    // root->add_field_to_page(new text_field("field3"));
+    // // root->add_field_to_page(new float_io_field("float_in ", FIELD_IN, &f_var, "mm", 2, 3));
+    // root->add_field_to_page(new float_io_field("float_o", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3, 500.0, 0.0));
+    // page* subpage_1=root->add_new_page("link");
+
+    // /*subpage test*/
+    // subpage_1->add_field_to_page(new text_field("test"));
+    // subpage_1->add_field_to_page(new bool_io_field("State_1", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
+    // subpage_1->add_field_to_page(new bool_io_field("State", FIELD_OUT, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
+    // // subpage_1->add_field_to_page(new bool_io_field("State_i", FIELD_IN, &debug_bool));
+    // // subpage_1->add_field_to_page(new bool_io_field("State_o", FIELD_OUT, &debug_bool));
+
+    // prim_idx=find_next_editable(GUI_CURSOR_MAX_INDEX);//cursor starting position
 }
 
 //==================================================================================================================
