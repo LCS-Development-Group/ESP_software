@@ -22,7 +22,6 @@ void task_gui_main(void *args)
                 case GUI_NTCODE_CUR_NEG:
                     //ESP_LOGI("GUI", "UP");
                     retcode=gui->move_cursor_down();
-                    
                     break;
 
                 case GUI_NTCODE_CUR_POS:
@@ -329,7 +328,6 @@ uint8_t gui_controller::move_cursor_down()
             float_io_field_ptr=cast_to_float_io(current_page->get_field_ptr(prim_idx));
             if(sec_lock==true)
             {//field varaible edition
-                uint8_t test=float_io_field_ptr->get_point_pos();
                 float_io_field_ptr->update_point_pos();
 
                 int8_t power=float_io_field_ptr->get_point_pos()-sec_idx;
