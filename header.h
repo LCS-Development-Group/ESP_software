@@ -6,20 +6,49 @@
 /*======================================================================================*/
 /* GENERAL                                                                              */
 /*======================================================================================*/
-#define TASK_NUM 3
+#define TASK_NUM 7
 #define ENC_TASKID 0
 #define GUI_TASKID 1
 #define VIS_TASKID 2
+#define SEN_TASKID 3
+#define ACT_TASKID 4
+#define REG_TASKID 5
+#define COM_TASKID 6
 
+/*planned to use evbits - might not*/
 #define ENC_EVBIT (1<<ENC_TASKID)
 #define GUI_EVBIT (1<<GUI_TASKID)
 #define VIS_EVBIT (1<<VIS_TASKID)
+#define SEN_EVBIT (1<<SEN_TASKID)
+#define ACT_EVBIT (1<<ACT_TASKID)
+#define REG_EVBIT (1<<REG_TASKID)
+#define COM_EVBIT (1<<COM_TASKID)
 
 #define TASK_START_SYNCBIT (1<<23)
 #define APP_MAIN_EVBIT (1<<22)
 
 extern EventGroupHandle_t main_event_group;
 extern TaskHandle_t task_handle_list[TASK_NUM];
+
+/*======================================================================================*/
+/* Actuator                                                                             */
+/*======================================================================================*/
+void task_actuator_main(void *args);
+
+/*======================================================================================*/
+/* Regulator                                                                            */
+/*======================================================================================*/
+void task_regulator_main(void *args);
+
+/*======================================================================================*/
+/* Sensor                                                                               */
+/*======================================================================================*/
+void task_sensor_main(void *args);
+
+/*======================================================================================*/
+/* Comm                                                                                 */
+/*======================================================================================*/
+void task_comm_main(void *args);
 
 /*======================================================================================*/
 /* Visual                                                                               */
@@ -55,21 +84,6 @@ void vis_init();
 #define VIS_NTCODE_REDRAW_VALUE             3
 #define VIS_NTCODE_REDRAW_ALL_VALUES        4
 #define VIS_NTCODE_REDRAW_VALUE_EDITMODE    5
-
-/*
-signals:
-draw page 125
-redraw current field value
-
-functions:
-1 redraw select
-2 redraw all names
-3 clear field value
-4 print field value
-5 print all values
-6 print bar
-
-*/
 
 /*======================================================================================*/
 /* UI ROTATIONAL ENCODER                                                                */
