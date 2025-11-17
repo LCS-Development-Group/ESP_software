@@ -2,6 +2,7 @@
 #include "common_includes.h"
 #include "gui_class.h"
 #include "vis_class.h"
+#include "act_class.h"
 
 /*======================================================================================*/
 /* GENERAL                                                                              */
@@ -34,6 +35,29 @@ extern TaskHandle_t task_handle_list[TASK_NUM];
 /* Actuator                                                                             */
 /*======================================================================================*/
 void task_actuator_main(void *args);
+
+//membrana
+extern t_basic_actuator act_membrane;
+#define ACT_MEMB_EN_PIN         GPIO_NUM_42
+#define ACT_MEMB_EN_LVL         0
+#define ACT_MEMB_DIS_LVL        !(ACT_MEMB_EN_LVL)
+
+//serwa
+#define ACT_SERV0_EN_PIN        GPIO_EXP_NUMB4
+#define ACT_SERV1_EN_PIN        GPIO_EXP_NUMB5
+#define ACT_SERV2_EN_PIN        GPIO_EXP_NUMB6
+#define ACT_SERV3_EN_PIN        GPIO_EXP_NUMB7
+
+#define ACT_SERV0_PWM_PIN       GPIO_NUM_4
+#define ACT_SERV1_PWM_PIN       GPIO_NUM_5
+#define ACT_SERV2_PWM_PIN       GPIO_NUM_6
+#define ACT_SERV3_PWM_PIN       GPIO_NUM_7
+
+#define ACT_SERV_PWM_FREQ_HZ    50
+#define ACT_SERV_PWM_TIMER      LEDC_TIMER_0
+#define ACT_SERV_PWM_
+
+void act_init();
 
 /*======================================================================================*/
 /* Regulator                                                                            */
