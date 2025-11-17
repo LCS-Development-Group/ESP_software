@@ -82,13 +82,13 @@ void gui_controller::fill_fields()
 {
     /*Menu (root)*/
     root->add_field_to_page(new text_field("test"));
-    root->add_field_to_page(new float_io_field("f_i", FIELD_IN, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3));
-    root->add_field_to_page(new float_io_field("f2", FIELD_IN, &DEBUG_FLOAT_2, &DEBUG_FLOAT_2_MUT, "Ab", 2));
+    root->add_field_to_page(new float_io_field("f_i", FIELD_IN, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3, 500.0, 0.0));
+    root->add_field_to_page(new float_io_field("f2", FIELD_IN, &DEBUG_FLOAT_2, &DEBUG_FLOAT_2_MUT, "Ab", 2, 500.0, 0.0));
     root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
     //root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
     root->add_field_to_page(new text_field("field3"));
     // root->add_field_to_page(new float_io_field("float_in ", FIELD_IN, &f_var, "mm", 2, 3));
-    root->add_field_to_page(new float_io_field("float_o", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3));
+    root->add_field_to_page(new float_io_field("float_o", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3, 500.0, 0.0));
     page* subpage_1=root->add_new_page("link");
 
     /*subpage test*/
@@ -155,9 +155,11 @@ float_io_field::float_io_field(
     SemaphoreHandle_t *_var_mutex,
     /*derived class arguments*/
     std::string _unit,
-    uint8_t _prec)
+    uint8_t _prec,
+    float _var_max,
+    float _var_min)
     :io_field<float>(t_field_type::FLOAT_IO, _name, _io, _var, _var_mutex),
-    unit(_unit), prec(_prec)
+    unit(_unit), prec(_prec), var_max(_var_max), var_min(_var_min)
 {
     point_pos=0;
     update_point_pos();
@@ -180,13 +182,11 @@ uint8_t float_io_field::get_numof_digits() const
     return point_pos+prec;
 }
 
-bool float_io_field::update_point_pos()
+void float_io_field::update_point_pos()
 {
     xSemaphoreTake(*var_mutex, portMAX_DELAY);
     uint16_t float_var=(uint16_t)*var;
     xSemaphoreGive(*var_mutex);
-
-    uint8_t old=point_pos;
     
     if(float_var==0) 
     {
@@ -202,23 +202,39 @@ bool float_io_field::update_point_pos()
         }
         point_pos=order;
     }
-    if(old==point_pos) return GUI_FLOAT_POINTPOS_NOCHANGE;
-    else return GUI_FLOAT_POINTPOS_CHANGE;
 }
 
-void float_io_field::increment(int8_t power)
+bool float_io_field::increment(int8_t power)
 {
-    float temp=std::powf(10.0, power);
+    float temp=std::powf(10.0, power), new_var;
+    bool retcode;
     xSemaphoreTake(*var_mutex, portMAX_DELAY);
-    *var+=temp;
+    new_var=*var+temp;
+    if(new_var>var_max) retcode=GUI_FLOAT_XXCREMENT_NOCHANGE;
+    else if(new_var<var_min) retcode=GUI_FLOAT_XXCREMENT_NOCHANGE;
+    else
+    {
+        retcode=GUI_FLOAT_XXCREMENT_CHANGE;
+        *var=new_var;
+    }
     xSemaphoreGive(*var_mutex);
+    return retcode;
 }
-void float_io_field::decrement(int8_t power)
+bool float_io_field::decrement(int8_t power)
 {
-    float temp=std::powf(10.0, power);
+    float temp=std::powf(10.0, power), new_var;
+    bool retcode;
     xSemaphoreTake(*var_mutex, portMAX_DELAY);
-    *var-=temp;
+    new_var=*var-temp;
+    if(new_var>var_max) retcode=GUI_FLOAT_XXCREMENT_NOCHANGE;
+    else if(new_var<var_min) retcode=GUI_FLOAT_XXCREMENT_NOCHANGE;
+    else
+    {
+        retcode=GUI_FLOAT_XXCREMENT_CHANGE;
+        *var=new_var;
+    }
     xSemaphoreGive(*var_mutex);
+    return retcode;
 }
 
 
@@ -257,12 +273,13 @@ uint8_t gui_controller::move_cursor_up()
             float_io_field_ptr=cast_to_float_io(current_page->get_field_ptr(prim_idx));//i hope this is in fact a float_io_bool
             if(sec_lock==true)
             {//field varaible edition
-                if(float_io_field_ptr->update_point_pos()==GUI_FLOAT_POINTPOS_CHANGE) sec_idx--;
+                float_io_field_ptr->update_point_pos();
 
-                int8_t pos=float_io_field_ptr->get_point_pos()-sec_idx;
-                if(sec_idx<float_io_field_ptr->get_point_pos()) pos--;
-                float_io_field_ptr->increment(pos);
-                return GUI_RETCODE_REDRAW_VALUE;
+                int8_t power=float_io_field_ptr->get_point_pos()-sec_idx;
+                if(sec_idx<float_io_field_ptr->get_point_pos()) power--;
+
+                if(float_io_field_ptr->increment(power)==GUI_FLOAT_XXCREMENT_CHANGE) return GUI_RETCODE_REDRAW_VALUE;
+                else return GUI_RETCODE_DEFAULT;
             }
             else
             {//move secondary cursor right
@@ -312,12 +329,14 @@ uint8_t gui_controller::move_cursor_down()
             float_io_field_ptr=cast_to_float_io(current_page->get_field_ptr(prim_idx));
             if(sec_lock==true)
             {//field varaible edition
-                if(float_io_field_ptr->update_point_pos()==GUI_FLOAT_POINTPOS_CHANGE) sec_idx++;
+                uint8_t test=float_io_field_ptr->get_point_pos();
+                float_io_field_ptr->update_point_pos();
 
-                int8_t pos=float_io_field_ptr->get_point_pos()-sec_idx;
-                if(sec_idx<float_io_field_ptr->get_point_pos()) pos--;
-                float_io_field_ptr->decrement(pos);
-                return GUI_RETCODE_REDRAW_VALUE;
+                int8_t power=float_io_field_ptr->get_point_pos()-sec_idx;
+                if(sec_idx<float_io_field_ptr->get_point_pos()) power--;
+
+                if(float_io_field_ptr->decrement(power)==GUI_FLOAT_XXCREMENT_CHANGE) return GUI_RETCODE_REDRAW_VALUE;
+                else return GUI_RETCODE_DEFAULT;
             }
             else
             {//move secondary cursor left
