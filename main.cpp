@@ -14,6 +14,9 @@ SemaphoreHandle_t DEBUG_FLOAT_2_MUT=xSemaphoreCreateMutex();
 TaskHandle_t task_handle_list[TASK_NUM];
 EventGroupHandle_t main_event_group;
 
+SemaphoreHandle_t i2c0_mutex;
+SemaphoreHandle_t i2c1_mutex;
+
 void task_create_fail(uint8_t taskid)
 {
     ESP_LOGE("Setup", "Task id=%d creation failed\n", taskid);
@@ -22,10 +25,16 @@ void task_create_fail(uint8_t taskid)
 
 extern "C" void app_main(void)
 {
+    misc_init();
+    exp_init();
+
     enc_gpio_init();
     enc_pnct_init();
     gui_init();
     vis_init();
+    act_init();
+
+    exp_set_pin(TP2_PIN, 1);
 
     main_event_group=xEventGroupCreate();
     if(main_event_group==NULL)
@@ -51,4 +60,20 @@ extern "C" void app_main(void)
     ESP_LOGW("Main", "app_main awoken\n");    
 }
 
+void misc_init()
+{
+    ESP_ERROR_CHECK(i2cdev_init());
+    i2c0_mutex=xSemaphoreCreateMutex();
+    if(i2c0_mutex==NULL) 
+    {
+        ESP_LOGE("Main", "i2c0_mutex creation failed");
+        exit(-1);
+    }
 
+    i2c1_mutex=xSemaphoreCreateMutex();
+    if(i2c1_mutex==NULL) 
+    {
+        ESP_LOGE("Main", "i2c1_mutex creation failed");
+        exit(-1);
+    }
+}

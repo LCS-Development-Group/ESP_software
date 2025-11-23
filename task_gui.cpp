@@ -88,15 +88,20 @@ void gui_controller::fill_fields()
 
     /*General*/
     //data from sensors, state of membrane, etc
+    page_info->add_field_to_page(new text_field("WIP"));
 
     /*Regulation*/
     //detailed settings and info about regulation
+    page_regulator->add_field_to_page(new text_field("WIP"));
 
     /*servos*/
     //servomechanism control
+    page_servos->add_field_to_page(new text_field("WIP"));
 
     /*Display*/
     //brightness, timeout(?)
+    page_display->add_field_to_page(new text_field("WIP"));
+    
 
     /*About*/
     page_about->add_field_to_page(new text_field("Program by Karol Pach"));

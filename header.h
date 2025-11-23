@@ -3,6 +3,8 @@
 #include "gui_class.h"
 #include "vis_class.h"
 #include "act_class.h"
+#include "expander.h"
+#include "I2C.h"
 
 /*======================================================================================*/
 /* GENERAL                                                                              */
@@ -43,19 +45,33 @@ extern t_basic_actuator act_membrane;
 #define ACT_MEMB_DIS_LVL        !(ACT_MEMB_EN_LVL)
 
 //serwa
-#define ACT_SERV0_EN_PIN        GPIO_EXP_NUMB4
-#define ACT_SERV1_EN_PIN        GPIO_EXP_NUMB5
-#define ACT_SERV2_EN_PIN        GPIO_EXP_NUMB6
-#define ACT_SERV3_EN_PIN        GPIO_EXP_NUMB7
+#define ACT_SERV_NUMOF          4
+extern servo_config_t servos;
+
+#define ACT_SERV0_EN_PIN        GPIO_EXP_NUM_B4
+#define ACT_SERV1_EN_PIN        GPIO_EXP_NUM_B5
+#define ACT_SERV2_EN_PIN        GPIO_EXP_NUM_B6
+#define ACT_SERV3_EN_PIN        GPIO_EXP_NUM_B7
 
 #define ACT_SERV0_PWM_PIN       GPIO_NUM_4
 #define ACT_SERV1_PWM_PIN       GPIO_NUM_5
 #define ACT_SERV2_PWM_PIN       GPIO_NUM_6
 #define ACT_SERV3_PWM_PIN       GPIO_NUM_7
 
-#define ACT_SERV_PWM_FREQ_HZ    50
-#define ACT_SERV_PWM_TIMER      LEDC_TIMER_0
-#define ACT_SERV_PWM_
+extern float serv0_angle;
+extern float serv1_angle;
+extern float serv2_angle;
+extern float serv3_angle;
+
+#define ACT_SERV_DEF_ANGLE      0.0f
+
+#define ACT_SERV_EN_LVL         1
+#define ACT_SERV_DIS_LVL         !(ACT_SERV_EN_LVL)
+
+#define ACT_SERV_FREQ_HZ        50
+#define ACT_SERV_MAX_ANGLE_DEG  180
+#define ACT_SERV_MIN_WIDTH_US   1500
+#define ACT_SERV_MAX_WIDTH_US   2500
 
 void act_init();
 
@@ -113,8 +129,8 @@ void vis_init();
 /* UI ROTATIONAL ENCODER                                                                */
 /*======================================================================================*/
 void task_encoder_main(void *args);
-#define ENC_CLK_PIN                 GPIO_NUM_14
-#define ENC_DT_PIN                  GPIO_NUM_13
+#define ENC_CLK_PIN                 GPIO_NUM_13
+#define ENC_DT_PIN                  GPIO_NUM_14
 #define ENC_SW_PIN                  GPIO_NUM_12
 #define ENC_PCNT_HIGH               1      //after reaching that many steps a one "big step" is registered
 #define ENC_PCNT_LOW                (-1)*ENC_PCNT_HIGH
@@ -147,6 +163,11 @@ void gui_init();
 /*======================================================================================*/
 /* MISC                                                                                 */
 /*======================================================================================*/
+void misc_init();
+
+
+
+
 
 extern bool DEBUG_BOOL;
 extern SemaphoreHandle_t DEBUG_BOOL_MUT;

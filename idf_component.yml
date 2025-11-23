@@ -16,3 +16,7 @@ dependencies:
   #   public: true
   espressif/esp_lcd_ili9341: ^2.0.0
   esp-idf-lib/button: '*'
+  esp-idf-lib/sht3x: ^1.0.8
+  esp-idf-lib/mcp23x17: ^1.1.8
+  esp-idf-lib/ina219: '*'
+  espressif/servo: "^0.1.0"
