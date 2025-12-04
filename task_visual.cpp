@@ -217,8 +217,8 @@ void vis_controller::draw_bool_io_field(bool_io_field* bool_io_field_ptr, uint8_
 {
     bool val=bool_io_field_ptr->get_val();
 
-    if(val==true) draw_text("ON ", line+1, LCD_FIELD_VALUE_START);
-    else draw_text("OFF", line+1, LCD_FIELD_VALUE_START);    
+    if(val==true) draw_text(bool_io_field_ptr->get_true_text(), line+1, LCD_FIELD_VALUE_START);
+    else draw_text(bool_io_field_ptr->get_false_text(), line+1, LCD_FIELD_VALUE_START);    
 }
 
 void vis_controller::draw_float_io_field(float_io_field *float_io_field_ptr, uint8_t line)

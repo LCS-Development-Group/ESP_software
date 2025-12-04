@@ -80,12 +80,11 @@ void gui_init()
 void gui_controller::fill_fields()
 {
     /*Menu (Root)*/
-    page* page_info=root->add_new_page("General");
-    page* page_regulator=root->add_new_page("Regulation");
-    page* page_servos=root->add_new_page("Servos");
-    page* page_display=root->add_new_page("Display");
-    page* page_about=root->add_new_page("About");
-    page* subpage_1=root->add_new_page("DEBUG");
+    page* page_info=root->add_new_page("General", nullptr);
+    page* page_regulator=root->add_new_page("Regulation", nullptr);
+    page* page_servos=root->add_new_page("Servos", nullptr);
+    page* page_display=root->add_new_page("Display", nullptr);
+    page* page_about=root->add_new_page("About", nullptr);
 
     /*General*/
     //data from sensors, state of membrane, etc
@@ -97,7 +96,17 @@ void gui_controller::fill_fields()
 
     /*servos*/
     //servomechanism control
-    page_servos->add_field_to_page(new text_field("WIP"));
+    // page* page_serv0=page_servos->add_new_page("Serwo 0", new t_notify_package(task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_SERV0));
+    // page* page_serv1=page_servos->add_new_page("Serwo 1", new t_notify_package(task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_SERV1));
+    // page* page_serv2=page_servos->add_new_page("Serwo 2", new t_notify_package(task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_SERV2));
+    page* page_serv3=page_servos->add_new_page("Serwo 3", new t_notify_package(&task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_SERV3));
+
+    page_serv3->add_field_to_page(new bool_io_field("Enabled", t_field_io_type::FIELD_IN, &(servos[3].enabled), &(servos[3].mutex), "On ", "Off"));   
+    page_serv3->add_field_to_page(new bool_io_field("Angle", t_field_io_type::FIELD_IN, &(servos[3].position), &(servos[3].mutex), "POS_1", "POS_0"));
+    page_serv3->add_field_to_page(new float_io_field("POS_0", t_field_io_type::FIELD_IN, &(servos[3].angle[0]), &(servos[3].mutex), "^", 1, ACT_SERV_MAX_ANGLE_DEG, 0.0));
+    page_serv3->add_field_to_page(new float_io_field("POS_1", t_field_io_type::FIELD_IN, &(servos[3].angle[1]), &(servos[3].mutex), "^", 1, ACT_SERV_MAX_ANGLE_DEG, 0.0));
+    
+    //page_serv3->add_field_to_page(new float_io_field())
 
     /*Display*/
     //brightness, timeout(?)
@@ -125,9 +134,9 @@ void gui_controller::fill_fields()
 
     // /*subpage test*/
     // subpage_1->add_field_to_page(new text_field("test"));
-    subpage_1->add_field_to_page(new bool_io_field("bool_i", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
-    subpage_1->add_field_to_page(new bool_io_field("bool_o", FIELD_OUT, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
-    subpage_1->add_field_to_page(new float_io_field("temp", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "^", 2, 100, 0.0));
+    // subpage_1->add_field_to_page(new bool_io_field("bool_i", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
+    // subpage_1->add_field_to_page(new bool_io_field("bool_o", FIELD_OUT, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
+    // subpage_1->add_field_to_page(new float_io_field("temp", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "^", 2, 100, 0.0));
     // // subpage_1->add_field_to_page(new bool_io_field("State_i", FIELD_IN, &debug_bool));
     // // subpage_1->add_field_to_page(new bool_io_field("State_o", FIELD_OUT, &debug_bool));
 
@@ -168,8 +177,10 @@ bool_io_field::bool_io_field(
     std::string _name, 
     t_field_io_type _io, 
     bool *_var,
-    SemaphoreHandle_t *_var_mutex)
-    :io_field<bool>(t_field_type::BOOL_IO , _name, _io, _var, _var_mutex){}
+    SemaphoreHandle_t *_var_mutex,
+    std::string _true_text,
+    std::string _false_text)
+    :io_field<bool>(t_field_type::BOOL_IO , _name, _io, _var, _var_mutex), true_text(_true_text), false_text(_false_text){}
 
 void bool_io_field::switch_bool()
 {
@@ -177,6 +188,8 @@ void bool_io_field::switch_bool()
     *var=!(*var);
     xSemaphoreGive(*var_mutex);
 }
+std::string bool_io_field::get_true_text() const {return true_text;}
+std::string bool_io_field::get_false_text() const {return false_text;}
 
 //==================================================================================================================
 // FLOAT_IO FIELD                                                                                                   
@@ -277,7 +290,7 @@ bool float_io_field::decrement(int8_t power)
 
 gui_controller::gui_controller()
 {
-    root=new page("MENU", nullptr);
+    root=new page("MENU", nullptr, nullptr);
     current_page=root;
     prim_idx=0;
     prim_lock=false;
@@ -439,6 +452,7 @@ uint8_t gui_controller::enter()
                 {//input - editting allowed (bool so no entering to secondary cursor level)
                     bool_io_field_ptr=cast_to_bool_io(current_page->get_field_ptr(prim_idx));
                     bool_io_field_ptr->switch_bool();
+                    gui->get_current_page()->notify_associated_task();
                     if(check_if_displayed_excluding(bool_io_field_ptr->get_var_ptr(), prim_idx)==true) return GUI_RETCODE_REDRAW_ALL_VALUES;
                     else return GUI_RETCODE_REDRAW_VALUE;
                 }
@@ -477,6 +491,7 @@ uint8_t gui_controller::go_back()
             prim_lock=false;
             prev_sec_idx=sec_idx;
             sec_idx=GUI_CURSOR_MAX_INDEX;
+            gui->get_current_page()->notify_associated_task();
             return GUI_RETCODE_REDRAW_ALL_VALUES;
         }
     }
@@ -555,11 +570,13 @@ bool gui_controller::check_if_displayed_excluding(float* _var, uint8_t excluded)
 // Page                                                                                                  
 //==================================================================================================================
 
-page::page(std::string _name, page* _uppage)
-:name(_name), uppage(_uppage){}
+page::page(std::string _name, page* _uppage, t_notify_package *_ntpack)
+:name(_name), uppage(_uppage), ntpack(_ntpack){}
 
 page::~page()
 {
+    if(ntpack!=nullptr) delete ntpack;
+
     for(int i=0; i<page_list.size(); i++)
     if(page_list[i]!=nullptr) delete page_list[i];
 }
@@ -569,9 +586,9 @@ void page::add_field_to_page(basic_field* new_field)
     page_list.push_back(new_field);
 }
 
-page* page::add_new_page(std::string _name)
+page* page::add_new_page(std::string _name, t_notify_package *_ntpack)
 {
-    page* newpage=new page(_name, this);
+    page* newpage=new page(_name, this, _ntpack);
     page_list.push_back(new page_link_field(_name, newpage));
     return newpage;
 }
@@ -585,5 +602,12 @@ basic_field* page::get_field_ptr(int index) const
 }
 
 page* page::get_uppage_ptr() const {return uppage;}
-
 std::string page::get_page_name() const {return name;}
+t_notify_package *page::get_ntpack() const {return ntpack;}
+void page::notify_associated_task()
+{
+    if(ntpack!=nullptr)
+    {
+        xTaskNotifyIndexed(*(ntpack->task_to_notify), 0, ntpack->ntcode, eSetValueWithoutOverwrite);
+    }
+}

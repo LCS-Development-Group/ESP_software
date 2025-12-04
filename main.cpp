@@ -30,9 +30,11 @@ extern "C" void app_main(void)
 
     enc_gpio_init();
     enc_pnct_init();
+    act_init();
+
     gui_init();
     vis_init();
-    act_init();
+
     // float angles[2]={0.0, 180.0};
     // bool idx=0;
 
@@ -49,6 +51,8 @@ extern "C" void app_main(void)
     //}
 
     //vTaskDelay(portMAX_DELAY);
+
+    
 
     main_event_group=xEventGroupCreate();
     if(main_event_group==NULL)
@@ -70,28 +74,28 @@ extern "C" void app_main(void)
     vTaskDelay(pdMS_TO_TICKS(100));
     xEventGroupClearBits(main_event_group, TASK_START_SYNCBIT);//safely clear the syncbit
 
-    /*float display presentation*/
-    bool retval;
-    int val;
-    srand(0);
-    while(true)
-    {
-        val=rand()%21-10;
-        xSemaphoreTake(DEBUG_FLOAT_MUT, portMAX_DELAY);
-        DEBUG_FLOAT+=((float)val)*0.01f;
-        xSemaphoreGive(DEBUG_FLOAT_MUT);
+    // /*float display presentation*/
+    // bool retval;
+    // int val;
+    // srand(0);
+    // while(true)
+    // {
+    //     val=rand()%21-10;
+    //     xSemaphoreTake(DEBUG_FLOAT_MUT, portMAX_DELAY);
+    //     DEBUG_FLOAT+=((float)val)*0.01f;
+    //     xSemaphoreGive(DEBUG_FLOAT_MUT);
 
-        xSemaphoreTake(gui_mutex, portMAX_DELAY);
-        retval=gui->check_if_displayed(&DEBUG_FLOAT);
-        xSemaphoreGive(gui_mutex);
+    //     xSemaphoreTake(gui_mutex, portMAX_DELAY);
+    //     retval=gui->check_if_displayed(&DEBUG_FLOAT);
+    //     xSemaphoreGive(gui_mutex);
         
-        if(retval)
-        {
-            xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, VIS_NTCODE_REDRAW_ALL_VALUES, eSetValueWithoutOverwrite);
-        }
+    //     if(retval)
+    //     {
+    //         xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, VIS_NTCODE_REDRAW_ALL_VALUES, eSetValueWithoutOverwrite);
+    //     }
         
-        vTaskDelay(pdMS_TO_TICKS(2000));
-    }
+    //     vTaskDelay(pdMS_TO_TICKS(2000));
+    // }
     
 
     xEventGroupWaitBits(main_event_group, APP_MAIN_EVBIT, pdTRUE, pdFALSE, portMAX_DELAY);

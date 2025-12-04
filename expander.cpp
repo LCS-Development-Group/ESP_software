@@ -36,10 +36,12 @@ void exp_init()
 void exp_set_pin(uint8_t pin, bool lvl)
 {
     if(pin>15) return;
+    if(((exp_mask&(1U<<pin))>>pin)==lvl) return; //no change
+
     exp_mask&=~((uint16_t)1<< pin);//clear
     exp_mask|=(((uint16_t)lvl)<<pin);//set val;
     xSemaphoreTake(i2c1_mutex, portMAX_DELAY);
     ESP_ERROR_CHECK(mcp23x17_port_write(&exp_dev, exp_mask));
     xSemaphoreGive(i2c1_mutex);
-    ESP_LOGI("EXP", "mask set to 0x%04X", exp_mask);
+    //ESP_LOGI("EXP", "mask set to 0x%04X", exp_mask);
 }

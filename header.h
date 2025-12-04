@@ -76,28 +76,22 @@ extern t_basic_actuator act_membrane;
 
 //servos
 #define ACT_SERV_NUMOF          4
-extern servo_config_t servos;
+extern servo_config_t serv_cfg;
+extern t_servo servos[ACT_SERV_NUMOF];
 
 #define ACT_SERV0_EN_PIN        GPIO_EXP_NUM_B4
 #define ACT_SERV1_EN_PIN        GPIO_EXP_NUM_B5
 #define ACT_SERV2_EN_PIN        GPIO_EXP_NUM_B6
-#define ACT_SERV3_EN_PIN        GPIO_EXP_NUM_B7
+// #define ACT_SERV3_EN_PIN        GPIO_EXP_NUM_B7
+#define ACT_SERV3_EN_PIN        GPIO_EXP_NUM_B2 //temp - TP1
 
 #define ACT_SERV0_PWM_PIN       GPIO_NUM_4
 #define ACT_SERV1_PWM_PIN       GPIO_NUM_5
 #define ACT_SERV2_PWM_PIN       GPIO_NUM_6
 #define ACT_SERV3_PWM_PIN       GPIO_NUM_7
 
-extern float serv0_angle;
-extern float serv1_angle;
-extern float serv2_angle;
-extern float serv3_angle;
-
-#define ACT_SERV_DEF_ANGLE      0.0f
-
 #define ACT_SERV_EN_LVL         1
 #define ACT_SERV_DIS_LVL        !(ACT_SERV_EN_LVL)
-
 #define ACT_SERV_FREQ_HZ        50
 #define ACT_SERV_MAX_ANGLE_DEG  180
 #define ACT_SERV_MIN_WIDTH_US   1500
@@ -110,6 +104,12 @@ extern float serv3_angle;
 #define ACT_STEP_EN_LVL         0
 #define ACT_STEP_DIS_LVL        !(ACT_STEP_EN_LVL)
 #define ACT_STEP_DIR_DEF_LVL    0
+
+#define ACT_NTCODE_UPDATE_SERV0 0
+#define ACT_NTCODE_UPDATE_SERV1 1
+#define ACT_NTCODE_UPDATE_SERV2 2
+#define ACT_NTCODE_UPDATE_SERV3 3
+#define ACT_NTCODE_UPDATE_MEMB 4
 
 void act_init();
 

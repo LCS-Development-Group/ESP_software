@@ -13,7 +13,12 @@ struct t_basic_actuator
     gpio_config_t pin_en_cfg;
 };
 
-struct t_servo: public t_basic_actuator
+struct t_servo
 {
-    servo_config_t servo_cfg;
+    bool enabled;
+    SemaphoreHandle_t mutex;
+    uint8_t en_pin;
+    bool position;
+
+    float angle[2];
 };

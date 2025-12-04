@@ -2,33 +2,90 @@
 #include "act_class.h"
 
 t_basic_actuator act_membrane;
-servo_config_t servos;
-float serv0_angle=ACT_SERV_DEF_ANGLE;
-float serv1_angle=ACT_SERV_DEF_ANGLE;
-float serv2_angle=ACT_SERV_DEF_ANGLE;
-float serv3_angle=ACT_SERV_DEF_ANGLE;
+servo_config_t serv_cfg;
+t_servo servos[ACT_SERV_NUMOF];
+void update_servo(uint8_t id);
 
 void task_actuator_main(void *args)
 {
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
     ESP_LOGI("ACT", "task_actuator started");
 
-
-    //exp_set_pin(ACT_SERV3_EN_PIN, ACT_SERV_EN_LVL);
-    
-    float angles[2]={0.0, 180.0};
-    bool idx=0;
-    vTaskDelay(portMAX_DELAY);
-
-    while(1)
+    uint32_t ntcode=0x00;
+    while(true)
     {
-        iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 3, angles[idx]);
-        idx=!idx;
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
+        {
+            //ESP_LOGI("ACT", "Notified with %d", ntcode);
+            switch(ntcode)
+            {
+                case ACT_NTCODE_UPDATE_MEMB:
+                    break;
+
+                case ACT_NTCODE_UPDATE_SERV0:
+                    break;
+
+                case ACT_NTCODE_UPDATE_SERV1:
+                    break;
+
+                case ACT_NTCODE_UPDATE_SERV2:
+                    break;
+
+                case ACT_NTCODE_UPDATE_SERV3:
+                    update_servo(3);
+                    break;
+
+                default:
+                    ESP_LOGW("ACT", "Woken by unknown ntcode: %d", ntcode);
+                    break;
+            }
+        }
     }
 
-    vTaskDelay(portMAX_DELAY);//temporary
+
+
+
+
+
+
+
+    
+    // float angles[2]={0.0, 180.0};
+    // bool idx=0;
+    // //vTaskDelay(portMAX_DELAY);
+    // exp_set_pin(ACT_SERV3_EN_PIN, ACT_SERV_EN_LVL);
+    // exp_set_pin(TP1_PIN, 1);
+
+    // while(1)
+    // {
+    //     iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 3, angles[idx]);
+    //     idx=!idx;
+    //     vTaskDelay(pdMS_TO_TICKS(2000));
+    // }
+
+    // vTaskDelay(portMAX_DELAY);//temporary
 }
+
+void update_servo(uint8_t id)
+{
+    if(id>ACT_SERV_NUMOF) return;
+    xSemaphoreTake(servos[id].mutex, portMAX_DELAY);
+    
+    //enable
+    exp_set_pin(servos[id].en_pin, servos[id].enabled);
+
+    //angle
+    float angle;
+    
+    ESP_ERROR_CHECK(iot_servo_read_angle(LEDC_LOW_SPEED_MODE, id, &angle));
+    if(angle!=servos[id].angle[servos[id].position])
+        ESP_ERROR_CHECK(iot_servo_write_angle(LEDC_LOW_SPEED_MODE, id, servos[id].angle[servos[id].position]));
+
+    xSemaphoreGive(servos[id].mutex);
+}
+
+
+
 
 void act_init_membrane()
 {
@@ -56,7 +113,7 @@ void act_init_membrane()
 
 void act_init_servos()
 {
-    servos={
+    serv_cfg={
         .max_angle=ACT_SERV_MAX_ANGLE_DEG,
         .min_width_us=ACT_SERV_MIN_WIDTH_US,
         .max_width_us=ACT_SERV_MAX_WIDTH_US,
@@ -79,13 +136,58 @@ void act_init_servos()
         .channel_number=ACT_SERV_NUMOF
     };
 
-    ESP_ERROR_CHECK(iot_servo_init(LEDC_LOW_SPEED_MODE, &servos));
+    ESP_ERROR_CHECK(iot_servo_init(LEDC_LOW_SPEED_MODE, &serv_cfg));
     vTaskDelay(pdMS_TO_TICKS(200));
-    
-    iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, serv0_angle);
-    iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 1, serv0_angle);
-    iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 2, serv0_angle);
-    iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 3, serv0_angle);
+
+    /*servo 0*/
+    servos[0]=
+    {
+        .enabled=false,
+        .mutex=xSemaphoreCreateMutex(),
+        .en_pin=ACT_SERV0_EN_PIN,//expander
+        .position=0,
+        .angle={ACT_SERV_MAX_ANGLE_DEG, 0}
+    };
+
+    /*servo 1*/
+    servos[1]=
+    {
+        .enabled=false,
+        .mutex=xSemaphoreCreateMutex(),
+        .en_pin=ACT_SERV1_EN_PIN,//expander
+        .position=0,
+        .angle={ACT_SERV_MAX_ANGLE_DEG, 0}
+    };
+
+    /*servo 2*/
+    servos[2]=
+    {
+        .enabled=false,
+        .mutex=xSemaphoreCreateMutex(),
+        .en_pin=ACT_SERV2_EN_PIN,//expander
+        .position=0,
+        .angle={ACT_SERV_MAX_ANGLE_DEG, 0}
+    };
+
+    /*servo 3*/
+    servos[3]=
+    {
+        .enabled=false,
+        .mutex=xSemaphoreCreateMutex(),
+        .en_pin=ACT_SERV3_EN_PIN,//expander
+        .position=0,
+        .angle={ACT_SERV_MAX_ANGLE_DEG, 0}
+    };
+
+    for(uint8_t i=0; i<ACT_SERV_NUMOF; i++)
+    {
+        if(servos[i].mutex==NULL)
+        {
+            ESP_LOGE("ACT", "Servo%d mutex creation failed", i);
+            exit(-1);
+        }
+        iot_servo_write_angle(LEDC_LOW_SPEED_MODE, i, servos[i].angle[servos[i].position]);
+    }
 }
 
 void act_init_stepper()

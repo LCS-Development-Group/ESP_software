@@ -16,6 +16,13 @@ enum t_field_io_type{FIELD_IN, FIELD_OUT};
 #define GUI_FLOAT_XXCREMENT_NOCHANGE            0
 #define GUI_FLOAT_XXCREMENT_CHANGE              !(GUI_FLOAT_XXCREMENT_NOCHANGE)
 
+struct t_notify_package
+{
+    TaskHandle_t *task_to_notify;
+    uint32_t ntcode;
+    t_notify_package(TaskHandle_t *_task_to_notify, uint32_t _ntcode):task_to_notify(_task_to_notify), ntcode(_ntcode){}
+};
+
 class basic_field
 {
     protected:
@@ -37,18 +44,21 @@ class page
     std::vector <basic_field*> page_list;
     std::string name;
     page *uppage;
+    t_notify_package *ntpack;
 
     public:
     
-    page(std::string _name, page* _uppage);
+    page(std::string _name, page* _uppage, t_notify_package *_ntpack);
     ~page();
     void add_field_to_page(basic_field* new_field);
-    page *add_new_page(std::string _name);
+    page *add_new_page(std::string _name, t_notify_package *_ntpack);
 
     uint8_t get_numof_fields() const;
     basic_field* get_field_ptr(int index) const;
     page* get_uppage_ptr() const;
     std::string get_page_name() const;
+    t_notify_package *get_ntpack() const;
+    void notify_associated_task();
 };
 
 class text_field: public basic_field
@@ -108,14 +118,20 @@ class io_field : public basic_field
 
 class bool_io_field: public io_field<bool>
 {
+    std::string true_text;
+    std::string false_text;
     public:
     bool_io_field(
         std::string _name, 
         t_field_io_type _io, 
         bool *_var,
-        SemaphoreHandle_t *_var_mutex);
+        SemaphoreHandle_t *_var_mutex,
+        std::string _true_text,
+        std::string _false_text);
 
     void switch_bool();
+    std::string get_true_text() const;
+    std::string get_false_text() const;
 };
 
 class float_io_field: public io_field<float>
