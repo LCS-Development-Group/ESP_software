@@ -85,6 +85,7 @@ void gui_controller::fill_fields()
     page* page_servos=root->add_new_page("Servos");
     page* page_display=root->add_new_page("Display");
     page* page_about=root->add_new_page("About");
+    page* subpage_1=root->add_new_page("DEBUG");
 
     /*General*/
     //data from sensors, state of membrane, etc
@@ -104,9 +105,9 @@ void gui_controller::fill_fields()
     
 
     /*About*/
-    page_about->add_field_to_page(new text_field("Program by Karol Pach"));
+    page_about->add_field_to_page(new text_field("Program by:"));
+    page_about->add_field_to_page(new text_field("Karol Pach"));
     page_about->add_field_to_page(new text_field("LCS 2025"));
-
 
 
 
@@ -124,8 +125,9 @@ void gui_controller::fill_fields()
 
     // /*subpage test*/
     // subpage_1->add_field_to_page(new text_field("test"));
-    // subpage_1->add_field_to_page(new bool_io_field("State_1", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
-    // subpage_1->add_field_to_page(new bool_io_field("State", FIELD_OUT, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
+    subpage_1->add_field_to_page(new bool_io_field("bool_i", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
+    subpage_1->add_field_to_page(new bool_io_field("bool_o", FIELD_OUT, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
+    subpage_1->add_field_to_page(new float_io_field("temp", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "^", 2, 100, 0.0));
     // // subpage_1->add_field_to_page(new bool_io_field("State_i", FIELD_IN, &debug_bool));
     // // subpage_1->add_field_to_page(new bool_io_field("State_o", FIELD_OUT, &debug_bool));
 

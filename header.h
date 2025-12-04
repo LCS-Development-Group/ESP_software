@@ -3,8 +3,8 @@
 #include "gui_class.h"
 #include "vis_class.h"
 #include "act_class.h"
-#include "expander.h"
 #include "I2C.h"
+#include <mcp23x17.h>
 
 /*======================================================================================*/
 /* GENERAL                                                                              */
@@ -34,17 +34,47 @@ extern EventGroupHandle_t main_event_group;
 extern TaskHandle_t task_handle_list[TASK_NUM];
 
 /*======================================================================================*/
+/* EXPANDER                                                                             */
+/*======================================================================================*/
+#define GPIO_EXP_NUM_A0 0
+#define GPIO_EXP_NUM_A1 1
+#define GPIO_EXP_NUM_A2 2
+#define GPIO_EXP_NUM_A3 3
+#define GPIO_EXP_NUM_A4 4
+#define GPIO_EXP_NUM_A5 5
+#define GPIO_EXP_NUM_A6 6
+#define GPIO_EXP_NUM_A7 7
+#define GPIO_EXP_NUM_B0 8
+#define GPIO_EXP_NUM_B1 9
+#define GPIO_EXP_NUM_B2 10
+#define GPIO_EXP_NUM_B3 11
+#define GPIO_EXP_NUM_B4 12
+#define GPIO_EXP_NUM_B5 13
+#define GPIO_EXP_NUM_B6 14
+#define GPIO_EXP_NUM_B7 15
+
+#define EXP_FREQ_HZ         400000
+#define EXP_ADDR            0x20
+//Port 1 -> I2C.h
+
+extern mcp23x17_t exp_dev;
+extern uint16_t exp_mask;
+void exp_init();
+void exp_set_pin(uint8_t pin, bool lvl);
+
+
+/*======================================================================================*/
 /* Actuator                                                                             */
 /*======================================================================================*/
 void task_actuator_main(void *args);
 
-//membrana
+//membrane
 extern t_basic_actuator act_membrane;
 #define ACT_MEMB_EN_PIN         GPIO_NUM_42
 #define ACT_MEMB_EN_LVL         0
 #define ACT_MEMB_DIS_LVL        !(ACT_MEMB_EN_LVL)
 
-//serwa
+//servos
 #define ACT_SERV_NUMOF          4
 extern servo_config_t servos;
 
@@ -66,12 +96,20 @@ extern float serv3_angle;
 #define ACT_SERV_DEF_ANGLE      0.0f
 
 #define ACT_SERV_EN_LVL         1
-#define ACT_SERV_DIS_LVL         !(ACT_SERV_EN_LVL)
+#define ACT_SERV_DIS_LVL        !(ACT_SERV_EN_LVL)
 
 #define ACT_SERV_FREQ_HZ        50
 #define ACT_SERV_MAX_ANGLE_DEG  180
 #define ACT_SERV_MIN_WIDTH_US   1500
 #define ACT_SERV_MAX_WIDTH_US   2500
+
+//Stepper motors
+#define ACT_STEP_EN_PIN         GPIO_EXP_NUM_A7
+#define ACT_STEP_DIR_PIN        GPIO_EXP_NUM_B1
+
+#define ACT_STEP_EN_LVL         0
+#define ACT_STEP_DIS_LVL        !(ACT_STEP_EN_LVL)
+#define ACT_STEP_DIR_DEF_LVL    0
 
 void act_init();
 
@@ -99,8 +137,8 @@ void vis_init();
 
 #define LCD_HOST                SPI2_HOST
 #define LCD_CLOCK_HZ            (10 * 1000 * 1000) //10MHz
-#define LCD_BL_ON_LVL           1
-#define LCD_BL_OFF_LVL          !LCD_BL_ON_LVL //necessery?
+#define LCD_BL_ON_LVL           1//Temporary - pwm signal eventually
+#define LCD_BL_OFF_LVL          !LCD_BL_ON_LVL  
 #define LCD_DIN_PIN             GPIO_NUM_10 //din
 #define LCD_CLK_PIN             GPIO_NUM_9 //clk
 #define LCD_CS_PIN              GPIO_NUM_8 //cs
@@ -132,7 +170,7 @@ void task_encoder_main(void *args);
 #define ENC_CLK_PIN                 GPIO_NUM_13
 #define ENC_DT_PIN                  GPIO_NUM_14
 #define ENC_SW_PIN                  GPIO_NUM_12
-#define ENC_PCNT_HIGH               1      //after reaching that many steps a one "big step" is registered
+#define ENC_PCNT_HIGH               2      //after reaching that many steps a one "big step" is registered
 #define ENC_PCNT_LOW                (-1)*ENC_PCNT_HIGH
 void enc_gpio_init();
 void enc_pnct_init();
@@ -164,8 +202,15 @@ void gui_init();
 /* MISC                                                                                 */
 /*======================================================================================*/
 void misc_init();
-
-
+#define TP0_PIN     GPIO_EXP_NUM_B3
+#define TP1_PIN     GPIO_EXP_NUM_B2
+#define TP2_PIN     GPIO_EXP_NUM_B0
+#define TP3_PIN     GPIO_EXP_NUM_A6
+#define TP4_PIN     GPIO_EXP_NUM_A5
+#define TP5_PIN     GPIO_EXP_NUM_A4
+#define TP10_PIN    GPIO_NUM_36
+#define TP11_PIN    GPIO_NUM_35
+#define TP_DEF_LVL  0
 
 
 
@@ -177,7 +222,6 @@ extern SemaphoreHandle_t DEBUG_FLOAT_MUT;
 
 extern float DEBUG_FLOAT_2;
 extern SemaphoreHandle_t DEBUG_FLOAT_2_MUT;
-
 
 // #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
 // #define BYTE_TO_BINARY(byte) 

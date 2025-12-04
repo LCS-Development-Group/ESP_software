@@ -13,13 +13,16 @@ void task_actuator_main(void *args)
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
     ESP_LOGI("ACT", "task_actuator started");
 
-    exp_set_pin(ACT_SERV0_EN_PIN, ACT_SERV_EN_LVL);
+
+    //exp_set_pin(ACT_SERV3_EN_PIN, ACT_SERV_EN_LVL);
+    
     float angles[2]={0.0, 180.0};
     bool idx=0;
+    vTaskDelay(portMAX_DELAY);
 
     while(1)
     {
-        iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, angles[idx]);
+        iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 3, angles[idx]);
         idx=!idx;
         vTaskDelay(pdMS_TO_TICKS(2000));
     }
@@ -80,16 +83,9 @@ void act_init_servos()
     vTaskDelay(pdMS_TO_TICKS(200));
     
     iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, serv0_angle);
-    exp_set_pin(ACT_SERV0_EN_PIN, ACT_SERV_DIS_LVL);
-
     iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 1, serv0_angle);
-    exp_set_pin(ACT_SERV1_EN_PIN, ACT_SERV_DIS_LVL);
-
     iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 2, serv0_angle);
-    exp_set_pin(ACT_SERV2_EN_PIN, ACT_SERV_DIS_LVL);
-
     iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 3, serv0_angle);
-    exp_set_pin(ACT_SERV3_EN_PIN, ACT_SERV_DIS_LVL);
 }
 
 void act_init_stepper()

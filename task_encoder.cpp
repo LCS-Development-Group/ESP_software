@@ -54,7 +54,7 @@ void task_encoder_main(void *args)
                     break;
 
                 default:
-                    ESP_LOGW("Encoder", "ENC_NTCODE_ROT at undefined counter value");
+                    ESP_LOGW("Encoder", "ENC_NTCODE_ROT at undefined counter value: %d", pos);
                     break;
                 }
                 pcnt_unit_clear_count(count);
@@ -128,6 +128,6 @@ void enc_pnct_init()
     count_callback.on_reach=counter_isr;//register callback function
     pcnt_unit_register_event_callbacks(count, &count_callback, NULL);
 
-    pcnt_unit_add_watch_point(count, 1);
-    pcnt_unit_add_watch_point(count, -1);
+    pcnt_unit_add_watch_point(count, ENC_PCNT_HIGH);
+    pcnt_unit_add_watch_point(count, ENC_PCNT_LOW);
 }

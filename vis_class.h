@@ -9,7 +9,7 @@
 
 #define LCD_MAX_LINES                   (240/VIS_FONT_H) //including page name
 #define LCD_MAX_CHARS_PER_LINE          (320/VIS_FONT_W) //including margin
-#define LCD_FIELD_VALUE_START           10 //where field value is displayed
+#define LCD_FIELD_VALUE_START           12 //where field value is displayed
 #define LCD_L_MARGIN                    1   
 
 class vis_controller

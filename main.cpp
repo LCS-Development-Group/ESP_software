@@ -4,7 +4,7 @@
 bool DEBUG_BOOL=false;
 SemaphoreHandle_t DEBUG_BOOL_MUT=xSemaphoreCreateMutex();
 
-float DEBUG_FLOAT=420.2137;
+float DEBUG_FLOAT=21.65;
 SemaphoreHandle_t DEBUG_FLOAT_MUT=xSemaphoreCreateMutex();
 
 float DEBUG_FLOAT_2=15.3;
@@ -33,8 +33,22 @@ extern "C" void app_main(void)
     gui_init();
     vis_init();
     act_init();
+    // float angles[2]={0.0, 180.0};
+    // bool idx=0;
 
-    exp_set_pin(TP2_PIN, 1);
+    // exp_set_pin(TP1_PIN, 1);
+    // exp_set_pin(ACT_SERV3_EN_PIN, ACT_SERV_EN_LVL);
+    // exp_set_pin(ACT_SERV0_EN_PIN, ACT_SERV_EN_LVL);
+
+
+    // while(1)
+    // {
+    //     iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 3, angles[idx]);
+    //     idx=!idx;
+    //     vTaskDelay(pdMS_TO_TICKS(2000));
+    //}
+
+    //vTaskDelay(portMAX_DELAY);
 
     main_event_group=xEventGroupCreate();
     if(main_event_group==NULL)
@@ -55,6 +69,30 @@ extern "C" void app_main(void)
     xEventGroupSetBits(main_event_group, TASK_START_SYNCBIT);//start the tasks
     vTaskDelay(pdMS_TO_TICKS(100));
     xEventGroupClearBits(main_event_group, TASK_START_SYNCBIT);//safely clear the syncbit
+
+    /*float display presentation*/
+    bool retval;
+    int val;
+    srand(0);
+    while(true)
+    {
+        val=rand()%21-10;
+        xSemaphoreTake(DEBUG_FLOAT_MUT, portMAX_DELAY);
+        DEBUG_FLOAT+=((float)val)*0.01f;
+        xSemaphoreGive(DEBUG_FLOAT_MUT);
+
+        xSemaphoreTake(gui_mutex, portMAX_DELAY);
+        retval=gui->check_if_displayed(&DEBUG_FLOAT);
+        xSemaphoreGive(gui_mutex);
+        
+        if(retval)
+        {
+            xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, VIS_NTCODE_REDRAW_ALL_VALUES, eSetValueWithoutOverwrite);
+        }
+        
+        vTaskDelay(pdMS_TO_TICKS(2000));
+    }
+    
 
     xEventGroupWaitBits(main_event_group, APP_MAIN_EVBIT, pdTRUE, pdFALSE, portMAX_DELAY);
     ESP_LOGW("Main", "app_main awoken\n");    
