@@ -4,7 +4,9 @@
 t_basic_actuator act_membrane;
 servo_config_t serv_cfg;
 t_servo servos[ACT_SERV_NUMOF];
+
 void update_servo(uint8_t id);
+void update_basic_actuator(t_basic_actuator *actuator);
 
 void task_actuator_main(void *args)
 {
@@ -20,6 +22,7 @@ void task_actuator_main(void *args)
             switch(ntcode)
             {
                 case ACT_NTCODE_UPDATE_MEMB:
+                    update_basic_actuator(&act_membrane);
                     break;
 
                 case ACT_NTCODE_UPDATE_SERV0:
@@ -84,20 +87,28 @@ void update_servo(uint8_t id)
     xSemaphoreGive(servos[id].mutex);
 }
 
+void update_basic_actuator(t_basic_actuator *actuator)
+{
+    if(actuator==nullptr) return;
 
+    xSemaphoreTake(actuator->mutex, portMAX_DELAY);
 
+    //enable
+    if(actuator->expander==true) exp_set_pin(actuator->en_pin, actuator->enabled);
+    else ESP_ERROR_CHECK(gpio_set_level(gpio_num_t(actuator->en_pin), actuator->enabled));
+    xSemaphoreGive(actuator->mutex);
+}
 
 void act_init_membrane()
 {
-    act_membrane.pin_en_cfg={
+    gpio_config_t pin_en_cfg={
         .pin_bit_mask=(1ULL<<ACT_MEMB_EN_PIN),
         .mode=GPIO_MODE_OUTPUT,
         .pull_up_en=GPIO_PULLUP_DISABLE,
         .pull_down_en=GPIO_PULLDOWN_DISABLE,
         .intr_type=GPIO_INTR_DISABLE,
     };
-    ESP_ERROR_CHECK(gpio_config(&act_membrane.pin_en_cfg));
-    gpio_set_level(ACT_MEMB_EN_PIN, ACT_MEMB_DIS_LVL);
+    ESP_ERROR_CHECK(gpio_config(&pin_en_cfg));
 
     act_membrane.enabled=false;
     act_membrane.expander=false;
@@ -107,8 +118,8 @@ void act_init_membrane()
         ESP_LOGE("ACT", "Membrane mutex creation failed");
         exit(-1);
     }
-
     act_membrane.en_pin=ACT_MEMB_EN_PIN;
+    gpio_set_level(gpio_num_t(act_membrane.en_pin), ACT_MEMB_DIS_LVL);
 }
 
 void act_init_servos()

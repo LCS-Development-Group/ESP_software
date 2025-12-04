@@ -10,7 +10,6 @@ struct t_basic_actuator
     SemaphoreHandle_t mutex;
     bool expander;              //steered via expander (true) or directly (false)
     uint8_t en_pin;
-    gpio_config_t pin_en_cfg;
 };
 
 struct t_servo

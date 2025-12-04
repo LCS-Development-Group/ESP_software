@@ -71,7 +71,7 @@ void task_actuator_main(void *args);
 //membrane
 extern t_basic_actuator act_membrane;
 #define ACT_MEMB_EN_PIN         GPIO_NUM_42
-#define ACT_MEMB_EN_LVL         0
+#define ACT_MEMB_EN_LVL         1
 #define ACT_MEMB_DIS_LVL        !(ACT_MEMB_EN_LVL)
 
 //servos

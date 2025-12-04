@@ -83,6 +83,7 @@ void gui_controller::fill_fields()
     page* page_info=root->add_new_page("General", nullptr);
     page* page_regulator=root->add_new_page("Regulation", nullptr);
     page* page_servos=root->add_new_page("Servos", nullptr);
+    page* page_debug=root->add_new_page("DEBUG", new t_notify_package(&task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_MEMB));
     page* page_display=root->add_new_page("Display", nullptr);
     page* page_about=root->add_new_page("About", nullptr);
 
@@ -118,29 +119,7 @@ void gui_controller::fill_fields()
     page_about->add_field_to_page(new text_field("Karol Pach"));
     page_about->add_field_to_page(new text_field("LCS 2025"));
 
-
-
-
-    // /*Menu (root)*/
-    // root->add_field_to_page(new text_field("test"));
-    // root->add_field_to_page(new float_io_field("f_i", FIELD_IN, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3, 500.0, 0.0));
-    // root->add_field_to_page(new float_io_field("f2", FIELD_IN, &DEBUG_FLOAT_2, &DEBUG_FLOAT_2_MUT, "Ab", 2, 500.0, 0.0));
-    // root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
-    // //root->add_field_to_page(new bool_io_field("State", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
-    // root->add_field_to_page(new text_field("field3"));
-    // // root->add_field_to_page(new float_io_field("float_in ", FIELD_IN, &f_var, "mm", 2, 3));
-    // root->add_field_to_page(new float_io_field("float_o", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "Ab", 3, 500.0, 0.0));
-    // page* subpage_1=root->add_new_page("link");
-
-    // /*subpage test*/
-    // subpage_1->add_field_to_page(new text_field("test"));
-    // subpage_1->add_field_to_page(new bool_io_field("bool_i", FIELD_IN, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
-    // subpage_1->add_field_to_page(new bool_io_field("bool_o", FIELD_OUT, &DEBUG_BOOL, &DEBUG_BOOL_MUT));
-    // subpage_1->add_field_to_page(new float_io_field("temp", FIELD_OUT, &DEBUG_FLOAT, &DEBUG_FLOAT_MUT, "^", 2, 100, 0.0));
-    // // subpage_1->add_field_to_page(new bool_io_field("State_i", FIELD_IN, &debug_bool));
-    // // subpage_1->add_field_to_page(new bool_io_field("State_o", FIELD_OUT, &debug_bool));
-
-    // prim_idx=find_next_editable(GUI_CURSOR_MAX_INDEX);//cursor starting position
+    page_debug->add_field_to_page(new bool_io_field("manual_en", t_field_io_type::FIELD_IN, &(act_membrane.enabled), &(act_membrane.mutex), "On ", "Off"));
 }
 
 //==================================================================================================================
