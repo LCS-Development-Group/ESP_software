@@ -26,12 +26,15 @@ void task_actuator_main(void *args)
                     break;
 
                 case ACT_NTCODE_UPDATE_SERV0:
+                    update_servo(0);
                     break;
 
                 case ACT_NTCODE_UPDATE_SERV1:
+                    update_servo(1);
                     break;
 
                 case ACT_NTCODE_UPDATE_SERV2:
+                    update_servo(2);
                     break;
 
                 case ACT_NTCODE_UPDATE_SERV3:
@@ -44,29 +47,6 @@ void task_actuator_main(void *args)
             }
         }
     }
-
-
-
-
-
-
-
-
-    
-    // float angles[2]={0.0, 180.0};
-    // bool idx=0;
-    // //vTaskDelay(portMAX_DELAY);
-    // exp_set_pin(ACT_SERV3_EN_PIN, ACT_SERV_EN_LVL);
-    // exp_set_pin(TP1_PIN, 1);
-
-    // while(1)
-    // {
-    //     iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 3, angles[idx]);
-    //     idx=!idx;
-    //     vTaskDelay(pdMS_TO_TICKS(2000));
-    // }
-
-    // vTaskDelay(portMAX_DELAY);//temporary
 }
 
 void update_servo(uint8_t id)
@@ -157,7 +137,9 @@ void act_init_servos()
         .mutex=xSemaphoreCreateMutex(),
         .en_pin=ACT_SERV0_EN_PIN,//expander
         .position=0,
-        .angle={ACT_SERV_MAX_ANGLE_DEG, 0}
+        .angle={
+            nvs_get_float(NVS_SERVOS[0][0], ACT_SERV_POS0_DEF),
+            nvs_get_float(NVS_SERVOS[0][1], ACT_SERV_POS1_DEF)}
     };
 
     /*servo 1*/
@@ -167,7 +149,9 @@ void act_init_servos()
         .mutex=xSemaphoreCreateMutex(),
         .en_pin=ACT_SERV1_EN_PIN,//expander
         .position=0,
-        .angle={ACT_SERV_MAX_ANGLE_DEG, 0}
+        .angle={
+            nvs_get_float(NVS_SERVOS[1][0], ACT_SERV_POS0_DEF),
+            nvs_get_float(NVS_SERVOS[1][1], ACT_SERV_POS1_DEF)}
     };
 
     /*servo 2*/
@@ -177,7 +161,9 @@ void act_init_servos()
         .mutex=xSemaphoreCreateMutex(),
         .en_pin=ACT_SERV2_EN_PIN,//expander
         .position=0,
-        .angle={ACT_SERV_MAX_ANGLE_DEG, 0}
+        .angle={
+            nvs_get_float(NVS_SERVOS[2][0], ACT_SERV_POS0_DEF),
+            nvs_get_float(NVS_SERVOS[2][1], ACT_SERV_POS1_DEF)}
     };
 
     /*servo 3*/
@@ -187,7 +173,9 @@ void act_init_servos()
         .mutex=xSemaphoreCreateMutex(),
         .en_pin=ACT_SERV3_EN_PIN,//expander
         .position=0,
-        .angle={ACT_SERV_MAX_ANGLE_DEG, 0}
+        .angle={
+            nvs_get_float(NVS_SERVOS[3][0], ACT_SERV_POS0_DEF),
+            nvs_get_float(NVS_SERVOS[3][1], ACT_SERV_POS1_DEF)}
     };
 
     for(uint8_t i=0; i<ACT_SERV_NUMOF; i++)

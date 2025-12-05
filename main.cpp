@@ -27,6 +27,7 @@ extern "C" void app_main(void)
 {
     misc_init();
     exp_init();
+    init_nvs();
 
     enc_gpio_init();
     enc_pnct_init();
@@ -74,29 +75,14 @@ extern "C" void app_main(void)
     vTaskDelay(pdMS_TO_TICKS(100));
     xEventGroupClearBits(main_event_group, TASK_START_SYNCBIT);//safely clear the syncbit
 
-    // /*float display presentation*/
-    // bool retval;
-    // int val;
-    // srand(0);
-    // while(true)
-    // {
-    //     val=rand()%21-10;
-    //     xSemaphoreTake(DEBUG_FLOAT_MUT, portMAX_DELAY);
-    //     DEBUG_FLOAT+=((float)val)*0.01f;
-    //     xSemaphoreGive(DEBUG_FLOAT_MUT);
 
-    //     xSemaphoreTake(gui_mutex, portMAX_DELAY);
-    //     retval=gui->check_if_displayed(&DEBUG_FLOAT);
-    //     xSemaphoreGive(gui_mutex);
-        
-    //     if(retval)
-    //     {
-    //         xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, VIS_NTCODE_REDRAW_ALL_VALUES, eSetValueWithoutOverwrite);
-    //     }
-        
-    //     vTaskDelay(pdMS_TO_TICKS(2000));
-    // }
-    
+
+
+    while(true)
+    {
+        vTaskDelay(pdMS_TO_TICKS(NVS_SAVE_PERIOD_S*1000));
+        nvs_save_values();
+    }
 
     xEventGroupWaitBits(main_event_group, APP_MAIN_EVBIT, pdTRUE, pdFALSE, portMAX_DELAY);
     ESP_LOGW("Main", "app_main awoken\n");    

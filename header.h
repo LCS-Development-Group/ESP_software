@@ -96,6 +96,8 @@ extern t_servo servos[ACT_SERV_NUMOF];
 #define ACT_SERV_MAX_ANGLE_DEG  180
 #define ACT_SERV_MIN_WIDTH_US   1500
 #define ACT_SERV_MAX_WIDTH_US   2500
+#define ACT_SERV_POS0_DEF       0
+#define ACT_SERV_POS1_DEF       ACT_SERV_MAX_ANGLE_DEG
 
 //Stepper motors
 #define ACT_STEP_EN_PIN         GPIO_EXP_NUM_A7
@@ -199,6 +201,21 @@ void gui_init();
 #define GUI_CURSOR_MAX_INDEX    255
 
 /*======================================================================================*/
+/* NVS                                                                                  */
+/*======================================================================================*/
+//non volatile storage
+#define NVS_SPACE_NAME "NVS_SPACE"
+#define NVS_SAVE_PERIOD_S 10
+
+extern nvs_handle_t nvs;
+void init_nvs();
+float nvs_get_float(const char* key, float def);
+void nvs_save_values();
+
+/*keys defined in nvs.cpp*/
+extern const char* NVS_SERVOS[ACT_SERV_NUMOF][2];
+
+/*======================================================================================*/
 /* MISC                                                                                 */
 /*======================================================================================*/
 void misc_init();
@@ -222,6 +239,9 @@ extern SemaphoreHandle_t DEBUG_FLOAT_MUT;
 
 extern float DEBUG_FLOAT_2;
 extern SemaphoreHandle_t DEBUG_FLOAT_2_MUT;
+
+
+
 
 // #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
 // #define BYTE_TO_BINARY(byte) 

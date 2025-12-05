@@ -5,7 +5,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_chip_info.h"
-//#include "esp_flash.h"
 #include "esp_system.h"
 #include "esp_log.h" // makra do sygnalizacji LOGx
 
@@ -16,3 +15,5 @@
 #include <string>
 #include "freertos/semphr.h"
 #include <cmath>
+#include "nvs.h"
+#include "nvs_flash.h"
