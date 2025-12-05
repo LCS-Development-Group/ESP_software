@@ -14,8 +14,7 @@ SemaphoreHandle_t DEBUG_FLOAT_2_MUT=xSemaphoreCreateMutex();
 TaskHandle_t task_handle_list[TASK_NUM];
 EventGroupHandle_t main_event_group;
 
-SemaphoreHandle_t i2c0_mutex;
-SemaphoreHandle_t i2c1_mutex;
+t_i2c_bus i2c_bus[I2C_BUS_NUMOF];
 
 void task_create_fail(uint8_t taskid)
 {
@@ -32,6 +31,7 @@ extern "C" void app_main(void)
     enc_gpio_init();
     enc_pnct_init();
     act_init();
+    sen_init();
 
     gui_init();
     vis_init();
@@ -91,17 +91,26 @@ extern "C" void app_main(void)
 void misc_init()
 {
     ESP_ERROR_CHECK(i2cdev_init());
-    i2c0_mutex=xSemaphoreCreateMutex();
-    if(i2c0_mutex==NULL) 
+
+    i2c_bus[I2C0_PORT]={
+        .SDA_pin=I2C0_SDA_PIN,
+        .SCL_pin=I2C0_SCL_PIN,
+        .mutex=xSemaphoreCreateMutex(),
+    };
+    if(i2c_bus[I2C0_PORT].mutex==NULL) 
     {
-        ESP_LOGE("Main", "i2c0_mutex creation failed");
+        ESP_LOGE("Main", "i2c%d_mutex creation failed", I2C0_PORT);
         exit(-1);
     }
 
-    i2c1_mutex=xSemaphoreCreateMutex();
-    if(i2c1_mutex==NULL) 
+    i2c_bus[I2C1_PORT]={
+        .SDA_pin=I2C1_SDA_PIN,
+        .SCL_pin=I2C1_SCL_PIN,
+        .mutex=xSemaphoreCreateMutex(),
+    };
+    if(i2c_bus[I2C1_PORT].mutex==NULL) 
     {
-        ESP_LOGE("Main", "i2c1_mutex creation failed");
+        ESP_LOGE("Main", "i2c%d_mutex creation failed", I2C1_PORT);
         exit(-1);
     }
 }

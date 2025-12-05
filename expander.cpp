@@ -20,8 +20,8 @@ uint16_t exp_mask=0x00
 
 void exp_init()
 {
-    xSemaphoreTake(i2c1_mutex, portMAX_DELAY);
-    ESP_ERROR_CHECK(mcp23x17_init_desc(&exp_dev, EXP_ADDR, I2C1_PORT, (gpio_num_t)I2C1_SDA_PIN, I2C1_SCL_PIN));
+    xSemaphoreTake(i2c_bus[EXP_PORT].mutex, portMAX_DELAY);
+    ESP_ERROR_CHECK(mcp23x17_init_desc(&exp_dev, EXP_ADDR, EXP_PORT, i2c_bus[EXP_PORT].SDA_pin, i2c_bus[EXP_PORT].SCL_pin));
     exp_dev.cfg.master.clk_speed=EXP_FREQ_HZ;
     
     for(int i=0; i<15; i++)
@@ -30,7 +30,7 @@ void exp_init()
         //ESP_ERROR_CHECK(mcp23x17_set_level(&exp_dev, i, EXP_GPIO_DEF_LVL));
     }
     ESP_ERROR_CHECK(mcp23x17_port_write(&exp_dev, exp_mask));
-    xSemaphoreGive(i2c1_mutex);
+    xSemaphoreGive(i2c_bus[EXP_PORT].mutex);
 }
 
 void exp_set_pin(uint8_t pin, bool lvl)
@@ -40,8 +40,9 @@ void exp_set_pin(uint8_t pin, bool lvl)
 
     exp_mask&=~((uint16_t)1<< pin);//clear
     exp_mask|=(((uint16_t)lvl)<<pin);//set val;
-    xSemaphoreTake(i2c1_mutex, portMAX_DELAY);
+
+    xSemaphoreTake(i2c_bus[EXP_PORT].mutex, portMAX_DELAY);
     ESP_ERROR_CHECK(mcp23x17_port_write(&exp_dev, exp_mask));
-    xSemaphoreGive(i2c1_mutex);
+    xSemaphoreGive(i2c_bus[EXP_PORT].mutex);
     //ESP_LOGI("EXP", "mask set to 0x%04X", exp_mask);
 }

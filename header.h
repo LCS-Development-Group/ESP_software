@@ -55,7 +55,7 @@ extern TaskHandle_t task_handle_list[TASK_NUM];
 
 #define EXP_FREQ_HZ         400000
 #define EXP_ADDR            0x20
-//Port 1 -> I2C.h
+#define EXP_PORT            I2C1_PORT
 
 extern mcp23x17_t exp_dev;
 extern uint16_t exp_mask;
@@ -124,6 +124,42 @@ void task_regulator_main(void *args);
 /* Sensor                                                                               */
 /*======================================================================================*/
 void task_sensor_main(void *args);
+void sen_init();
+
+//INA219
+#define SEN_INA219_ADDR     0x40
+#define SEN_INA219_PORT     I2C1_PORT
+
+//SHT35 internal
+#define SEN_RHT_INT_ADDR    0x44
+#define SEN_RHT_INT_PORT    I2C0_PORT
+extern sht3x_t RHT_int;
+
+//SHT35 external
+#define SEN_RHT_EXT_ADDR    0x44
+#define SEN_RHT_EXT_PORT    I2C1_PORT
+
+//variables
+struct t_RHT_var
+{
+    float RH;
+    float T;
+    SemaphoreHandle_t mutex;
+};
+extern t_RHT_var RHT_ext_var;
+extern t_RHT_var RHT_int_var;
+
+struct t_INA_var
+{
+    float current;
+    float voltage;
+    float power;
+    SemaphoreHandle_t mutex;
+};
+extern t_INA_var memb_var;
+
+
+#define SEN_VAR_DEF_VAL     0.0
 
 /*======================================================================================*/
 /* Comm                                                                                 */
