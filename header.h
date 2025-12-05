@@ -4,7 +4,6 @@
 #include "vis_class.h"
 #include "act_class.h"
 #include "I2C.h"
-#include <mcp23x17.h>
 
 /*======================================================================================*/
 /* GENERAL                                                                              */
@@ -126,19 +125,6 @@ void task_regulator_main(void *args);
 void task_sensor_main(void *args);
 void sen_init();
 
-//INA219
-#define SEN_INA219_ADDR     0x40
-#define SEN_INA219_PORT     I2C1_PORT
-
-//SHT35 internal
-#define SEN_RHT_INT_ADDR    0x44
-#define SEN_RHT_INT_PORT    I2C0_PORT
-extern sht3x_t RHT_int;
-
-//SHT35 external
-#define SEN_RHT_EXT_ADDR    0x44
-#define SEN_RHT_EXT_PORT    I2C1_PORT
-
 //variables
 struct t_RHT_var
 {
@@ -146,9 +132,6 @@ struct t_RHT_var
     float T;
     SemaphoreHandle_t mutex;
 };
-extern t_RHT_var RHT_ext_var;
-extern t_RHT_var RHT_int_var;
-
 struct t_INA_var
 {
     float current;
@@ -156,8 +139,33 @@ struct t_INA_var
     float power;
     SemaphoreHandle_t mutex;
 };
-extern t_INA_var memb_var;
 
+/*SHT35 internal*/
+extern t_RHT_var RHT_int_var;
+#define SEN_RHT_INT_ADDR            0x44
+#define SEN_RHT_INT_PORT            I2C0_PORT
+#define SEN_NTCODE_UPDATE_RHT_INT   1
+
+/*SHT35 external*/
+extern t_RHT_var RHT_ext_var;
+#define SEN_RHT_EXT_ADDR            0x44
+#define SEN_RHT_EXT_PORT            I2C1_PORT
+#define SEN_NTCODE_UPDATE_RHT_EXT   2
+
+/*INA219*/
+extern t_INA_var memb_var;
+#define SEN_CURSEN_ADDR             0x40
+#define SEN_CURSEN_PORT             I2C1_PORT
+#define SEN_NTCODE_UPDATE_MEMB      0
+
+//sensor settings
+#define SEN_CURSEN_BUS_VOLT_RANGE   INA219_BUS_RANGE_16V
+#define SEN_CURSEN_GAIN             INA219_GAIN_1//+-40mV
+#define SEN_CURSEN_U_RES            INA219_RES_12BIT_4S //12bit time for adc, average over 4 samples - about 2.13ms total
+#define SEN_CURSEN_I_RES            INA219_RES_12BIT_16S //12bit time for adc, average over 16 samples - about 8.51ms total
+#define SEN_CURSEN_WAIT_MS          15
+#define SEN_CURSEN_MODE             INA219_MODE_TRIG_SHUNT_BUS //both shunt and bus measured once when triggered
+#define SEN_CURSEN_RSHUNT_mOHM      4.0f
 
 #define SEN_VAR_DEF_VAL     0.0
 
