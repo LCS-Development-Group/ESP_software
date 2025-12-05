@@ -25,10 +25,8 @@ void exp_init()
     exp_dev.cfg.master.clk_speed=EXP_FREQ_HZ;
     
     for(int i=0; i<15; i++)
-    {
         ESP_ERROR_CHECK(mcp23x17_set_mode(&exp_dev, i, MCP23X17_GPIO_OUTPUT));
-        //ESP_ERROR_CHECK(mcp23x17_set_level(&exp_dev, i, EXP_GPIO_DEF_LVL));
-    }
+
     ESP_ERROR_CHECK(mcp23x17_port_write(&exp_dev, exp_mask));
     xSemaphoreGive(i2c_bus[EXP_PORT].mutex);
 }
@@ -44,5 +42,4 @@ void exp_set_pin(uint8_t pin, bool lvl)
     xSemaphoreTake(i2c_bus[EXP_PORT].mutex, portMAX_DELAY);
     ESP_ERROR_CHECK(mcp23x17_port_write(&exp_dev, exp_mask));
     xSemaphoreGive(i2c_bus[EXP_PORT].mutex);
-    //ESP_LOGI("EXP", "mask set to 0x%04X", exp_mask);
 }

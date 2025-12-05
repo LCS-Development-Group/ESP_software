@@ -5,6 +5,8 @@
 #include "act_class.h"
 #include "I2C.h"
 
+#define DEBUG_TASK_ANOUNCE false
+
 /*======================================================================================*/
 /* GENERAL                                                                              */
 /*======================================================================================*/
@@ -18,16 +20,18 @@
 #define COM_TASKID 6
 
 /*planned to use evbits - might not*/
-#define ENC_EVBIT (1<<ENC_TASKID)
-#define GUI_EVBIT (1<<GUI_TASKID)
-#define VIS_EVBIT (1<<VIS_TASKID)
-#define SEN_EVBIT (1<<SEN_TASKID)
-#define ACT_EVBIT (1<<ACT_TASKID)
-#define REG_EVBIT (1<<REG_TASKID)
-#define COM_EVBIT (1<<COM_TASKID)
+#define ENC_EVBIT               (1<<ENC_TASKID)
+#define GUI_EVBIT               (1<<GUI_TASKID)
+#define VIS_EVBIT               (1<<VIS_TASKID)
+#define SEN_EVBIT               (1<<SEN_TASKID)
+#define ACT_EVBIT               (1<<ACT_TASKID)
+#define REG_EVBIT               (1<<REG_TASKID)
+#define COM_EVBIT               (1<<COM_TASKID)
 
-#define TASK_START_SYNCBIT (1<<23)
-#define APP_MAIN_EVBIT (1<<22)
+#define TASK_START_SYNCBIT      (1<<23)
+#define APP_MAIN_EVBIT          (1<<22)
+#define MAIN_LOOP_DELAY_MS      1000//1s
+#define MAIN_LOOP_REDRAW_MS     100
 
 extern EventGroupHandle_t main_event_group;
 extern TaskHandle_t task_handle_list[TASK_NUM];
@@ -144,19 +148,16 @@ struct t_INA_var
 extern t_RHT_var RHT_int_var;
 #define SEN_RHT_INT_ADDR            0x44
 #define SEN_RHT_INT_PORT            I2C0_PORT
-#define SEN_NTCODE_UPDATE_RHT_INT   1
 
 /*SHT35 external*/
 extern t_RHT_var RHT_ext_var;
 #define SEN_RHT_EXT_ADDR            0x44
 #define SEN_RHT_EXT_PORT            I2C1_PORT
-#define SEN_NTCODE_UPDATE_RHT_EXT   2
 
 /*INA219*/
 extern t_INA_var memb_var;
 #define SEN_CURSEN_ADDR             0x40
 #define SEN_CURSEN_PORT             I2C1_PORT
-#define SEN_NTCODE_UPDATE_MEMB      0
 
 //sensor settings
 #define SEN_CURSEN_BUS_VOLT_RANGE   INA219_BUS_RANGE_16V
@@ -167,7 +168,18 @@ extern t_INA_var memb_var;
 #define SEN_CURSEN_MODE             INA219_MODE_TRIG_SHUNT_BUS //both shunt and bus measured once when triggered
 #define SEN_CURSEN_RSHUNT_mOHM      4.0f
 
-#define SEN_VAR_DEF_VAL     0.0
+#define SEN_MIN_VAL         0.0
+#define SEN_RH_MAX_VAL      100.0
+#define SEN_T_MAX_VAL       100.0
+#define SEN_CUR_MAX_VAL     10.0
+#define SEN_VOL_MAX_VAL     5.0
+#define SEN_POW_MAX_VAL     30.0
+
+/*ntcodes*/
+#define SEN_NTCODE_UPDATE_ALL       0
+#define SEN_NTCODE_UPDATE_MEMB      1
+#define SEN_NTCODE_UPDATE_RHT_INT   2
+#define SEN_NTCODE_UPDATE_RHT_EXT   3
 
 /*======================================================================================*/
 /* Comm                                                                                 */
@@ -248,8 +260,8 @@ void gui_init();
 /* NVS                                                                                  */
 /*======================================================================================*/
 //non volatile storage
-#define NVS_SPACE_NAME "NVS_SPACE"
-#define NVS_SAVE_PERIOD_S 10
+#define NVS_SPACE_NAME          "NVS_SPACE"
+#define NVS_SAVE_PERIOD_LOOPS   30
 
 extern nvs_handle_t nvs;
 void init_nvs();

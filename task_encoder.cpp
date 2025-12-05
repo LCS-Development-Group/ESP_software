@@ -27,7 +27,7 @@ void enc_sw_cb(button_t *btn, button_state_t state)
 void task_encoder_main(void *args)
 {
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
-    ESP_LOGI("Encoder", "task_encoder started");
+    if(DEBUG_TASK_ANOUNCE) ESP_LOGI("ENC", "task_encoder started");
 
     pcnt_unit_enable(count);
     pcnt_unit_clear_count(count);

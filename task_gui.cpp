@@ -7,7 +7,7 @@ SemaphoreHandle_t gui_mutex;
 void task_gui_main(void *args)
 {
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
-    ESP_LOGI("Gui", "task_gui started");
+    if(DEBUG_TASK_ANOUNCE) ESP_LOGI("GUI", "task_gui started");
 
 
     uint32_t ntcode=0x00;
@@ -61,7 +61,7 @@ void gui_init()
         gui=new gui_controller;
         if(gui==nullptr)
         {
-            ESP_LOGE("GUI", "vis_controller creation failed");
+            ESP_LOGE("GUI", "gui_controller creation failed");
             exit(-1);
         }
         gui->fill_fields();
@@ -80,16 +80,30 @@ void gui_init()
 void gui_controller::fill_fields()
 {
     /*Menu (Root)*/
-    page* page_info=root->add_new_page("General", nullptr);
+    page* page_sensors=root->add_new_page("Sensors", nullptr);
+    page* page_membrane=root->add_new_page("Membrane", new t_notify_package(&task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_MEMB));
     page* page_regulator=root->add_new_page("Regulation", nullptr);
     page* page_servos=root->add_new_page("Servos", nullptr);
-    page* page_debug=root->add_new_page("DEBUG", new t_notify_package(&task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_MEMB));
-    page* page_display=root->add_new_page("Display", nullptr);
-    page* page_about=root->add_new_page("About", nullptr);
+    //page* page_display=root->add_new_page("Display", nullptr);
+    page* page_about=root->add_new_page("About", new t_notify_package(&task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_MEMB));
 
-    /*General*/
-    //data from sensors, state of membrane, etc
-    page_info->add_field_to_page(new text_field("WIP"));
+    /*Sensors*/
+    //data from sensors, etc
+    page_sensors->add_field_to_page(new text_field(""));//a way to make empty line
+    page_sensors->add_field_to_page(new text_field("chamber:"));
+    page_sensors->add_field_to_page(new float_io_field("Temperat.", t_field_io_type::FIELD_OUT, &(RHT_int_var.T), &(RHT_int_var.mutex), " ^", 2, SEN_T_MAX_VAL, SEN_MIN_VAL));
+    page_sensors->add_field_to_page(new float_io_field("Humidity", t_field_io_type::FIELD_OUT, &(RHT_int_var.RH), &(RHT_int_var.mutex), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
+    page_sensors->add_field_to_page(new text_field(""));//a way to make empty line
+    page_sensors->add_field_to_page(new text_field("external:"));
+    page_sensors->add_field_to_page(new float_io_field("Temperat.", t_field_io_type::FIELD_OUT, &(RHT_ext_var.T), &(RHT_ext_var.mutex), " ^", 2, SEN_T_MAX_VAL, SEN_MIN_VAL));
+    page_sensors->add_field_to_page(new float_io_field("Humidity", t_field_io_type::FIELD_OUT, &(RHT_ext_var.RH), &(RHT_ext_var.mutex), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
+
+    /*Membrane*/
+    //mebrane info
+    page_membrane->add_field_to_page(new bool_io_field("State", t_field_io_type::FIELD_IN, &(act_membrane.enabled), &(act_membrane.mutex), "On ", "Off"));
+    page_membrane->add_field_to_page(new float_io_field("Current", t_field_io_type::FIELD_OUT, &(memb_var.current), &(memb_var.mutex), " A", 3, SEN_CUR_MAX_VAL, SEN_MIN_VAL));
+    page_membrane->add_field_to_page(new float_io_field("Power", t_field_io_type::FIELD_OUT, &(memb_var.power), &(memb_var.mutex), " W", 3, SEN_POW_MAX_VAL, SEN_MIN_VAL));
+    page_membrane->add_field_to_page(new float_io_field("VCC", t_field_io_type::FIELD_OUT, &(memb_var.voltage), &(memb_var.mutex), " V", 3, SEN_VOL_MAX_VAL, SEN_MIN_VAL));
 
     /*Regulation*/
     //detailed settings and info about regulation
@@ -111,15 +125,14 @@ void gui_controller::fill_fields()
 
     /*Display*/
     //brightness, timeout(?)
-    page_display->add_field_to_page(new text_field("WIP"));
+    //page_display->add_field_to_page(new text_field("WIP"));
     
 
     /*About*/
     page_about->add_field_to_page(new text_field("Program by:"));
     page_about->add_field_to_page(new text_field("Karol Pach"));
     page_about->add_field_to_page(new text_field("LCS 2025"));
-
-    page_debug->add_field_to_page(new bool_io_field("manual_en", t_field_io_type::FIELD_IN, &(act_membrane.enabled), &(act_membrane.mutex), "On ", "Off"));
+    page_about->add_field_to_page(new bool_io_field("DEBUG_MEMB", t_field_io_type::FIELD_IN, &(act_membrane.enabled), &(act_membrane.mutex), "On ", "Off"));
 }
 
 //==================================================================================================================
