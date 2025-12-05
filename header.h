@@ -97,7 +97,7 @@ extern t_servo servos[ACT_SERV_NUMOF];
 #define ACT_SERV_DIS_LVL        !(ACT_SERV_EN_LVL)
 #define ACT_SERV_FREQ_HZ        50
 #define ACT_SERV_MAX_ANGLE_DEG  180
-#define ACT_SERV_MIN_WIDTH_US   1500
+#define ACT_SERV_MIN_WIDTH_US   500
 #define ACT_SERV_MAX_WIDTH_US   2500
 #define ACT_SERV_POS0_DEF       0
 #define ACT_SERV_POS1_DEF       ACT_SERV_MAX_ANGLE_DEG
@@ -114,7 +114,8 @@ extern t_servo servos[ACT_SERV_NUMOF];
 #define ACT_NTCODE_UPDATE_SERV1 1
 #define ACT_NTCODE_UPDATE_SERV2 2
 #define ACT_NTCODE_UPDATE_SERV3 3
-#define ACT_NTCODE_UPDATE_MEMB 4
+#define ACT_NTCODE_UPDATE_MEMB  4
+
 
 void act_init();
 

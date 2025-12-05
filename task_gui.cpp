@@ -316,26 +316,21 @@ uint8_t gui_controller::move_cursor_up()
                 int8_t power=float_io_field_ptr->get_point_pos()-sec_idx;
                 if(sec_idx<float_io_field_ptr->get_point_pos()) power--;
 
-                if(float_io_field_ptr->increment(power)==GUI_FLOAT_XXCREMENT_CHANGE) return GUI_RETCODE_REDRAW_VALUE;
+                if(float_io_field_ptr->decrement(power)==GUI_FLOAT_XXCREMENT_CHANGE) return GUI_RETCODE_REDRAW_VALUE;
                 else return GUI_RETCODE_DEFAULT;
             }
             else
-            {//move secondary cursor right
-                if(sec_idx<float_io_field_ptr->get_numof_digits())//temp
+            {//move secondary cursor left
+                if(sec_idx>0) 
                 {
-                    
-                    if(sec_idx==float_io_field_ptr->get_point_pos()-1)//decimal point
+                    if(sec_idx==float_io_field_ptr->get_point_pos()+1)//decimal point
                     {
-                        if(float_io_field_ptr->get_prec()!=0)//there is something after it
-                        {
-                            prev_sec_idx=sec_idx;
-                            sec_idx+=2;
-                            return GUI_RETCODE_REDRAW_BAR;
-                        }
-                        else return GUI_RETCODE_DEFAULT;
+                        prev_sec_idx=sec_idx;
+                        sec_idx-=2;
+                        return GUI_RETCODE_REDRAW_BAR;
                     }
                     prev_sec_idx=sec_idx;
-                    sec_idx++;
+                    sec_idx--;
                     return GUI_RETCODE_REDRAW_BAR;
                 }
             }
@@ -372,22 +367,26 @@ uint8_t gui_controller::move_cursor_down()
                 int8_t power=float_io_field_ptr->get_point_pos()-sec_idx;
                 if(sec_idx<float_io_field_ptr->get_point_pos()) power--;
 
-                if(float_io_field_ptr->decrement(power)==GUI_FLOAT_XXCREMENT_CHANGE) return GUI_RETCODE_REDRAW_VALUE;
+                if(float_io_field_ptr->increment(power)==GUI_FLOAT_XXCREMENT_CHANGE) return GUI_RETCODE_REDRAW_VALUE;
                 else return GUI_RETCODE_DEFAULT;
             }
             else
-            {//move secondary cursor left
-                if(sec_idx>0) 
+            {//move secondary cursor right
+                if(sec_idx<float_io_field_ptr->get_numof_digits())//temp
                 {
                     
-                    if(sec_idx==float_io_field_ptr->get_point_pos()+1)//decimal point
+                    if(sec_idx==float_io_field_ptr->get_point_pos()-1)//decimal point
                     {
-                        prev_sec_idx=sec_idx;
-                        sec_idx-=2;
-                        return GUI_RETCODE_REDRAW_BAR;
+                        if(float_io_field_ptr->get_prec()!=0)//there is something after it
+                        {
+                            prev_sec_idx=sec_idx;
+                            sec_idx+=2;
+                            return GUI_RETCODE_REDRAW_BAR;
+                        }
+                        else return GUI_RETCODE_DEFAULT;
                     }
                     prev_sec_idx=sec_idx;
-                    sec_idx--;
+                    sec_idx++;
                     return GUI_RETCODE_REDRAW_BAR;
                 }
             }
