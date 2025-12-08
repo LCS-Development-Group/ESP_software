@@ -9,6 +9,9 @@ const char* NVS_SERVOS[ACT_SERV_NUMOF][2]={
     {"S3P0", "S3P1"}
 };
 
+const char* NVS_REG_H="HIST";
+const char* NVS_REG_SP="SETP";
+
 nvs_handle_t nvs;
 typedef union
 {
@@ -72,7 +75,7 @@ void nvs_save_values()
                 if(data.float_rep!=servos[i].angle[j])
                 {
                     data.float_rep=servos[i].angle[j];
-                    err=nvs_set_u32(nvs, NVS_SERVOS[i][j], data.uint_rep);
+                    nvs_set_u32(nvs, NVS_SERVOS[i][j], data.uint_rep);
                     commit=true;
                 }
             }
@@ -84,6 +87,35 @@ void nvs_save_values()
         }
         xSemaphoreGive(servos[i].mutex);
     }
+
+    //regulator
+    xSemaphoreTake(regulator.mutex, portMAX_DELAY);
+    
+    //histeresis
+    err=nvs_get_u32(nvs, NVS_REG_H, &(data.uint_rep));
+    if(err==ESP_OK || err==ESP_ERR_NVS_NOT_FOUND)
+    {
+        if(data.float_rep!=regulator.H)
+        {
+            data.float_rep=regulator.H;
+            nvs_set_u32(nvs, NVS_REG_H, data.uint_rep);
+            commit=true;
+        }
+    }
+
+    //setpoint
+    err=nvs_get_u32(nvs, NVS_REG_SP, &(data.uint_rep));
+    if(err==ESP_OK || err==ESP_ERR_NVS_NOT_FOUND)
+    {
+        if(data.float_rep!=regulator.SP)
+        {
+            data.float_rep=regulator.SP;
+            nvs_set_u32(nvs, NVS_REG_SP, data.uint_rep);
+            commit=true;
+        }
+    }
+
+    xSemaphoreGive(regulator.mutex);
 
     if(commit)ESP_ERROR_CHECK(nvs_commit(nvs));
 }

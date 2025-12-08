@@ -32,6 +32,7 @@ extern "C" void app_main(void)
     enc_pnct_init();
     act_init();
     sen_init();
+    reg_init();
 
     gui_init();
     vis_init();
@@ -62,16 +63,23 @@ extern "C" void app_main(void)
     while(true)
     {
         //schedule sensore reading aquisition
+        vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
         xTaskNotifyIndexed(task_handle_list[SEN_TASKID], 0, SEN_NTCODE_UPDATE_ALL, eSetValueWithoutOverwrite);
-        vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_REDRAW_MS));
+
+        //update the regulator
+        vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
+        xTaskNotifyIndexed(task_handle_list[REG_TASKID], 0, REG_NTCODE_UPDATE, eSetValueWithoutOverwrite);
 
         //check if the page with readings is displayed -> redraw it
-        xSemaphoreTake(gui_mutex, portMAX_DELAY);
-        retval_sen=gui->check_if_displayed(&RHT_int_var.T);
-        retval_memb=gui->check_if_displayed(&memb_var.current);
-        xSemaphoreGive(gui_mutex);
-        if(retval_sen || retval_memb) xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, VIS_NTCODE_REDRAW_ALL_VALUES, eSetValueWithoutOverwrite);
-
+        vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
+        if(xSemaphoreTake(gui_mutex, pdMS_TO_TICKS(MAIN_LOOP_REDRAW_WAIT_MS))==pdTRUE)
+        {
+            retval_sen=gui->check_if_displayed(&RHT_int_var.T);
+            retval_memb=gui->check_if_displayed(&memb_var.current);
+            xSemaphoreGive(gui_mutex);
+            if(retval_sen || retval_memb) xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, VIS_NTCODE_REDRAW_ALL_VALUES, eSetValueWithoutOverwrite);
+        }
+        
         //saving some values to NVS - not every iteration
         nvs_counter++;
         if(nvs_counter==NVS_SAVE_PERIOD_LOOPS)

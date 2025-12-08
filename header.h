@@ -28,10 +28,11 @@
 #define REG_EVBIT               (1<<REG_TASKID)
 #define COM_EVBIT               (1<<COM_TASKID)
 
-#define TASK_START_SYNCBIT      (1<<23)
-#define APP_MAIN_EVBIT          (1<<22)
-#define MAIN_LOOP_DELAY_MS      1000//1s
-#define MAIN_LOOP_REDRAW_MS     100
+#define TASK_START_SYNCBIT          (1<<23)
+#define APP_MAIN_EVBIT              (1<<22)
+#define MAIN_LOOP_DELAY_MS          1000//1s
+#define MAIN_LOOP_MINIDELAY_MS      50
+#define MAIN_LOOP_REDRAW_WAIT_MS    100
 
 extern EventGroupHandle_t main_event_group;
 extern TaskHandle_t task_handle_list[TASK_NUM];
@@ -123,6 +124,22 @@ void act_init();
 /* Regulator                                                                            */
 /*======================================================================================*/
 void task_regulator_main(void *args);
+void reg_init();
+struct t_reg_var
+{
+    bool enabled;
+    float H;
+    float SP;
+    float PV;
+    float E;
+    bool CV;
+    SemaphoreHandle_t mutex;
+};
+extern t_reg_var regulator;
+#define REG_DEF_VAL     0.0
+#define REG_DEF_BOOL    false
+
+#define REG_NTCODE_UPDATE   0
 
 /*======================================================================================*/
 /* Sensor                                                                               */
@@ -271,6 +288,8 @@ void nvs_save_values();
 
 /*keys defined in nvs.cpp*/
 extern const char* NVS_SERVOS[ACT_SERV_NUMOF][2];
+extern const char* NVS_REG_H;
+extern const char* NVS_REG_SP;
 
 /*======================================================================================*/
 /* MISC                                                                                 */
@@ -296,17 +315,3 @@ extern SemaphoreHandle_t DEBUG_FLOAT_MUT;
 
 extern float DEBUG_FLOAT_2;
 extern SemaphoreHandle_t DEBUG_FLOAT_2_MUT;
-
-
-
-
-// #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
-// #define BYTE_TO_BINARY(byte) 
-//     ((byte) & 0x80 ? '1' : '0'), 
-//     ((byte) & 0x40 ? '1' : '0'), 
-//     ((byte) & 0x20 ? '1' : '0'), 
-//     ((byte) & 0x10 ? '1' : '0'), 
-//     ((byte) & 0x08 ? '1' : '0'), 
-//     ((byte) & 0x04 ? '1' : '0'), 
-//     ((byte) & 0x02 ? '1' : '0'), 
-//     ((byte) & 0x01 ? '1' : '0')

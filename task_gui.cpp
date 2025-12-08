@@ -81,33 +81,42 @@ void gui_controller::fill_fields()
 {
     /*Menu (Root)*/
     page* page_sensors=root->add_new_page("Sensors", nullptr);
-    page* page_membrane=root->add_new_page("Membrane", new t_notify_package(&task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_MEMB));
     page* page_regulator=root->add_new_page("Regulation", nullptr);
-    page* page_servos=root->add_new_page("Servos", nullptr);
+    page* page_membrane=root->add_new_page("Membrane", new t_notify_package(&task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_MEMB));
+    page* page_servos=root->add_new_page("Servos", nullptr);//no ntpack?
     //page* page_display=root->add_new_page("Display", nullptr);
-    page* page_about=root->add_new_page("About", new t_notify_package(&task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_MEMB));
+    page* page_about=root->add_new_page("About", nullptr);
 
     /*Sensors*/
     //data from sensors, etc
     page_sensors->add_field_to_page(new text_field(""));//a way to make empty line
     page_sensors->add_field_to_page(new text_field("chamber:"));
-    page_sensors->add_field_to_page(new float_io_field("Temperat.", t_field_io_type::FIELD_OUT, &(RHT_int_var.T), &(RHT_int_var.mutex), " ^", 2, SEN_T_MAX_VAL, SEN_MIN_VAL));
+    page_sensors->add_field_to_page(new float_io_field("Temp.", t_field_io_type::FIELD_OUT, &(RHT_int_var.T), &(RHT_int_var.mutex), " ^", 2, SEN_T_MAX_VAL, SEN_MIN_VAL));
     page_sensors->add_field_to_page(new float_io_field("Humidity", t_field_io_type::FIELD_OUT, &(RHT_int_var.RH), &(RHT_int_var.mutex), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
     page_sensors->add_field_to_page(new text_field(""));//a way to make empty line
     page_sensors->add_field_to_page(new text_field("external:"));
-    page_sensors->add_field_to_page(new float_io_field("Temperat.", t_field_io_type::FIELD_OUT, &(RHT_ext_var.T), &(RHT_ext_var.mutex), " ^", 2, SEN_T_MAX_VAL, SEN_MIN_VAL));
+    page_sensors->add_field_to_page(new float_io_field("Temp.", t_field_io_type::FIELD_OUT, &(RHT_ext_var.T), &(RHT_ext_var.mutex), " ^", 2, SEN_T_MAX_VAL, SEN_MIN_VAL));
     page_sensors->add_field_to_page(new float_io_field("Humidity", t_field_io_type::FIELD_OUT, &(RHT_ext_var.RH), &(RHT_ext_var.mutex), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
 
     /*Membrane*/
     //mebrane info
-    page_membrane->add_field_to_page(new bool_io_field("State", t_field_io_type::FIELD_IN, &(act_membrane.enabled), &(act_membrane.mutex), "On ", "Off"));
+    page_membrane->add_field_to_page(new bool_io_field("State", t_field_io_type::FIELD_OUT, &(act_membrane.enabled), &(act_membrane.mutex), "On ", "Off"));
     page_membrane->add_field_to_page(new float_io_field("Current", t_field_io_type::FIELD_OUT, &(memb_var.current), &(memb_var.mutex), " A", 3, SEN_CUR_MAX_VAL, SEN_MIN_VAL));
     page_membrane->add_field_to_page(new float_io_field("Power", t_field_io_type::FIELD_OUT, &(memb_var.power), &(memb_var.mutex), " W", 3, SEN_POW_MAX_VAL, SEN_MIN_VAL));
-    page_membrane->add_field_to_page(new float_io_field("VCC", t_field_io_type::FIELD_OUT, &(memb_var.voltage), &(memb_var.mutex), " V", 3, SEN_VOL_MAX_VAL, SEN_MIN_VAL));
+    page_membrane->add_field_to_page(new float_io_field("Voltage", t_field_io_type::FIELD_OUT, &(memb_var.voltage), &(memb_var.mutex), " V", 3, SEN_VOL_MAX_VAL, SEN_MIN_VAL));
+    page_membrane->add_field_to_page(new bool_io_field("Manual_en", t_field_io_type::FIELD_IN, &(act_membrane.enabled), &(act_membrane.mutex), "On ", "Off"));
 
     /*Regulation*/
     //detailed settings and info about regulation
-    page_regulator->add_field_to_page(new text_field("WIP"));
+    page_regulator->add_field_to_page(new bool_io_field("Enabled", t_field_io_type::FIELD_IN, &(regulator.enabled), &(regulator.mutex), "On ", "Off"));
+    page_regulator->add_field_to_page(new float_io_field("SP", t_field_io_type::FIELD_IN, &(regulator.SP), &(regulator.mutex), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
+    page_regulator->add_field_to_page(new float_io_field("H", t_field_io_type::FIELD_IN, &(regulator.H), &(regulator.mutex), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
+    page_regulator->add_field_to_page(new text_field("DEBUG:"));//a way to make empty line
+    page_regulator->add_field_to_page(new float_io_field("PV", t_field_io_type::FIELD_OUT, &(regulator.PV), &(regulator.mutex), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
+    page_regulator->add_field_to_page(new float_io_field("E", t_field_io_type::FIELD_OUT, &(regulator.E), &(regulator.mutex), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
+    page_regulator->add_field_to_page(new bool_io_field("CV", t_field_io_type::FIELD_OUT, &(regulator.CV), &(regulator.mutex), "On ", "Off"));
+    //page_regulator->add_field_to_page(new float_io_field("Voltage", t_field_io_type::FIELD_OUT, &(memb_var.voltage), &(memb_var.mutex), " V", 3, SEN_VOL_MAX_VAL, SEN_MIN_VAL));
+
 
     /*servos*/
     //servomechanism control
@@ -132,7 +141,6 @@ void gui_controller::fill_fields()
     page_about->add_field_to_page(new text_field("Program by:"));
     page_about->add_field_to_page(new text_field("Karol Pach"));
     page_about->add_field_to_page(new text_field("LCS 2025"));
-    page_about->add_field_to_page(new bool_io_field("DEBUG_MEMB", t_field_io_type::FIELD_IN, &(act_membrane.enabled), &(act_membrane.mutex), "On ", "Off"));
 }
 
 //==================================================================================================================
