@@ -294,6 +294,7 @@ void vis_init()
     ESP_ERROR_CHECK(esp_lcd_new_panel_ili9341(lcd_io_handle, &lcd_dev_config, &lcd_handle));
 
     /*Final init*/
+    ESP_ERROR_CHECK(esp_lcd_panel_mirror(lcd_handle, true, true));
     ESP_ERROR_CHECK(esp_lcd_panel_reset(lcd_handle));
     ESP_ERROR_CHECK(esp_lcd_panel_init(lcd_handle));
 

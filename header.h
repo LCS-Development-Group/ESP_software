@@ -203,6 +203,40 @@ extern t_INA_var memb_var;
 /* Comm                                                                                 */
 /*======================================================================================*/
 void task_comm_main(void *args);
+void com_init();
+
+#define COM_UART_BAUDRATE       115200
+#define COM_UART_PORT           UART_NUM_0
+#define COM_BUFF_SIZE           256
+#define COM_UART_START_MSG      "\n$START"
+#define COM_UART_START_LEN      7
+extern uint8_t *uart_buffer;
+extern uint16_t uart_buffer_idx;
+#define COM_FRC_PART_LEN        3
+#define COM_INT_PART_LEN        3
+#define COM_NUMOF_VAR           10
+
+#define COM_T_INT_ID            't'
+#define COM_RH_INT_ID           'h'
+#define COM_T_EXT_ID            'T'
+#define COM_RH_EXT_ID           'H'
+#define COM_REG_SP              'S'
+#define COM_REG_H               'g'
+#define COM_MEMB_STAT_ID        'm'
+#define COM_MEMB_CUR_ID         'c'
+#define COM_MEMB_VOL_ID         'v'
+#define COM_MEMB_POW_ID         'p'
+
+struct __attribute__((packed)) t_DataPacket
+{
+    uint8_t id;
+    uint8_t int_part[COM_INT_PART_LEN];
+    uint8_t frc_part[COM_FRC_PART_LEN];
+};
+
+#define COM_NTCODE_SENDALL  0
+
+
 
 /*======================================================================================*/
 /* Visual                                                                               */

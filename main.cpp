@@ -33,6 +33,7 @@ extern "C" void app_main(void)
     act_init();
     sen_init();
     reg_init();
+    com_init();
 
     gui_init();
     vis_init();
@@ -50,7 +51,7 @@ extern "C" void app_main(void)
     if(xTaskCreate(task_sensor_main, "task_sensor", 2048, NULL, 1, &task_handle_list[SEN_TASKID])!=pdPASS) task_create_fail(SEN_TASKID);
     if(xTaskCreate(task_actuator_main, "task_actuator", 2048, NULL, 1, &task_handle_list[ACT_TASKID])!=pdPASS) task_create_fail(ACT_TASKID);
     if(xTaskCreate(task_regulator_main, "task_regulator", 2048, NULL, 1, &task_handle_list[REG_TASKID])!=pdPASS) task_create_fail(REG_TASKID);
-    if(xTaskCreate(task_comm_main, "task_comm", 2048, NULL, 1, &task_handle_list[COM_TASKID])!=pdPASS) task_create_fail(COM_TASKID);
+    if(xTaskCreate(task_comm_main, "task_comm", 4096, NULL, 1, &task_handle_list[COM_TASKID])!=pdPASS) task_create_fail(COM_TASKID);
     
     vTaskDelay(pdMS_TO_TICKS(100));
     xEventGroupSetBits(main_event_group, TASK_START_SYNCBIT);//start the tasks
@@ -69,6 +70,10 @@ extern "C" void app_main(void)
         //update the regulator
         vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
         xTaskNotifyIndexed(task_handle_list[REG_TASKID], 0, REG_NTCODE_UPDATE, eSetValueWithoutOverwrite);
+
+        //send data to the pc
+        vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
+        xTaskNotifyIndexed(task_handle_list[COM_TASKID], 0, COM_NTCODE_SENDALL, eSetValueWithoutOverwrite);
 
         //check if the page with readings is displayed -> redraw it
         vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
