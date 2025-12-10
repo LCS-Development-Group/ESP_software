@@ -11,6 +11,7 @@ const char* NVS_SERVOS[ACT_SERV_NUMOF][2]={
 
 const char* NVS_REG_H="HIST";
 const char* NVS_REG_SP="SETP";
+const char* NVS_COM_PERIOD="COMP";
 
 nvs_handle_t nvs;
 typedef union
@@ -62,7 +63,7 @@ void nvs_save_values()
     esp_err_t err;
     bool commit=false;
 
-    //serva
+    /*serva*/
     uint8_t j;
     for(uint8_t i=0; i<ACT_SERV_NUMOF; i++)
     {
@@ -88,7 +89,7 @@ void nvs_save_values()
         xSemaphoreGive(servos[i].mutex);
     }
 
-    //regulator
+    /*regulator*/
     xSemaphoreTake(regulator.mutex, portMAX_DELAY);
     
     //histeresis
@@ -114,8 +115,21 @@ void nvs_save_values()
             commit=true;
         }
     }
-
     xSemaphoreGive(regulator.mutex);
+
+    /*communicator*/
+    xSemaphoreTake(com_send_mutex, portMAX_DELAY);
+    err=nvs_get_u32(nvs, NVS_COM_PERIOD, &(data.uint_rep));
+    if(err==ESP_OK || err==ESP_ERR_NVS_NOT_FOUND)
+    {
+        if(data.float_rep!=com_send_period)
+        {
+            data.float_rep=com_send_period;
+            nvs_set_u32(nvs, NVS_COM_PERIOD, data.uint_rep);
+            commit=true;
+        }
+    }
+    xSemaphoreGive(com_send_mutex);
 
     if(commit)ESP_ERROR_CHECK(nvs_commit(nvs));
 }

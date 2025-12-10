@@ -60,10 +60,11 @@ extern "C" void app_main(void)
 
     TickType_t last_wakeup=xTaskGetTickCount();
     uint8_t nvs_counter=0;
+    uint32_t com_counter=0, _com_counter;
     bool retval_sen, retval_memb;
     while(true)
     {
-        //schedule sensore reading aquisition
+        //schedule sensor reading aquisition
         vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
         xTaskNotifyIndexed(task_handle_list[SEN_TASKID], 0, SEN_NTCODE_UPDATE_ALL, eSetValueWithoutOverwrite);
 
@@ -71,9 +72,19 @@ extern "C" void app_main(void)
         vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
         xTaskNotifyIndexed(task_handle_list[REG_TASKID], 0, REG_NTCODE_UPDATE, eSetValueWithoutOverwrite);
 
-        //send data to the pc
+        //send data to the pc - not every iteration
         vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
-        xTaskNotifyIndexed(task_handle_list[COM_TASKID], 0, COM_NTCODE_SENDALL, eSetValueWithoutOverwrite);
+        if(xSemaphoreTake(com_send_mutex, pdMS_TO_TICKS(MAIN_LOOP_REDRAW_WAIT_MS))==pdTRUE)
+        {
+            com_counter++;
+            _com_counter=(uint32_t)com_send_period;
+            if(_com_counter<=com_counter)
+            {
+                com_counter=0;
+                xTaskNotifyIndexed(task_handle_list[COM_TASKID], 0, COM_NTCODE_SENDALL, eSetValueWithoutOverwrite);
+            }
+            xSemaphoreGive(com_send_mutex);
+        }
 
         //check if the page with readings is displayed -> redraw it
         vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
@@ -84,6 +95,7 @@ extern "C" void app_main(void)
             xSemaphoreGive(gui_mutex);
             if(retval_sen || retval_memb) xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, VIS_NTCODE_REDRAW_ALL_VALUES, eSetValueWithoutOverwrite);
         }
+
         
         //saving some values to NVS - not every iteration
         nvs_counter++;

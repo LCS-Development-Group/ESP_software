@@ -227,6 +227,11 @@ extern uint16_t uart_buffer_idx;
 #define COM_MEMB_VOL_ID         'v'
 #define COM_MEMB_POW_ID         'p'
 
+#define COM_SEND_PERIOD_LOOPS_MAX   999
+#define COM_SEND_PERIOD_LOOPS_MIN   1
+extern float com_send_period;//float because gui needs to be able to edit
+extern SemaphoreHandle_t com_send_mutex;
+
 struct __attribute__((packed)) t_DataPacket
 {
     uint8_t id;
@@ -324,6 +329,7 @@ void nvs_save_values();
 extern const char* NVS_SERVOS[ACT_SERV_NUMOF][2];
 extern const char* NVS_REG_H;
 extern const char* NVS_REG_SP;
+extern const char* NVS_COM_PERIOD;
 
 /*======================================================================================*/
 /* MISC                                                                                 */
