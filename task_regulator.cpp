@@ -6,6 +6,7 @@ bool send_redraw=false;
 bool prev_cv=false;
 void zero_regulator();
 bool update_reg();
+void two_state_regulate();
 
 void set_membrane();
 
@@ -90,10 +91,7 @@ bool update_reg()
     regulator.E=regulator.SP-regulator.PV;
 
     //regulation logic
-    if(regulator.E>(regulator.H/2)) regulator.CV=false;
-    else if(regulator.E<(-1*regulator.H/2)) regulator.CV=true;
-
-    //ESP_LOGI("REG","E=%f, E/2=%f, E/2=%f, CV=%d, %d", regulator.E, regulator.H/2, -1*regulator.H/2, regulator.CV, regulator.E<(-1*regulator.H/2));
+    two_state_regulate();
 
     if(regulator.CV!=prev_cv)
     {//just changed
@@ -102,6 +100,13 @@ bool update_reg()
 
     xSemaphoreGive(regulator.mutex);
     return true;
+}
+void two_state_regulate()
+{
+    //expects mutex to be taken
+    float H_2=regulator.H/2;
+    if(regulator.E<(-1*H_2)) regulator.CV=true;
+    if(regulator.E>(H_2)) regulator.CV=false;
 }
 
 void zero_regulator()
