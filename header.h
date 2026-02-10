@@ -6,6 +6,7 @@
 #include "I2C.h"
 
 #define DEBUG_TASK_ANOUNCE false
+#define DEBUG_INVERT_LCD true
 
 /*======================================================================================*/
 /* GENERAL                                                                              */

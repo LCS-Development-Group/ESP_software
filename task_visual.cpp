@@ -141,7 +141,6 @@ void vis_controller::start()
 {
     esp_lcd_panel_disp_on_off(*lcd_handle, true);
     esp_lcd_panel_swap_xy(*lcd_handle, true);
-    //esp_lcd_panel_mirror(*lcd_handle, true, true);
 
     gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL);
 
@@ -294,7 +293,7 @@ void vis_init()
     ESP_ERROR_CHECK(esp_lcd_new_panel_ili9341(lcd_io_handle, &lcd_dev_config, &lcd_handle));
 
     /*Final init*/
-    ESP_ERROR_CHECK(esp_lcd_panel_mirror(lcd_handle, true, true));
+    ESP_ERROR_CHECK(esp_lcd_panel_mirror(lcd_handle, !DEBUG_INVERT_LCD, !DEBUG_INVERT_LCD));
     ESP_ERROR_CHECK(esp_lcd_panel_reset(lcd_handle));
     ESP_ERROR_CHECK(esp_lcd_panel_init(lcd_handle));
 

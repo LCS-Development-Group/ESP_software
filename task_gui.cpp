@@ -144,6 +144,7 @@ void gui_controller::fill_fields()
     /*About*/
     page_about->add_field_to_page(new text_field("Program by:"));
     page_about->add_field_to_page(new text_field("Karol Pach"));
+    page_about->add_field_to_page(new text_field("Major version: 1.1"));
     page_about->add_field_to_page(new text_field("LCS 2025"));
 }
 
