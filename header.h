@@ -3,6 +3,7 @@
 #include "gui_class.h"
 #include "vis_class.h"
 #include "act_class.h"
+#include "sen_class.h"
 #include "I2C.h"
 
 #define DEBUG_TASK_ANOUNCE false
@@ -177,6 +178,10 @@ extern t_RHT_var RHT_ext_var;
 extern t_INA_var memb_var;
 #define SEN_CURSEN_ADDR             0x40
 #define SEN_CURSEN_PORT             I2C1_PORT
+
+extern t_RHT_sensor* RHT_int;
+extern t_RHT_sensor* RHT_ext;
+extern t_INA_sensor* CURSEN;
 
 //sensor settings
 #define SEN_CURSEN_BUS_VOLT_RANGE   INA219_BUS_RANGE_16V

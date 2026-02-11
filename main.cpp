@@ -28,15 +28,18 @@ extern "C" void app_main(void)
     exp_init();
     init_nvs();
 
-    enc_gpio_init();
-    enc_pnct_init();
-    act_init();
+    //enc_gpio_init();
+    //enc_pnct_init();
+    //act_init();
     sen_init();
-    reg_init();
-    com_init();
+    //reg_init();
+    //com_init();
 
-    gui_init();
-    vis_init();
+    //gui_init();
+    //vis_init();
+
+    ESP_LOGW("main", "init finished");
+    vTaskDelay(portMAX_DELAY);
 
     main_event_group=xEventGroupCreate();
     if(main_event_group==NULL)
