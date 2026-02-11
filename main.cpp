@@ -28,15 +28,15 @@ extern "C" void app_main(void)
     exp_init();
     init_nvs();
 
-    //enc_gpio_init();
-    //enc_pnct_init();
-    //act_init();
+    enc_gpio_init();
+    enc_pnct_init();
+    act_init();
     sen_init();
-    //reg_init();
-    //com_init();
+    reg_init();
+    com_init();
 
-    //gui_init();
-    //vis_init();
+    gui_init();
+    vis_init();
 
     ESP_LOGW("main", "init finished");
     vTaskDelay(portMAX_DELAY);
@@ -93,8 +93,8 @@ extern "C" void app_main(void)
         vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
         if(xSemaphoreTake(gui_mutex, pdMS_TO_TICKS(MAIN_LOOP_REDRAW_WAIT_MS))==pdTRUE)
         {
-            retval_sen=gui->check_if_displayed(&RHT_int_var.T);
-            retval_memb=gui->check_if_displayed(&memb_var.current);
+            retval_sen=gui->check_if_displayed(RHT_int->get_T_ptr());
+            retval_memb=gui->check_if_displayed(CURSEN->get_current_ptr());
             xSemaphoreGive(gui_mutex);
             if(retval_sen || retval_memb) xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, VIS_NTCODE_REDRAW_ALL_VALUES, eSetValueWithoutOverwrite);
         }

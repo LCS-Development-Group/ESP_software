@@ -90,16 +90,16 @@ void create_message()
     clear_buff();
 
     //chamber RHT
-    xSemaphoreTake(RHT_int_var.mutex, portMAX_DELAY);
-    write_packet_to_buff(create_packet(COM_T_INT_ID, float_to_string(RHT_int_var.T)));
-    write_packet_to_buff(create_packet(COM_RH_INT_ID, float_to_string(RHT_int_var.RH)));
-    xSemaphoreGive(RHT_int_var.mutex);
+    xSemaphoreTake(*RHT_int->get_mutex_ptr(), portMAX_DELAY);
+    write_packet_to_buff(create_packet(COM_T_INT_ID, float_to_string(RHT_int->get_T())));
+    write_packet_to_buff(create_packet(COM_RH_INT_ID, float_to_string(RHT_int->get_RH())));
+    xSemaphoreGive(*RHT_int->get_mutex_ptr());
 
     //external RHT
-    xSemaphoreTake(RHT_ext_var.mutex, portMAX_DELAY);
-    write_packet_to_buff(create_packet(COM_T_EXT_ID, float_to_string(RHT_ext_var.T)));
-    write_packet_to_buff(create_packet(COM_RH_EXT_ID, float_to_string(RHT_ext_var.RH)));
-    xSemaphoreGive(RHT_ext_var.mutex);
+    xSemaphoreTake(*RHT_ext->get_mutex_ptr(), portMAX_DELAY);
+    write_packet_to_buff(create_packet(COM_T_EXT_ID, float_to_string(RHT_ext->get_T())));
+    write_packet_to_buff(create_packet(COM_RH_EXT_ID, float_to_string(RHT_ext->get_RH())));
+    xSemaphoreGive(*RHT_ext->get_mutex_ptr());
 
     //regulator
     xSemaphoreTake(regulator.mutex, portMAX_DELAY);
@@ -109,11 +109,11 @@ void create_message()
     xSemaphoreGive(regulator.mutex);
 
     //membrane
-    xSemaphoreTake(memb_var.mutex, portMAX_DELAY);
-    write_packet_to_buff(create_packet(COM_MEMB_CUR_ID, float_to_string(memb_var.current)));
-    write_packet_to_buff(create_packet(COM_MEMB_VOL_ID, float_to_string(memb_var.voltage)));
-    write_packet_to_buff(create_packet(COM_MEMB_POW_ID, float_to_string(memb_var.power)));
-    xSemaphoreGive(memb_var.mutex);
+    xSemaphoreTake(*CURSEN->get_mutex_ptr(), portMAX_DELAY);
+    write_packet_to_buff(create_packet(COM_MEMB_CUR_ID, float_to_string(CURSEN->get_current())));
+    write_packet_to_buff(create_packet(COM_MEMB_VOL_ID, float_to_string(CURSEN->get_voltage())));
+    write_packet_to_buff(create_packet(COM_MEMB_POW_ID, float_to_string(CURSEN->get_power())));
+    xSemaphoreGive(*CURSEN->get_mutex_ptr());
 }
 
 void clear_buff()

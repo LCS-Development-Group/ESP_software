@@ -83,9 +83,9 @@ bool update_reg()
     //else: still enabled -> rest of function
 
     //update process value (PV)
-    xSemaphoreTake(RHT_int_var.mutex, portMAX_DELAY);
-    regulator.PV=RHT_int_var.RH;
-    xSemaphoreGive(RHT_int_var.mutex);
+    xSemaphoreTake(*RHT_int->get_mutex_ptr(), portMAX_DELAY);
+    regulator.PV=RHT_int->get_RH();
+    xSemaphoreGive(*RHT_int->get_mutex_ptr());
 
     //update erorr value (E)
     regulator.E=regulator.SP-regulator.PV;

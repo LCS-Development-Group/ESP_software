@@ -29,7 +29,7 @@ public:
     uint8_t get_addr() const {return addr;}
     bool get_present() const {return present;}
     bool get_proceed_nonpresent() const {return proceed_nonpresent;}
-    SemaphoreHandle_t *get_var_mutex() {return &mutex;}
+    SemaphoreHandle_t *get_mutex_ptr() {return &mutex;}
 };
 
 class t_RHT_sensor: public t_sensor
@@ -67,10 +67,11 @@ class t_INA_sensor: public t_sensor
     float voltage;
     float power;
 
-    ina219_t dev;
+    ina219_t *dev;
 
 public:
     t_INA_sensor(uint8_t _port, uint8_t _addr, bool _proceed_nonpresent, bool _auto_reconnect, float _default_current, float _default_voltage, float _default_power);
+    ~t_INA_sensor(){if(dev!=nullptr) delete dev;}
 
     float get_current() const {return current;}
     float get_voltage() const {return voltage;}

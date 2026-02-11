@@ -92,21 +92,21 @@ void gui_controller::fill_fields()
     //data from sensors, etc
     page_sensors->add_field_to_page(new text_field(""));//a way to make empty line
     page_sensors->add_field_to_page(new text_field("chamber:"));
-    page_sensors->add_field_to_page(new float_io_field("Temp.", t_field_io_type::FIELD_OUT, &(RHT_int_var.T), &(RHT_int_var.mutex), " ^", 2, SEN_T_MAX_VAL, SEN_MIN_VAL));
-    page_sensors->add_field_to_page(new float_io_field("Humidity", t_field_io_type::FIELD_OUT, &(RHT_int_var.RH), &(RHT_int_var.mutex), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
+    page_sensors->add_field_to_page(new float_io_field("Temp.", t_field_io_type::FIELD_OUT, RHT_int->get_T_ptr(), RHT_int->get_mutex_ptr(), " ^", 2, SEN_T_MAX_VAL, SEN_MIN_VAL));
+    page_sensors->add_field_to_page(new float_io_field("Humidity", t_field_io_type::FIELD_OUT, RHT_int->get_RH_ptr(), RHT_int->get_mutex_ptr(), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
     page_sensors->add_field_to_page(new text_field(""));//a way to make empty line
     page_sensors->add_field_to_page(new text_field("external:"));
-    page_sensors->add_field_to_page(new float_io_field("Temp.", t_field_io_type::FIELD_OUT, &(RHT_ext_var.T), &(RHT_ext_var.mutex), " ^", 2, SEN_T_MAX_VAL, SEN_MIN_VAL));
-    page_sensors->add_field_to_page(new float_io_field("Humidity", t_field_io_type::FIELD_OUT, &(RHT_ext_var.RH), &(RHT_ext_var.mutex), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
+    page_sensors->add_field_to_page(new float_io_field("Temp.", t_field_io_type::FIELD_OUT, RHT_ext->get_T_ptr(), RHT_ext->get_mutex_ptr(), " ^", 2, SEN_T_MAX_VAL, SEN_MIN_VAL));
+    page_sensors->add_field_to_page(new float_io_field("Humidity", t_field_io_type::FIELD_OUT, RHT_ext->get_RH_ptr(), RHT_ext->get_mutex_ptr(), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
 
     /*Membrane*/
     //mebrane info
     page_membrane->add_field_to_page(new bool_io_field("State", t_field_io_type::FIELD_OUT, &(act_membrane.enabled), &(act_membrane.mutex), "On ", "Off"));
-    page_membrane->add_field_to_page(new float_io_field("Current", t_field_io_type::FIELD_OUT, &(memb_var.current), &(memb_var.mutex), " A", 3, SEN_CUR_MAX_VAL, SEN_MIN_VAL));
-    page_membrane->add_field_to_page(new float_io_field("Power", t_field_io_type::FIELD_OUT, &(memb_var.power), &(memb_var.mutex), " W", 3, SEN_POW_MAX_VAL, SEN_MIN_VAL));
-    page_membrane->add_field_to_page(new float_io_field("Voltage", t_field_io_type::FIELD_OUT, &(memb_var.voltage), &(memb_var.mutex), " V", 3, SEN_VOL_MAX_VAL, SEN_MIN_VAL));
+    page_membrane->add_field_to_page(new float_io_field("Current", t_field_io_type::FIELD_OUT, CURSEN->get_current_ptr(), CURSEN->get_mutex_ptr(), " A", 3, SEN_CUR_MAX_VAL, SEN_MIN_VAL));
+    page_membrane->add_field_to_page(new float_io_field("Power", t_field_io_type::FIELD_OUT, CURSEN->get_voltage_ptr(), CURSEN->get_mutex_ptr(), " W", 3, SEN_POW_MAX_VAL, SEN_MIN_VAL));
+    page_membrane->add_field_to_page(new float_io_field("Voltage", t_field_io_type::FIELD_OUT, CURSEN->get_power_ptr(), CURSEN->get_mutex_ptr(), " V", 3, SEN_VOL_MAX_VAL, SEN_MIN_VAL));
     page_membrane->add_field_to_page(new bool_io_field("Manual_en", t_field_io_type::FIELD_IN, &(act_membrane.enabled), &(act_membrane.mutex), "On ", "Off"));
-    page_membrane->add_field_to_page(new float_io_field("Humidity", t_field_io_type::FIELD_OUT, &(RHT_int_var.RH), &(RHT_int_var.mutex), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
+    page_sensors->add_field_to_page(new float_io_field("Humidity", t_field_io_type::FIELD_OUT, RHT_int->get_RH_ptr(), RHT_int->get_mutex_ptr(), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
 
     /*Regulation*/
     //detailed settings and info about regulation

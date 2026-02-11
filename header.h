@@ -149,39 +149,28 @@ extern t_reg_var regulator;
 void task_sensor_main(void *args);
 void sen_init();
 
-//variables
-struct t_RHT_var
-{
-    float RH;
-    float T;
-    SemaphoreHandle_t mutex;
-};
-struct t_INA_var
-{
-    float current;
-    float voltage;
-    float power;
-    SemaphoreHandle_t mutex;
-};
-
 /*SHT35 internal*/
-extern t_RHT_var RHT_int_var;
+extern t_RHT_sensor *RHT_int;
 #define SEN_RHT_INT_ADDR            0x44
 #define SEN_RHT_INT_PORT            I2C0_PORT
+#define SEN_RHT_INT_AUTORECONNECT   false
+#define SEN_RHT_INT_PROCEED_NONCONN false
 
 /*SHT35 external*/
-extern t_RHT_var RHT_ext_var;
+extern t_RHT_sensor *RHT_ext;
 #define SEN_RHT_EXT_ADDR            0x44
 #define SEN_RHT_EXT_PORT            I2C1_PORT
+#define SEN_RHT_EXT_AUTORECONNECT   false
+#define SEN_RHT_EXT_PROCEED_NONCONN false
 
 /*INA219*/
-extern t_INA_var memb_var;
+extern t_INA_sensor* CURSEN;
 #define SEN_CURSEN_ADDR             0x40
 #define SEN_CURSEN_PORT             I2C1_PORT
+#define SEN_CURSEN_AUTORECONNECT    false
+#define SEN_CURSEN_PROCEED_NONCONN  false
 
-extern t_RHT_sensor* RHT_int;
-extern t_RHT_sensor* RHT_ext;
-extern t_INA_sensor* CURSEN;
+
 
 //sensor settings
 #define SEN_CURSEN_BUS_VOLT_RANGE   INA219_BUS_RANGE_16V
