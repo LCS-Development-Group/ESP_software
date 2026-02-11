@@ -330,6 +330,8 @@ extern const char* NVS_COM_PERIOD;
 /* MISC                                                                                 */
 /*======================================================================================*/
 void misc_init();
+void task_create_fail(uint8_t taskid);
+
 #define TP0_PIN     GPIO_EXP_NUM_B3
 #define TP1_PIN     GPIO_EXP_NUM_B2
 #define TP2_PIN     GPIO_EXP_NUM_B0
