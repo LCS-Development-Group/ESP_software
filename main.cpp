@@ -38,8 +38,8 @@ extern "C" void app_main(void)
     gui_init();
     vis_init();
 
-    ESP_LOGW("main", "init finished");
-    vTaskDelay(portMAX_DELAY);
+    // ESP_LOGW("main", "init finished");
+    // vTaskDelay(portMAX_DELAY);
 
     main_event_group=xEventGroupCreate();
     if(main_event_group==NULL)
