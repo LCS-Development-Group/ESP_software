@@ -2,34 +2,29 @@
 #include "common_includes.h"
 #include "I2C.h"
 
-// struct t_INA_var
-// {
-//     float current;
-//     float voltage;
-//     float power;
-//     SemaphoreHandle_t mutex;
-// };
-
-
 class t_sensor
 {
 protected:
     uint8_t port;
     uint8_t addr;
     SemaphoreHandle_t mutex;
-    bool present;
-    bool proceed_nonpresent;
-    bool auto_reconnect;
+    bool is_initialized;
+    bool proceed_when_fail;
 
 
 public:
-    t_sensor(uint8_t _port, uint8_t _addr, bool _proceed_nonpresent, bool _auto_reconnect);
+    t_sensor(uint8_t _port, uint8_t _addr, bool _proceed_when_fail);
 
     uint8_t get_port() const {return port;}
     uint8_t get_addr() const {return addr;}
-    bool get_present() const {return present;}
-    bool get_proceed_nonpresent() const {return proceed_nonpresent;}
+    bool get_is_initialized() const {return is_initialized;}
+    bool get_proceed_when_fail() const {return proceed_when_fail;}
     SemaphoreHandle_t *get_mutex_ptr() {return &mutex;}
+
+    virtual void reset_variable()=0;
+    virtual void reset_variable_without_mutex()=0;
+    virtual void connection_initialize()=0;
+    virtual void take_readings()=0;
 };
 
 class t_RHT_sensor: public t_sensor
@@ -43,7 +38,7 @@ class t_RHT_sensor: public t_sensor
     sht3x_t* dev;
 
 public:
-    t_RHT_sensor(uint8_t _port, uint8_t _addr, bool _proceed_nonpresent, bool _auto_reconnect, float _default_RH, float _default_T);
+    t_RHT_sensor(uint8_t _port, uint8_t _addr, bool _proceed_when_fail, float _default_RH, float _default_T);
     ~t_RHT_sensor();
 
     float get_RH() const {return RH;}
@@ -52,9 +47,10 @@ public:
     float* get_RH_ptr() {return &RH;}
     float* get_T_ptr() {return &T;}
 
-    void reset_variable();
-    void connect();
-    void take_readings();
+    void reset_variable() override;
+    void reset_variable_without_mutex() override;
+    void connection_initialize() override;
+    void take_readings() override;
 };
 
 class t_INA_sensor: public t_sensor
@@ -70,7 +66,7 @@ class t_INA_sensor: public t_sensor
     ina219_t *dev;
 
 public:
-    t_INA_sensor(uint8_t _port, uint8_t _addr, bool _proceed_nonpresent, bool _auto_reconnect, float _default_current, float _default_voltage, float _default_power);
+    t_INA_sensor(uint8_t _port, uint8_t _addr, bool _proceed_when_fail, float _default_current, float _default_voltage, float _default_power);
     ~t_INA_sensor(){if(dev!=nullptr) delete dev;}
 
     float get_current() const {return current;}
@@ -81,9 +77,10 @@ public:
     float* get_voltage_ptr() {return &voltage;}
     float* get_power_ptr() {return &power;}
 
-    void reset_variable();
-    void connect();
-    void take_readings();
+    void reset_variable() override;
+    void reset_variable_without_mutex() override;
+    void connection_initialize() override;
+    void take_readings() override;
 };
 
 

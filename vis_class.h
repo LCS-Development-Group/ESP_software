@@ -29,6 +29,7 @@ class vis_controller
     void draw_select();
     void draw_bar();
     void start();
+    void draw_missing_sensor_msg(uint8_t port, uint8_t addr, bool proceed, std::string name);
 
     private:
     void clear();

@@ -139,11 +139,6 @@ void vis_controller::draw_bar()
 
 void vis_controller::start()
 {
-    esp_lcd_panel_disp_on_off(*lcd_handle, true);
-    esp_lcd_panel_swap_xy(*lcd_handle, true);
-
-    gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL);
-
     clear();
     vTaskDelay(pdMS_TO_TICKS(100));
 
@@ -307,5 +302,39 @@ void vis_init()
             exit(-1);
         }
     }
+
+    /*Starting the panel*/
+    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, true));
+    ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(lcd_handle, true));
+
+    ESP_ERROR_CHECK(gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL));//here be PWM
 }
 
+void vis_controller::draw_missing_sensor_msg(uint8_t port, uint8_t addr, bool proceed, std::string name)
+{
+    std::stringstream ss;
+    clear();
+
+    draw_text("sensor "+name, 0, 0);
+    // ss<<"addr. 0x"<<std::hex<<std::uppercase<<std::setw(2)<<std::setfill('0')<<(int)addr;
+    // ss<<std::dec<<std::nouppercase<<std::setfill(' ')<<" at port "<<port;
+    // draw_text(ss.str(), 1, 0);
+    draw_text("Conn. Fail", 1, 0);
+
+    if(proceed)
+    {
+        draw_text("proceeding in: ", 4, 0);
+
+        for(uint8_t i=SEN_MISSING_PROCEED_DELAY_S; i>0; i--)
+        {
+            draw_text(std::to_string(i)+" ", 4, 15);
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+    }
+    else
+    {
+        draw_text("Not proceeding", 4, 0);
+        draw_text("reboot required", 5, 0);
+        vTaskDelay(portMAX_DELAY);
+    }
+}

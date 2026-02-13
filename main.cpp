@@ -16,7 +16,6 @@ EventGroupHandle_t main_event_group;
 
 t_i2c_bus i2c_bus[I2C_BUS_NUMOF];
 
-
 extern "C" void app_main(void)
 {
     misc_init();
@@ -33,20 +32,19 @@ extern "C" void app_main(void)
     gui_init();
     vis_init();
 
-    // ESP_LOGW("main", "init finished");
-    // vTaskDelay(portMAX_DELAY);
+    handle_missing_sensors();
 
     main_event_group=xEventGroupCreate();
     if(main_event_group==NULL)
     {
-        ESP_LOGE("Setup", "main_event_group creation failed\n");
+        ESP_LOGE("main", "main_event_group creation failed\n");
         exit(-1);
     }
 
     if(xTaskCreate(task_encoder_main, "task_encoder", 2048, NULL, 1, &task_handle_list[ENC_TASKID])!=pdPASS) task_create_fail(ENC_TASKID);
     if(xTaskCreate(task_gui_main, "task_gui", 2048, NULL, 1, &task_handle_list[GUI_TASKID])!=pdPASS) task_create_fail(GUI_TASKID);
     if(xTaskCreate(task_visual_main, "task_visual", 8192, NULL, 1, &task_handle_list[VIS_TASKID])!=pdPASS) task_create_fail(VIS_TASKID);
-    if(xTaskCreate(task_sensor_main, "task_sensor", 2048, NULL, 1, &task_handle_list[SEN_TASKID])!=pdPASS) task_create_fail(SEN_TASKID);
+    if(xTaskCreate(task_sensor_main, "task_sensor", 4096, NULL, 1, &task_handle_list[SEN_TASKID])!=pdPASS) task_create_fail(SEN_TASKID);
     if(xTaskCreate(task_actuator_main, "task_actuator", 2048, NULL, 1, &task_handle_list[ACT_TASKID])!=pdPASS) task_create_fail(ACT_TASKID);
     if(xTaskCreate(task_regulator_main, "task_regulator", 2048, NULL, 1, &task_handle_list[REG_TASKID])!=pdPASS) task_create_fail(REG_TASKID);
     if(xTaskCreate(task_comm_main, "task_comm", 4096, NULL, 1, &task_handle_list[COM_TASKID])!=pdPASS) task_create_fail(COM_TASKID);
@@ -60,6 +58,7 @@ extern "C" void app_main(void)
     uint8_t nvs_counter=0;
     uint32_t com_counter=0, _com_counter;
     bool retval_sen, retval_memb;
+    EventBits_t ev_retval;
     while(true)
     {
         //schedule sensor reading aquisition
@@ -103,12 +102,14 @@ extern "C" void app_main(void)
             nvs_counter=0;
         }
         
+        //check for system reboot trigger
+        ev_retval=xEventGroupWaitBits(main_event_group, SYSTEM_REBOOT_EVBIT, pdTRUE, pdFALSE, pdMS_TO_TICKS(10));
+        if((ev_retval & SYSTEM_REBOOT_EVBIT)!=0) system_gentle_reboot();
+
         //sleep until the next loop iteration
         vTaskDelayUntil(&last_wakeup, pdMS_TO_TICKS(MAIN_LOOP_DELAY_MS));
         last_wakeup=xTaskGetTickCount();
     }
 
-    xEventGroupWaitBits(main_event_group, APP_MAIN_EVBIT, pdTRUE, pdFALSE, portMAX_DELAY);
-    ESP_LOGW("Main", "app_main awoken");    
 }
 

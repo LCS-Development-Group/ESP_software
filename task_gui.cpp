@@ -103,8 +103,8 @@ void gui_controller::fill_fields()
     //mebrane info
     page_membrane->add_field_to_page(new bool_io_field("State", t_field_io_type::FIELD_OUT, &(act_membrane.enabled), &(act_membrane.mutex), "On ", "Off"));
     page_membrane->add_field_to_page(new float_io_field("Current", t_field_io_type::FIELD_OUT, CURSEN->get_current_ptr(), CURSEN->get_mutex_ptr(), " A", 3, SEN_CUR_MAX_VAL, SEN_MIN_VAL));
-    page_membrane->add_field_to_page(new float_io_field("Power", t_field_io_type::FIELD_OUT, CURSEN->get_voltage_ptr(), CURSEN->get_mutex_ptr(), " W", 3, SEN_POW_MAX_VAL, SEN_MIN_VAL));
-    page_membrane->add_field_to_page(new float_io_field("Voltage", t_field_io_type::FIELD_OUT, CURSEN->get_power_ptr(), CURSEN->get_mutex_ptr(), " V", 3, SEN_VOL_MAX_VAL, SEN_MIN_VAL));
+    page_membrane->add_field_to_page(new float_io_field("Power", t_field_io_type::FIELD_OUT, CURSEN->get_power_ptr(), CURSEN->get_mutex_ptr(), " W", 3, SEN_POW_MAX_VAL, SEN_MIN_VAL));
+    page_membrane->add_field_to_page(new float_io_field("Voltage", t_field_io_type::FIELD_OUT, CURSEN->get_voltage_ptr(), CURSEN->get_mutex_ptr(), " V", 3, SEN_VOL_MAX_VAL, SEN_MIN_VAL));
     page_membrane->add_field_to_page(new bool_io_field("Manual_en", t_field_io_type::FIELD_IN, &(act_membrane.enabled), &(act_membrane.mutex), "On ", "Off"));
     page_membrane->add_field_to_page(new float_io_field("Chamber RH", t_field_io_type::FIELD_OUT, RHT_int->get_RH_ptr(), RHT_int->get_mutex_ptr(), " %", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL));
 

@@ -7,6 +7,7 @@
 #include "esp_chip_info.h"
 #include "esp_system.h"
 #include "esp_log.h" // makra do sygnalizacji LOGx
+#include "esp_timer.h"
 
 #include <stdio.h>
 #include <stdlib.h>

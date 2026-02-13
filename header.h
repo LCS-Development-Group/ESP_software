@@ -21,17 +21,9 @@
 #define REG_TASKID 5
 #define COM_TASKID 6
 
-/*planned to use evbits - might not*/
-#define ENC_EVBIT               (1<<ENC_TASKID)
-#define GUI_EVBIT               (1<<GUI_TASKID)
-#define VIS_EVBIT               (1<<VIS_TASKID)
-#define SEN_EVBIT               (1<<SEN_TASKID)
-#define ACT_EVBIT               (1<<ACT_TASKID)
-#define REG_EVBIT               (1<<REG_TASKID)
-#define COM_EVBIT               (1<<COM_TASKID)
-
 #define TASK_START_SYNCBIT          (1<<23)
 #define APP_MAIN_EVBIT              (1<<22)
+#define SYSTEM_REBOOT_EVBIT         (1<<21)
 #define MAIN_LOOP_DELAY_MS          1000//1s
 #define MAIN_LOOP_MINIDELAY_MS      50
 #define MAIN_LOOP_REDRAW_WAIT_MS    100
@@ -151,26 +143,23 @@ void sen_init();
 
 /*SHT35 internal*/
 extern t_RHT_sensor *RHT_int;
-#define SEN_RHT_INT_ADDR            0x44
-#define SEN_RHT_INT_PORT            I2C0_PORT
-#define SEN_RHT_INT_AUTORECONNECT   false
-#define SEN_RHT_INT_PROCEED_NONCONN false
+#define SEN_RHT_INT_ADDR                0x44
+#define SEN_RHT_INT_PORT                I2C0_PORT
+#define SEN_RHT_INT_PROCEED_CONNFAIL    false //readings critical to the system (lack thereof = not much works)
 
 /*SHT35 external*/
 extern t_RHT_sensor *RHT_ext;
-#define SEN_RHT_EXT_ADDR            0x44
-#define SEN_RHT_EXT_PORT            I2C1_PORT
-#define SEN_RHT_EXT_AUTORECONNECT   false
-#define SEN_RHT_EXT_PROCEED_NONCONN false
+#define SEN_RHT_EXT_ADDR                0x44
+#define SEN_RHT_EXT_PORT                I2C1_PORT
+#define SEN_RHT_EXT_PROCEED_CONNFAIL    true
 
 /*INA219*/
 extern t_INA_sensor* CURSEN;
-#define SEN_CURSEN_ADDR             0x40
-#define SEN_CURSEN_PORT             I2C1_PORT
-#define SEN_CURSEN_AUTORECONNECT    false
-#define SEN_CURSEN_PROCEED_NONCONN  false
+#define SEN_CURSEN_ADDR                 0x40
+#define SEN_CURSEN_PORT                 I2C1_PORT
+#define SEN_CURSEN_PROCEED_CONNFAIL     true
 
-
+#define SEN_MISSING_PROCEED_DELAY_S     10
 
 //sensor settings
 #define SEN_CURSEN_BUS_VOLT_RANGE   INA219_BUS_RANGE_16V
@@ -244,6 +233,7 @@ struct __attribute__((packed)) t_DataPacket
 void task_visual_main(void *args);
 
 void vis_init();
+extern vis_controller *vis;
 
 #define LCD_HOST                SPI2_HOST
 #define LCD_CLOCK_HZ            (10 * 1000 * 1000) //10MHz
@@ -331,6 +321,9 @@ extern const char* NVS_COM_PERIOD;
 /*======================================================================================*/
 void misc_init();
 void task_create_fail(uint8_t taskid);
+void unstuck_i2c_bus(uint8_t port);//possibly deprecated
+void system_gentle_reboot();
+void handle_missing_sensors();
 
 #define TP0_PIN     GPIO_EXP_NUM_B3
 #define TP1_PIN     GPIO_EXP_NUM_B2
