@@ -319,7 +319,7 @@ void vis_controller::draw_missing_sensor_msg(uint8_t port, uint8_t addr, bool pr
     // ss<<"addr. 0x"<<std::hex<<std::uppercase<<std::setw(2)<<std::setfill('0')<<(int)addr;
     // ss<<std::dec<<std::nouppercase<<std::setfill(' ')<<" at port "<<port;
     // draw_text(ss.str(), 1, 0);
-    draw_text("Conn. Fail", 1, 0);
+    draw_text("Connection Fail", 1, 0);
 
     if(proceed)
     {
