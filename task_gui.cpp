@@ -4,6 +4,14 @@
 gui_controller *gui;
 SemaphoreHandle_t gui_mutex;
 
+float_mutex_t screensaver_delay;       
+bool_mutex_t screensaver_en;
+TimerHandle_t screensaver_timer;
+bool screensaver_state;
+void screensaver_timer_callback(TimerHandle_t timer);
+void screensaver_update();
+void screensaver_restart_timer();
+
 void task_gui_main(void *args)
 {
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
@@ -12,13 +20,42 @@ void task_gui_main(void *args)
 
     uint32_t ntcode=0x00;
     uint8_t retcode=GUI_RETCODE_DEFAULT;
+    bool temp;
+
+    xTimerStart(screensaver_timer, 0);
+
     while(true)
     {
         if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
         {
+            xSemaphoreTake(screensaver_en.mutex, portMAX_DELAY);
+            temp=screensaver_en.var;
+            xSemaphoreGive(screensaver_en.mutex);
+
+            if(temp==true && ntcode!=GUI_NTCODE_ACTIVATE_SS) 
+            {
+                ESP_LOGI("GUI", "evaluating the ss");
+                xTimerReset(screensaver_timer, 0);
+                if(screensaver_state==true) 
+                {
+                    xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, VIS_NTCODE_DEACTIVATE_SCREENSAVER, eSetValueWithoutOverwrite);
+                    screensaver_state=false;
+                    continue;
+                }
+            }
+
             xSemaphoreTake(gui_mutex, portMAX_DELAY);
             switch(ntcode)
             {
+                case GUI_NTCODE_UPDATE_SS:
+                    screensaver_update();
+                    break;
+
+                case GUI_NTCODE_ACTIVATE_SS:
+                    screensaver_state=true;
+                    retcode=VIS_NTCODE_ACTIVATE_SCREENSAVER;
+                    break;
+
                 case GUI_NTCODE_CUR_NEG:
                     //ESP_LOGI("GUI", "UP");
                     retcode=gui->move_cursor_down();
@@ -73,9 +110,52 @@ void gui_init()
         ESP_LOGE("GUI", "mutex creation failed");
         exit(-1);
     }
+
+
+    /*Screensaver*/
+    screensaver_delay.var=GUI_SS_DEF_DELAY_S;
+    screensaver_delay.mutex=xSemaphoreCreateMutex();
+    if(screensaver_delay.mutex==nullptr)
+    {
+        ESP_LOGE("GUI", "Screensaver_delay mutex creation failed");
+        exit(-1);
+    }
+
+    screensaver_en.var=GUI_SS_DEF_ENABLED;
+    screensaver_en.mutex=xSemaphoreCreateMutex();
+    if(screensaver_en.mutex==nullptr)
+    {
+        ESP_LOGE("GUI", "Screensaver_en mutex creation failed");
+        exit(-1);
+    }
+
+    screensaver_timer=xTimerCreate(
+        "SS_TMR",
+        pdMS_TO_TICKS(uint32_t(screensaver_delay.var*1000)),
+        pdFALSE,
+        NULL,
+        screensaver_timer_callback
+    );
+    if(screensaver_timer==NULL)
+    {
+        ESP_LOGE("GUI", "Screensaver_timer creation failed");
+        exit(-1);
+    }
+
+    screensaver_state=false;
 }
 
-/*GUI _CLASS AND RELATED*/
+void screensaver_update()
+{
+
+}
+
+void screensaver_timer_callback(TimerHandle_t timer)
+{
+    xTaskNotifyIndexed(task_handle_list[GUI_TASKID], 0, GUI_NTCODE_ACTIVATE_SS, eSetValueWithoutOverwrite);
+}
+
+/*GUI_CLASS AND RELATED*/
 
 void gui_controller::fill_fields()
 {

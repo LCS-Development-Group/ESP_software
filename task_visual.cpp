@@ -55,6 +55,18 @@ void task_visual_main(void *args)
                     vis->draw_bar();
                     break;
 
+                case VIS_NTCODE_ACTIVATE_SCREENSAVER:
+                    ESP_LOGI("VIS", "<ss active>");
+                    ESP_ERROR_CHECK(gpio_set_level(LCD_BL_PIN, !LCD_BL_ON_LVL));//here be PWM
+                    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, false));
+                    break;
+
+                case VIS_NTCODE_DEACTIVATE_SCREENSAVER:
+                    ESP_LOGI("VIS", "<ss not active>");
+                    ESP_ERROR_CHECK(gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL));//here be PWM
+                    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, true));
+                    break;
+
 
                 default:
                     ESP_LOGW("Visual", "Woken by unknown ntcode: %d", ntcode);

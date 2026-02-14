@@ -292,6 +292,8 @@ extern vis_controller *vis;
 #define VIS_NTCODE_REDRAW_VALUE             3
 #define VIS_NTCODE_REDRAW_ALL_VALUES        4
 #define VIS_NTCODE_REDRAW_VALUE_EDITMODE    5
+#define VIS_NTCODE_ACTIVATE_SCREENSAVER     6
+#define VIS_NTCODE_DEACTIVATE_SCREENSAVER   7
 
 /*======================================================================================*/
 /* UI ROTATIONAL ENCODER                                                                */
@@ -318,6 +320,14 @@ void task_gui_main(void *args);
 extern gui_controller *gui;
 extern SemaphoreHandle_t gui_mutex;
 
+/*Screensaver*/
+#define GUI_SS_DEF_DELAY_S      5
+#define GUI_SS_DEF_ENABLED      true
+
+extern float_mutex_t screensaver_delay;       
+extern bool_mutex_t screensaver_en;
+    
+
 void gui_init();
 
 /*Notification Codes*/
@@ -325,6 +335,8 @@ void gui_init();
 #define GUI_NTCODE_CUR_NEG      1
 #define GUI_NTCODE_CUR_ENT      2
 #define GUI_NTCODE_CUR_BCK      3
+#define GUI_NTCODE_ACTIVATE_SS  4
+#define GUI_NTCODE_UPDATE_SS    5
 
 #define GUI_CURSOR_MAX_INDEX    255
 
