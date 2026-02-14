@@ -32,6 +32,31 @@ extern EventGroupHandle_t main_event_group;
 extern TaskHandle_t task_handle_list[TASK_NUM];
 
 /*======================================================================================*/
+/* MISC                                                                                 */
+/*======================================================================================*/
+void misc_init();
+void task_create_fail(uint8_t taskid);
+void unstuck_i2c_bus(uint8_t port);//possibly deprecated
+void system_gentle_reboot();
+void handle_missing_sensors();
+
+#define TP0_PIN     GPIO_EXP_NUM_B3
+#define TP1_PIN     GPIO_EXP_NUM_B2
+#define TP2_PIN     GPIO_EXP_NUM_B0
+#define TP3_PIN     GPIO_EXP_NUM_A6
+#define TP4_PIN     GPIO_EXP_NUM_A5
+#define TP5_PIN     GPIO_EXP_NUM_A4
+#define TP10_PIN    GPIO_NUM_36
+#define TP11_PIN    GPIO_NUM_35
+#define TP_DEF_LVL  0
+
+struct float_mutex_t
+{
+    float var;
+    SemaphoreHandle_t mutex;
+};
+
+/*======================================================================================*/
 /* EXPANDER                                                                             */
 /*======================================================================================*/
 #define GPIO_EXP_NUM_A0 0
@@ -213,8 +238,7 @@ extern uint16_t uart_buffer_idx;
 
 #define COM_SEND_PERIOD_LOOPS_MAX   999
 #define COM_SEND_PERIOD_LOOPS_MIN   1
-extern float com_send_period;//float because gui needs to be able to edit
-extern SemaphoreHandle_t com_send_mutex;
+extern float_mutex_t com_send_period;//float because gui needs to be able to edit
 
 struct __attribute__((packed)) t_DataPacket
 {
@@ -315,33 +339,3 @@ extern const char* NVS_SERVOS[ACT_SERV_NUMOF][2];
 extern const char* NVS_REG_H;
 extern const char* NVS_REG_SP;
 extern const char* NVS_COM_PERIOD;
-
-/*======================================================================================*/
-/* MISC                                                                                 */
-/*======================================================================================*/
-void misc_init();
-void task_create_fail(uint8_t taskid);
-void unstuck_i2c_bus(uint8_t port);//possibly deprecated
-void system_gentle_reboot();
-void handle_missing_sensors();
-
-#define TP0_PIN     GPIO_EXP_NUM_B3
-#define TP1_PIN     GPIO_EXP_NUM_B2
-#define TP2_PIN     GPIO_EXP_NUM_B0
-#define TP3_PIN     GPIO_EXP_NUM_A6
-#define TP4_PIN     GPIO_EXP_NUM_A5
-#define TP5_PIN     GPIO_EXP_NUM_A4
-#define TP10_PIN    GPIO_NUM_36
-#define TP11_PIN    GPIO_NUM_35
-#define TP_DEF_LVL  0
-
-
-
-extern bool DEBUG_BOOL;
-extern SemaphoreHandle_t DEBUG_BOOL_MUT;
-
-extern float DEBUG_FLOAT;
-extern SemaphoreHandle_t DEBUG_FLOAT_MUT;
-
-extern float DEBUG_FLOAT_2;
-extern SemaphoreHandle_t DEBUG_FLOAT_2_MUT;

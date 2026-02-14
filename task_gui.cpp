@@ -134,7 +134,7 @@ void gui_controller::fill_fields()
     
 
     /*Comms*/
-    page_comm->add_field_to_page(new float_io_field("PERIOD", t_field_io_type::FIELD_IN, &(com_send_period), &(com_send_mutex), " S", 0, COM_SEND_PERIOD_LOOPS_MAX, COM_SEND_PERIOD_LOOPS_MIN));
+    page_comm->add_field_to_page(new float_io_field("PERIOD", t_field_io_type::FIELD_IN, &(com_send_period.var), &(com_send_period.mutex), " S", 0, COM_SEND_PERIOD_LOOPS_MAX, COM_SEND_PERIOD_LOOPS_MIN));
 
     /*Display*/
     //brightness, timeout(?)

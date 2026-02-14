@@ -118,18 +118,18 @@ void nvs_save_values()
     xSemaphoreGive(regulator.mutex);
 
     /*communicator*/
-    xSemaphoreTake(com_send_mutex, portMAX_DELAY);
+    xSemaphoreTake(com_send_period.mutex, portMAX_DELAY);
     err=nvs_get_u32(nvs, NVS_COM_PERIOD, &(data.uint_rep));
     if(err==ESP_OK || err==ESP_ERR_NVS_NOT_FOUND)
     {
-        if(data.float_rep!=com_send_period)
+        if(data.float_rep!=com_send_period.var)
         {
-            data.float_rep=com_send_period;
+            data.float_rep=(com_send_period.var);
             nvs_set_u32(nvs, NVS_COM_PERIOD, data.uint_rep);
             commit=true;
         }
     }
-    xSemaphoreGive(com_send_mutex);
+    xSemaphoreGive(com_send_period.mutex);
 
     if(commit)ESP_ERROR_CHECK(nvs_commit(nvs));
 }

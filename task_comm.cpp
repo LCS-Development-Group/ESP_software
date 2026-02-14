@@ -5,8 +5,7 @@
 
 uint8_t *uart_buffer;
 uint16_t uart_buffer_idx=COM_BUFF_SIZE-1;
-float com_send_period;//float because gui needs to be able to edit
-SemaphoreHandle_t com_send_mutex;
+float_mutex_t com_send_period;
 
 void create_message();
 void clear_buff();
@@ -128,13 +127,13 @@ void com_init()
     uart_buffer=(uint8_t *)malloc(COM_BUFF_SIZE);
     clear_buff();
 
-    com_send_mutex=xSemaphoreCreateMutex();
-    if(com_send_mutex==nullptr)
+    com_send_period.mutex=xSemaphoreCreateMutex();
+    if(com_send_period.mutex==nullptr)
     {
         ESP_LOGE("GUI", "mutex creation failed");
         exit(-1);
     }
-    com_send_period=nvs_get_float(NVS_COM_PERIOD, COM_SEND_PERIOD_LOOPS_MIN);
+    com_send_period.var=nvs_get_float(NVS_COM_PERIOD, COM_SEND_PERIOD_LOOPS_MIN);
 
     uart_config_t uart_config
     {

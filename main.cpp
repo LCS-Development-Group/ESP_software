@@ -71,16 +71,16 @@ extern "C" void app_main(void)
 
         //send data to the pc - not every iteration
         vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
-        if(xSemaphoreTake(com_send_mutex, pdMS_TO_TICKS(MAIN_LOOP_REDRAW_WAIT_MS))==pdTRUE)
+        if(xSemaphoreTake(com_send_period.mutex, pdMS_TO_TICKS(MAIN_LOOP_REDRAW_WAIT_MS))==pdTRUE)
         {
             com_counter++;
-            _com_counter=(uint32_t)com_send_period;
+            _com_counter=(uint32_t)(com_send_period.var);
             if(_com_counter<=com_counter)
             {
                 com_counter=0;
                 xTaskNotifyIndexed(task_handle_list[COM_TASKID], 0, COM_NTCODE_SENDALL, eSetValueWithoutOverwrite);
             }
-            xSemaphoreGive(com_send_mutex);
+            xSemaphoreGive(com_send_period.mutex);
         }
 
         //check if the page with readings is displayed -> redraw it
