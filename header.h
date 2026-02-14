@@ -55,6 +55,12 @@ struct float_mutex_t
     float var;
     SemaphoreHandle_t mutex;
 };
+struct bool_mutex_t
+{
+    bool var;
+    SemaphoreHandle_t mutex;
+};
+
 
 /*======================================================================================*/
 /* EXPANDER                                                                             */
