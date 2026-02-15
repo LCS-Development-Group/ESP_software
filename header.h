@@ -6,8 +6,10 @@
 #include "sen_class.h"
 #include "I2C.h"
 
-#define DEBUG_TASK_ANOUNCE false
-#define DEBUG_INVERT_LCD true
+#define DEBUG_TASK_ANOUNCE          false
+#define DEBUG_INVERT_LCD            true
+#define DEBUG_NVS_ERASE_ON_INIT     false
+#define DEBUG_COM_DISABLE_UART      true
 
 /*======================================================================================*/
 /* GENERAL                                                                              */
@@ -322,6 +324,8 @@ extern SemaphoreHandle_t gui_mutex;
 
 /*Screensaver*/
 #define GUI_SS_DEF_DELAY_S      5
+#define GUI_SS_MIN_DELAY_S      3
+#define GUI_SS_MAX_DELAY_S      120
 #define GUI_SS_DEF_ENABLED      true
 
 extern float_mutex_t screensaver_delay;       
@@ -344,12 +348,14 @@ void gui_init();
 /* NVS                                                                                  */
 /*======================================================================================*/
 //non volatile storage
-#define NVS_SPACE_NAME          "NVS_SPACE"
-#define NVS_SAVE_PERIOD_LOOPS   30
+#define NVS_SPACE_NAME              "NVS_SPACE"
+#define NVS_SAVE_PERIOD_LOOPS       60
+#define NVS_FLOAT_COMPARE_EPSILON   0.001f
 
 extern nvs_handle_t nvs;
 void init_nvs();
 float nvs_get_float(const char* key, float def);
+float nvs_get_bool(const char* key, bool def);
 void nvs_save_values();
 
 /*keys defined in nvs.cpp*/
@@ -357,3 +363,5 @@ extern const char* NVS_SERVOS[ACT_SERV_NUMOF][2];
 extern const char* NVS_REG_H;
 extern const char* NVS_REG_SP;
 extern const char* NVS_COM_PERIOD;
+extern const char* NVS_GUI_SS_DELAY;
+extern const char* NVS_GUI_SS_EN;

@@ -26,6 +26,7 @@ extern "C" void app_main(void)
     enc_pnct_init();
     act_init();
     sen_init();
+    vTaskDelay(pdMS_TO_TICKS(100));
     reg_init();
     com_init();
 
@@ -78,7 +79,7 @@ extern "C" void app_main(void)
             if(_com_counter<=com_counter)
             {
                 com_counter=0;
-                xTaskNotifyIndexed(task_handle_list[COM_TASKID], 0, COM_NTCODE_SENDALL, eSetValueWithoutOverwrite);
+                if(!DEBUG_COM_DISABLE_UART) xTaskNotifyIndexed(task_handle_list[COM_TASKID], 0, COM_NTCODE_SENDALL, eSetValueWithoutOverwrite);
             }
             xSemaphoreGive(com_send_period.mutex);
         }

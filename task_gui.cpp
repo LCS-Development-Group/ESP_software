@@ -34,7 +34,6 @@ void task_gui_main(void *args)
 
             if(temp==true && ntcode!=GUI_NTCODE_ACTIVATE_SS) 
             {
-                ESP_LOGI("GUI", "evaluating the ss");
                 xTimerReset(screensaver_timer, 0);
                 if(screensaver_state==true) 
                 {
@@ -101,7 +100,6 @@ void gui_init()
             ESP_LOGE("GUI", "gui_controller creation failed");
             exit(-1);
         }
-        gui->fill_fields();
     }
 
     gui_mutex=xSemaphoreCreateMutex();
@@ -113,7 +111,7 @@ void gui_init()
 
 
     /*Screensaver*/
-    screensaver_delay.var=GUI_SS_DEF_DELAY_S;
+    screensaver_delay.var=nvs_get_float(NVS_GUI_SS_DELAY, GUI_SS_DEF_DELAY_S);
     screensaver_delay.mutex=xSemaphoreCreateMutex();
     if(screensaver_delay.mutex==nullptr)
     {
@@ -121,7 +119,7 @@ void gui_init()
         exit(-1);
     }
 
-    screensaver_en.var=GUI_SS_DEF_ENABLED;
+    screensaver_en.var=nvs_get_bool(NVS_GUI_SS_EN, GUI_SS_DEF_ENABLED);
     screensaver_en.mutex=xSemaphoreCreateMutex();
     if(screensaver_en.mutex==nullptr)
     {
@@ -143,6 +141,7 @@ void gui_init()
     }
 
     screensaver_state=false;
+    gui->fill_fields();
 }
 
 void screensaver_update()
@@ -165,7 +164,7 @@ void gui_controller::fill_fields()
     page* page_membrane=root->add_new_page("Membrane", new t_notify_package(&task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_MEMB));
     page* page_servos=root->add_new_page("Servos", nullptr);//no ntpack?
     page* page_comm=root->add_new_page("Comms", nullptr);
-    //page* page_display=root->add_new_page("Display", nullptr);
+    page* page_display=root->add_new_page("Display", nullptr);
     page* page_about=root->add_new_page("About", nullptr);
 
     /*Sensors*/
@@ -218,7 +217,8 @@ void gui_controller::fill_fields()
 
     /*Display*/
     //brightness, timeout(?)
-    //page_display->add_field_to_page(new text_field("WIP"));
+    page_display->add_field_to_page(new bool_io_field("Screensaver", t_field_io_type::FIELD_IN, &(screensaver_en.var), &(screensaver_en.mutex), "   ON", "   OFF"));
+    page_display->add_field_to_page(new float_io_field("Delay", t_field_io_type::FIELD_IN, &(screensaver_delay.var), &(screensaver_delay.mutex), "s", 0, GUI_SS_MAX_DELAY_S, GUI_SS_MIN_DELAY_S));
     
 
     /*About*/

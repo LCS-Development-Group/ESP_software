@@ -12,6 +12,8 @@ const char* NVS_SERVOS[ACT_SERV_NUMOF][2]={
 const char* NVS_REG_H="HIST";
 const char* NVS_REG_SP="SETP";
 const char* NVS_COM_PERIOD="COMP";
+const char* NVS_GUI_SS_DELAY="SSDL";
+const char* NVS_GUI_SS_EN="SSEN";
 
 nvs_handle_t nvs;
 typedef union
@@ -22,6 +24,8 @@ typedef union
 
 void init_nvs()
 {
+    if(DEBUG_NVS_ERASE_ON_INIT) ESP_ERROR_CHECK(nvs_flash_erase());
+
     esp_err_t err=nvs_flash_init();
     if (err==ESP_ERR_NVS_NO_FREE_PAGES || err==ESP_ERR_NVS_NEW_VERSION_FOUND) 
     {
@@ -36,9 +40,15 @@ void init_nvs()
     err=nvs_open(NVS_SPACE_NAME, NVS_READWRITE, &nvs);
     if(err!=ESP_OK)
     {
-        ESP_LOGE("NVS", "Error opening NVS handle: %s", esp_err_to_name(err));
+        ESP_LOGE("NVS", "Error opening NVS space: %s", esp_err_to_name(err));
         exit(-1);
     }
+}
+
+/*true: unequal (!=), false: equal (==)*/
+bool floats_unequal(float A, float B)
+{
+    return (fabsf(A-B)>NVS_FLOAT_COMPARE_EPSILON);
 }
 
 float nvs_get_float(const char* key, float def)
@@ -48,88 +58,101 @@ float nvs_get_float(const char* key, float def)
     if(err==ESP_OK) return data.float_rep;
     else 
     {
-        if(err!=ESP_ERR_NVS_NOT_FOUND) 
-        {
-            ESP_LOGW("NVS", "Error reading %s while loading", key);
-            nvs_close(nvs);
-        }
+        if(err!=ESP_ERR_NVS_NOT_FOUND) ESP_LOGW("NVS", "Failed getting \"%s\"", key);
         return def;
     }
 }
 
-void nvs_save_values()
+float nvs_get_bool(const char* key, bool def)
+{
+    uint8_t data;
+    esp_err_t err=nvs_get_u8(nvs, key, &(data));
+    if(err==ESP_OK) return data;
+    else 
+    {
+        if(err!=ESP_ERR_NVS_NOT_FOUND) ESP_LOGW("NVS", "Failed getting \"%s\"", key);
+        return def;
+    }
+}
+
+bool save_float(const char* key, float val)
 {
     float_uint32_t data;
-    esp_err_t err;
-    bool commit=false;
+    esp_err_t err=nvs_get_u32(nvs, key, &(data.uint_rep));
+    if(err==ESP_ERR_NVS_NOT_FOUND || (err==ESP_OK && floats_unequal(val, data.float_rep)))
+    {
+        data.float_rep=val;
+        err=nvs_set_u32(nvs, key, data.uint_rep);
+        if(err!=ESP_OK) 
+        {
+            ESP_LOGW("NVS", "Failed setting \"%s\" (%s)", key, esp_err_to_name(err));
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
 
+bool save_bool(const char* key, bool val)
+{
+    uint8_t data;
+    esp_err_t err=nvs_get_u8(nvs, key, &(data));
+    if(err==ESP_OK || (err==ESP_OK && data!=val))
+    {
+        if(data!=val)
+        {
+            data=val;
+            err=nvs_set_u8(nvs, key, data);
+            if(err!=ESP_OK) 
+            {
+                ESP_LOGW("NVS", "Failed setting \"%s\" (%s)", key, esp_err_to_name(err));
+                return false;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+void nvs_save_values()
+{
+    bool commit=false;
+    
     /*serva*/
     uint8_t j;
     for(uint8_t i=0; i<ACT_SERV_NUMOF; i++)
     {
         xSemaphoreTake(servos[i].mutex, portMAX_DELAY);
+
         for(j=0; j<2; j++)
-        {
-            err=nvs_get_u32(nvs, NVS_SERVOS[i][j], &(data.uint_rep));
-            if(err==ESP_OK || err==ESP_ERR_NVS_NOT_FOUND)
-            {
-                if(data.float_rep!=servos[i].angle[j])
-                {
-                    data.float_rep=servos[i].angle[j];
-                    nvs_set_u32(nvs, NVS_SERVOS[i][j], data.uint_rep);
-                    commit=true;
-                }
-            }
-            else
-            {
-                ESP_LOGW("NVS", "Error reading %s while saving", NVS_SERVOS[i][j]);
-                nvs_close(nvs);
-            }
-        }
+            if(save_float(NVS_SERVOS[i][j], servos[i].angle[j])) commit=true;
+
         xSemaphoreGive(servos[i].mutex);
     }
 
     /*regulator*/
     xSemaphoreTake(regulator.mutex, portMAX_DELAY);
-    
-    //histeresis
-    err=nvs_get_u32(nvs, NVS_REG_H, &(data.uint_rep));
-    if(err==ESP_OK || err==ESP_ERR_NVS_NOT_FOUND)
-    {
-        if(data.float_rep!=regulator.H)
-        {
-            data.float_rep=regulator.H;
-            nvs_set_u32(nvs, NVS_REG_H, data.uint_rep);
-            commit=true;
-        }
-    }
-
-    //setpoint
-    err=nvs_get_u32(nvs, NVS_REG_SP, &(data.uint_rep));
-    if(err==ESP_OK || err==ESP_ERR_NVS_NOT_FOUND)
-    {
-        if(data.float_rep!=regulator.SP)
-        {
-            data.float_rep=regulator.SP;
-            nvs_set_u32(nvs, NVS_REG_SP, data.uint_rep);
-            commit=true;
-        }
-    }
+    if(save_float(NVS_REG_H, regulator.H)) commit=true; //histeresis
+    if(save_float(NVS_REG_SP, regulator.SP)) commit=true; //setpoint
     xSemaphoreGive(regulator.mutex);
 
     /*communicator*/
     xSemaphoreTake(com_send_period.mutex, portMAX_DELAY);
-    err=nvs_get_u32(nvs, NVS_COM_PERIOD, &(data.uint_rep));
-    if(err==ESP_OK || err==ESP_ERR_NVS_NOT_FOUND)
-    {
-        if(data.float_rep!=com_send_period.var)
-        {
-            data.float_rep=(com_send_period.var);
-            nvs_set_u32(nvs, NVS_COM_PERIOD, data.uint_rep);
-            commit=true;
-        }
-    }
+    if(save_float(NVS_COM_PERIOD, com_send_period.var)) commit=true;
     xSemaphoreGive(com_send_period.mutex);
 
-    if(commit)ESP_ERROR_CHECK(nvs_commit(nvs));
+    /*LCD*/
+    xSemaphoreTake(screensaver_delay.mutex, portMAX_DELAY);
+    if(save_float(NVS_GUI_SS_DELAY, screensaver_delay.var)) commit=true;
+    xSemaphoreGive(screensaver_delay.mutex);
+
+    xSemaphoreTake(screensaver_en.mutex, portMAX_DELAY);
+    if(save_bool(NVS_GUI_SS_EN, screensaver_en.var)) commit=true;
+    xSemaphoreGive(screensaver_en.mutex);
+
+    if(commit)
+    {
+        esp_err_t err=nvs_commit(nvs);
+        if(err!=ESP_OK) ESP_LOGW("NVS", "Failed commit (%s)", esp_err_to_name(err));
+    }
 }
