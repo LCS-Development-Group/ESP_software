@@ -60,7 +60,7 @@ void task_visual_main(void *args)
                     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, false));
                     break;
 
-                case VIS_NTCODE_DEACTIVATE_SCREENSAVER:
+                case VIS_NTCODE_DEACTIVATE_SCREENSAVER:;
                     ESP_ERROR_CHECK(gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL));//here be PWM
                     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, true));
                     break;

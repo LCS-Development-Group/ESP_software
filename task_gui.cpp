@@ -10,7 +10,6 @@ TimerHandle_t screensaver_timer;
 bool screensaver_state;
 void screensaver_timer_callback(TimerHandle_t timer);
 void screensaver_update();
-void screensaver_restart_timer();
 
 void task_gui_main(void *args)
 {
@@ -20,19 +19,22 @@ void task_gui_main(void *args)
 
     uint32_t ntcode=0x00;
     uint8_t retcode=GUI_RETCODE_DEFAULT;
-    bool temp;
+    bool ss_enabled;
 
-    xTimerStart(screensaver_timer, 0);
+    xSemaphoreTake(screensaver_en.mutex, portMAX_DELAY);
+    ss_enabled=screensaver_en.var;
+    xSemaphoreGive(screensaver_en.mutex);
+    if(ss_enabled) xTimerStart(screensaver_timer, 0);
 
     while(true)
     {
         if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
         {
             xSemaphoreTake(screensaver_en.mutex, portMAX_DELAY);
-            temp=screensaver_en.var;
+            ss_enabled=screensaver_en.var;
             xSemaphoreGive(screensaver_en.mutex);
 
-            if(temp==true && ntcode!=GUI_NTCODE_ACTIVATE_SS) 
+            if(ss_enabled==true && ntcode!=GUI_NTCODE_ACTIVATE_SS) 
             {
                 xTimerReset(screensaver_timer, 0);
                 if(screensaver_state==true) 
@@ -129,7 +131,7 @@ void gui_init()
 
     screensaver_timer=xTimerCreate(
         "SS_TMR",
-        pdMS_TO_TICKS(uint32_t(screensaver_delay.var*1000)),
+        pdMS_TO_TICKS((uint32_t)(screensaver_delay.var*1000)),
         pdFALSE,
         NULL,
         screensaver_timer_callback
@@ -146,7 +148,23 @@ void gui_init()
 
 void screensaver_update()
 {
+    xTimerStop(screensaver_timer, 0);
 
+    xSemaphoreTake(screensaver_en.mutex, portMAX_DELAY);
+    bool enabled=screensaver_en.var;
+    xSemaphoreGive(screensaver_en.mutex);
+
+    if(enabled==false) return;
+
+    TickType_t old_period=xTimerGetPeriod(screensaver_timer);
+
+    xSemaphoreTake(screensaver_delay.mutex, portMAX_DELAY);
+    TickType_t new_period=pdMS_TO_TICKS((uint32_t)(screensaver_delay.var*1000));
+    xSemaphoreGive(screensaver_delay.mutex);
+    
+    if(new_period!=old_period) xTimerChangePeriod(screensaver_timer, new_period, 0);
+    
+    xTimerReset(screensaver_timer, 0);
 }
 
 void screensaver_timer_callback(TimerHandle_t timer)
@@ -164,7 +182,7 @@ void gui_controller::fill_fields()
     page* page_membrane=root->add_new_page("Membrane", new t_notify_package(&task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_MEMB));
     page* page_servos=root->add_new_page("Servos", nullptr);//no ntpack?
     page* page_comm=root->add_new_page("Comms", nullptr);
-    page* page_display=root->add_new_page("Display", nullptr);
+    page* page_display=root->add_new_page("Display", new t_notify_package(&task_handle_list[GUI_TASKID], GUI_NTCODE_UPDATE_SS));
     page* page_about=root->add_new_page("About", nullptr);
 
     /*Sensors*/
@@ -217,7 +235,9 @@ void gui_controller::fill_fields()
 
     /*Display*/
     //brightness, timeout(?)
-    page_display->add_field_to_page(new bool_io_field("Screensaver", t_field_io_type::FIELD_IN, &(screensaver_en.var), &(screensaver_en.mutex), "   ON", "   OFF"));
+    page_display->add_field_to_page(new text_field(""));
+    page_display->add_field_to_page(new text_field("Screensaver:"));
+    page_display->add_field_to_page(new bool_io_field("enabled", t_field_io_type::FIELD_IN, &(screensaver_en.var), &(screensaver_en.mutex), "ON", "OFF"));
     page_display->add_field_to_page(new float_io_field("Delay", t_field_io_type::FIELD_IN, &(screensaver_delay.var), &(screensaver_delay.mutex), "s", 0, GUI_SS_MAX_DELAY_S, GUI_SS_MIN_DELAY_S));
     
 
