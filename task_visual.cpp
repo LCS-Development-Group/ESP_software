@@ -3,12 +3,7 @@
 #include <sstream>
 #include <iomanip>
 
-gpio_config_t lcd_bl_cfg;
-spi_bus_config_t spi_bus_cfg;
-esp_lcd_panel_io_handle_t lcd_io_handle;
-esp_lcd_panel_io_spi_config_t lcd_io_cfg;
-esp_lcd_panel_handle_t lcd_handle;
-esp_lcd_panel_dev_config_t lcd_dev_config;
+
 
 vis_controller *vis;
 
@@ -55,16 +50,15 @@ void task_visual_main(void *args)
                     vis->draw_bar();
                     break;
 
-                case VIS_NTCODE_ACTIVATE_SCREENSAVER:
-                    ESP_ERROR_CHECK(gpio_set_level(LCD_BL_PIN, !LCD_BL_ON_LVL));//here be PWM
-                    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, false));
-                    break;
+                // case VIS_NTCODE_ACTIVATE_SCREENSAVER:
+                //     ESP_ERROR_CHECK(gpio_set_level(LCD_BL_PIN, !LCD_BL_ON_LVL));//here be PWM
+                //     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, false));
+                //     break;
 
-                case VIS_NTCODE_DEACTIVATE_SCREENSAVER:;
-                    ESP_ERROR_CHECK(gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL));//here be PWM
-                    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, true));
-                    break;
-
+                // case VIS_NTCODE_DEACTIVATE_SCREENSAVER:;
+                //     ESP_ERROR_CHECK(gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL));//here be PWM
+                //     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, true));
+                //     break;
 
                 default:
                     ESP_LOGW("Visual", "Woken by unknown ntcode: %d", ntcode);
@@ -258,50 +252,7 @@ void vis_controller::draw_bar_at(uint8_t row, uint8_t col, uint8_t type)
 
 void vis_init()
 {
-    /*Most of the confing taken from example code for ILI9341 EDP-IDF driver*/
-
-    /*BL gpio init*/
-    lcd_bl_cfg.mode=GPIO_MODE_OUTPUT;
-    lcd_bl_cfg.pin_bit_mask=1ULL<<LCD_BL_PIN;
-    lcd_bl_cfg.pull_down_en=GPIO_PULLDOWN_DISABLE;
-    lcd_bl_cfg.pull_up_en=GPIO_PULLUP_DISABLE;
-    lcd_bl_cfg.intr_type=GPIO_INTR_DISABLE;
-    ESP_ERROR_CHECK(gpio_config(&lcd_bl_cfg));
-
-
-    /*Bus init*/
-    spi_bus_cfg.sclk_io_num=LCD_CLK_PIN;
-    spi_bus_cfg.mosi_io_num=LCD_DIN_PIN;
-    spi_bus_cfg.miso_io_num=-1; //miso unused
-    spi_bus_cfg.quadhd_io_num=-1;
-    spi_bus_cfg.quadwp_io_num=-1;
-    spi_bus_cfg.max_transfer_sz=LCD_HRES*LCD_VRES*LCD_BITS_PX;
-    ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &spi_bus_cfg, SPI_DMA_CH_AUTO));
-
-    /*I/O Pannel*/
-    lcd_io_handle=NULL;
-    lcd_io_cfg.cs_gpio_num=LCD_CS_PIN;
-    lcd_io_cfg.dc_gpio_num=LCD_DC_PIN;
-    lcd_io_cfg.pclk_hz=LCD_CLOCK_HZ;
-    lcd_io_cfg.lcd_cmd_bits=LCD_CMD_BITS;
-    lcd_io_cfg.lcd_param_bits=LCD_PARAM_BITS;
-    lcd_io_cfg.spi_mode=0;
-    lcd_io_cfg.trans_queue_depth=10;
-    ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)LCD_HOST, &lcd_io_cfg, &lcd_io_handle));
-
-    /*Panel driver*/
-    lcd_handle=NULL;
-    lcd_dev_config.reset_gpio_num=LCD_RST_PIN;
-    lcd_dev_config.rgb_ele_order=LCD_RGB_ELEMENT_ORDER_RGB;
-    lcd_dev_config.data_endian=LCD_RGB_DATA_ENDIAN_LITTLE;
-    lcd_dev_config.bits_per_pixel=LCD_BITS_PX;
-    ESP_ERROR_CHECK(esp_lcd_new_panel_ili9341(lcd_io_handle, &lcd_dev_config, &lcd_handle));
-
-    /*Final init*/
-    ESP_ERROR_CHECK(esp_lcd_panel_mirror(lcd_handle, !DEBUG_INVERT_LCD, !DEBUG_INVERT_LCD));
-    ESP_ERROR_CHECK(esp_lcd_panel_reset(lcd_handle));
-    ESP_ERROR_CHECK(esp_lcd_panel_init(lcd_handle));
-
+    
     /*controller instance creation*/
     if(vis==nullptr)
     {
@@ -312,12 +263,6 @@ void vis_init()
             exit(-1);
         }
     }
-
-    /*Starting the panel*/
-    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, true));
-    ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(lcd_handle, true));
-
-    ESP_ERROR_CHECK(gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL));//here be PWM
 }
 
 void vis_controller::draw_missing_sensor_msg(uint8_t port, uint8_t addr, bool proceed, std::string name)

@@ -14,7 +14,7 @@
 /*======================================================================================*/
 /* GENERAL                                                                              */
 /*======================================================================================*/
-#define TASK_NUM 7
+#define TASK_NUM 8
 #define ENC_TASKID 0
 #define GUI_TASKID 1
 #define VIS_TASKID 2
@@ -22,6 +22,7 @@
 #define ACT_TASKID 4
 #define REG_TASKID 5
 #define COM_TASKID 6
+#define LCD_TASKID 7
 
 #define TASK_START_SYNCBIT          (1<<23)
 #define APP_MAIN_EVBIT              (1<<22)
@@ -257,15 +258,22 @@ struct __attribute__((packed)) t_DataPacket
 
 #define COM_NTCODE_SENDALL  0
 
-
-
 /*======================================================================================*/
-/* Visual                                                                               */
+/* LCD                                                                                  */
 /*======================================================================================*/
-void task_visual_main(void *args);
+void task_lcd_main(void *args);
 
-void vis_init();
-extern vis_controller *vis;
+void lcd_init();
+struct lcd_settings_t{
+    SemaphoreHandle_t mutex;
+    bool ss_enabled;
+    bool ss_state;
+    float ss_delay;
+    float brightness;
+};
+extern lcd_settings_t lcd_settings;
+extern esp_lcd_panel_handle_t lcd_handle;
+
 
 #define LCD_HOST                SPI2_HOST
 #define LCD_CLOCK_HZ            (10 * 1000 * 1000) //10MHz
@@ -284,6 +292,19 @@ extern vis_controller *vis;
 #define LCD_CMD_BITS            8
 #define LCD_PARAM_BITS          8
 
+/*Notification Codes*/
+#define LCD_NTCODE_UPDATE_SETTINGS          0
+#define LCD_NTCODE_ACTIVATE_SCREENSAVER     1
+#define LCD_NTCODE_DEACTIVATE_SCREENSAVER   2
+
+/*======================================================================================*/
+/* Visual                                                                               */
+/*======================================================================================*/
+void task_visual_main(void *args);
+
+void vis_init();
+extern vis_controller *vis;
+
 /*Content stuff*/
 //in vis_class.h
 
@@ -294,8 +315,6 @@ extern vis_controller *vis;
 #define VIS_NTCODE_REDRAW_VALUE             3
 #define VIS_NTCODE_REDRAW_ALL_VALUES        4
 #define VIS_NTCODE_REDRAW_VALUE_EDITMODE    5
-#define VIS_NTCODE_ACTIVATE_SCREENSAVER     6
-#define VIS_NTCODE_DEACTIVATE_SCREENSAVER   7
 
 /*======================================================================================*/
 /* UI ROTATIONAL ENCODER                                                                */
@@ -328,10 +347,6 @@ extern SemaphoreHandle_t gui_mutex;
 #define GUI_SS_MAX_DELAY_S      120
 #define GUI_SS_DEF_ENABLED      true
 
-extern float_mutex_t screensaver_delay;       
-extern bool_mutex_t screensaver_en;
-    
-
 void gui_init();
 
 /*Notification Codes*/
@@ -339,8 +354,6 @@ void gui_init();
 #define GUI_NTCODE_CUR_NEG      1
 #define GUI_NTCODE_CUR_ENT      2
 #define GUI_NTCODE_CUR_BCK      3
-#define GUI_NTCODE_ACTIVATE_SS  4
-#define GUI_NTCODE_UPDATE_SS    5
 
 #define GUI_CURSOR_MAX_INDEX    255
 
@@ -355,7 +368,7 @@ void gui_init();
 extern nvs_handle_t nvs;
 void init_nvs();
 float nvs_get_float(const char* key, float def);
-float nvs_get_bool(const char* key, bool def);
+bool nvs_get_bool(const char* key, bool def);
 void nvs_save_values();
 
 /*keys defined in nvs.cpp*/

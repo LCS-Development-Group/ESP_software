@@ -30,6 +30,7 @@ extern "C" void app_main(void)
     reg_init();
     com_init();
 
+    lcd_init();
     gui_init();
     vis_init();
 
@@ -49,6 +50,7 @@ extern "C" void app_main(void)
     if(xTaskCreate(task_actuator_main, "task_actuator", 2048, NULL, 1, &task_handle_list[ACT_TASKID])!=pdPASS) task_create_fail(ACT_TASKID);
     if(xTaskCreate(task_regulator_main, "task_regulator", 2048, NULL, 1, &task_handle_list[REG_TASKID])!=pdPASS) task_create_fail(REG_TASKID);
     if(xTaskCreate(task_comm_main, "task_comm", 4096, NULL, 1, &task_handle_list[COM_TASKID])!=pdPASS) task_create_fail(COM_TASKID);
+    if(xTaskCreate(task_lcd_main, "task_lcd", 1024, NULL, 1, &task_handle_list[LCD_TASKID])!=pdPASS) task_create_fail(LCD_TASKID);
     
     vTaskDelay(pdMS_TO_TICKS(100));
     xEventGroupSetBits(main_event_group, TASK_START_SYNCBIT);//start the tasks

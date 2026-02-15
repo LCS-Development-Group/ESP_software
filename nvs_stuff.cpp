@@ -63,7 +63,7 @@ float nvs_get_float(const char* key, float def)
     }
 }
 
-float nvs_get_bool(const char* key, bool def)
+bool nvs_get_bool(const char* key, bool def)
 {
     uint8_t data;
     esp_err_t err=nvs_get_u8(nvs, key, &(data));
@@ -142,13 +142,11 @@ void nvs_save_values()
     xSemaphoreGive(com_send_period.mutex);
 
     /*LCD*/
-    xSemaphoreTake(screensaver_delay.mutex, portMAX_DELAY);
-    if(save_float(NVS_GUI_SS_DELAY, screensaver_delay.var)) commit=true;
-    xSemaphoreGive(screensaver_delay.mutex);
+    xSemaphoreTake(lcd_settings.mutex, portMAX_DELAY);
+    if(save_float(NVS_GUI_SS_DELAY, lcd_settings.ss_delay)) commit=true;
 
-    xSemaphoreTake(screensaver_en.mutex, portMAX_DELAY);
-    if(save_bool(NVS_GUI_SS_EN, screensaver_en.var)) commit=true;
-    xSemaphoreGive(screensaver_en.mutex);
+    if(save_bool(NVS_GUI_SS_EN, lcd_settings.ss_enabled)) commit=true;
+    xSemaphoreGive(lcd_settings.mutex);
 
     if(commit)
     {
