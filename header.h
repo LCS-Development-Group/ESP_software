@@ -277,20 +277,34 @@ extern esp_lcd_panel_handle_t lcd_handle;
 
 #define LCD_HOST                SPI2_HOST
 #define LCD_CLOCK_HZ            (10 * 1000 * 1000) //10MHz
-#define LCD_BL_ON_LVL           1//Temporary - pwm signal eventually
-#define LCD_BL_OFF_LVL          !LCD_BL_ON_LVL  
 #define LCD_DIN_PIN             GPIO_NUM_10 //din
 #define LCD_CLK_PIN             GPIO_NUM_9 //clk
 #define LCD_CS_PIN              GPIO_NUM_8 //cs
 #define LCD_DC_PIN              GPIO_NUM_18 //dc
 #define LCD_RST_PIN             GPIO_NUM_17 //rst
-#define LCD_BL_PIN              GPIO_NUM_16 //bl
 #define LCD_HRES                240 
 #define LCD_VRES                320
 #define LCD_NUM_PX              (LCD_HRES*LCD_VRES)
 #define LCD_BITS_PX             16
 #define LCD_CMD_BITS            8
 #define LCD_PARAM_BITS          8
+
+#define LCD_BL_PIN              GPIO_NUM_16 //bl
+#define LCD_BL_LEDC_CHANNEL     LEDC_CHANNEL_4
+#define LCD_BL_LEDC_TIMER       LEDC_TIMER_1
+#define LCD_BL_LEDC_MODE        LEDC_LOW_SPEED_MODE
+#define LCD_BL_FREQ_HZ          1000
+#define LCD_BL_DUTY_ON          1023
+#define LCD_BL_DUTY_OFF         0
+
+#define LCD_DEF_BRIGHT          50
+#define LCD_MAX_BRIGHT          100
+#define LCD_MIN_BRIGHT          5
+
+#define LCD_SS_DEF_DELAY_S      5
+#define LCD_SS_MIN_DELAY_S      3
+#define LCD_SS_MAX_DELAY_S      120
+#define LCD_SS_DEF_ENABLED      true
 
 /*Notification Codes*/
 #define LCD_NTCODE_UPDATE_SETTINGS          0
@@ -340,12 +354,6 @@ void task_gui_main(void *args);
 
 extern gui_controller *gui;
 extern SemaphoreHandle_t gui_mutex;
-
-/*Screensaver*/
-#define GUI_SS_DEF_DELAY_S      5
-#define GUI_SS_MIN_DELAY_S      3
-#define GUI_SS_MAX_DELAY_S      120
-#define GUI_SS_DEF_ENABLED      true
 
 void gui_init();
 

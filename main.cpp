@@ -24,13 +24,14 @@ extern "C" void app_main(void)
 
     enc_gpio_init();
     enc_pnct_init();
+    lcd_init();
+    
     act_init();
     sen_init();
     vTaskDelay(pdMS_TO_TICKS(100));
     reg_init();
     com_init();
 
-    lcd_init();
     gui_init();
     vis_init();
 

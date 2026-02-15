@@ -1,23 +1,27 @@
 #include "header.h"
 
-gpio_config_t lcd_bl_cfg;
-spi_bus_config_t spi_bus_cfg;
-esp_lcd_panel_io_handle_t lcd_io_handle;
-esp_lcd_panel_io_spi_config_t lcd_io_cfg;
+
+// ledc_timer_config_t lcd_bl_timer;
+// ledc_channel_config_t lcd_bl_channel;
+
+// spi_bus_config_t spi_bus_cfg;
+// esp_lcd_panel_io_handle_t lcd_io_handle;
+// esp_lcd_panel_io_spi_config_t lcd_io_cfg;
 esp_lcd_panel_handle_t lcd_handle;
-esp_lcd_panel_dev_config_t lcd_dev_config;
+// esp_lcd_panel_dev_config_t lcd_dev_config;
 
 TimerHandle_t screensaver_timer;
 lcd_settings_t lcd_settings;
 
 void screensaver_timer_callback(TimerHandle_t timer);
 void update_settings();
+void update_duty();
 
 void task_lcd_main(void *args)
 {
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
     if(DEBUG_TASK_ANOUNCE) ESP_LOGI("LCD", "task_lcdstarted");
-
+    
     xSemaphoreTake(lcd_settings.mutex, portMAX_DELAY);
     if(lcd_settings.ss_enabled) xTimerStart(screensaver_timer, 0);
     xSemaphoreGive(lcd_settings.mutex);
@@ -36,18 +40,18 @@ void task_lcd_main(void *args)
                     {
                         if(lcd_settings.ss_state==true)
                         {
-                            ESP_ERROR_CHECK(gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL));//here be PWM
-                            ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, true));
                             lcd_settings.ss_state=false;
+                            update_duty();
+                            ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, true));
                         }
                         xTimerReset(screensaver_timer, 0);
                     }
                     break;
 
                 case LCD_NTCODE_ACTIVATE_SCREENSAVER:
-                    ESP_ERROR_CHECK(gpio_set_level(LCD_BL_PIN, !LCD_BL_ON_LVL));//here be PWM
-                    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, false));
                     lcd_settings.ss_state=true;
+                    update_duty();
+                    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, false));
                     break;
 
                 case LCD_NTCODE_UPDATE_SETTINGS:
@@ -66,17 +70,38 @@ void task_lcd_main(void *args)
 void lcd_init()
 {
     /*Most of the confing taken from example code for ILI9341 EDP-IDF driver*/
+    lcd_settings.brightness=LCD_DEF_BRIGHT;
 
     /*BL gpio init*/
-    lcd_bl_cfg.mode=GPIO_MODE_OUTPUT;
-    lcd_bl_cfg.pin_bit_mask=1ULL<<LCD_BL_PIN;
-    lcd_bl_cfg.pull_down_en=GPIO_PULLDOWN_DISABLE;
-    lcd_bl_cfg.pull_up_en=GPIO_PULLUP_DISABLE;
-    lcd_bl_cfg.intr_type=GPIO_INTR_DISABLE;
-    ESP_ERROR_CHECK(gpio_config(&lcd_bl_cfg));
+    // lcd_bl_cfg.mode=GPIO_MODE_OUTPUT;
+    // lcd_bl_cfg.pin_bit_mask=1ULL<<LCD_BL_PIN;
+    // lcd_bl_cfg.pull_down_en=GPIO_PULLDOWN_DISABLE;
+    // lcd_bl_cfg.pull_up_en=GPIO_PULLUP_DISABLE;
+    // lcd_bl_cfg.intr_type=GPIO_INTR_DISABLE;
+    // ESP_ERROR_CHECK(gpio_config(&lcd_bl_cfg));
+
+    /*Backlight PWM*/
+    ledc_timer_config_t lcd_bl_timer={};
+    lcd_bl_timer.speed_mode         =LCD_BL_LEDC_MODE;
+    lcd_bl_timer.duty_resolution    =LEDC_TIMER_10_BIT;
+    lcd_bl_timer.timer_num          =LCD_BL_LEDC_TIMER;
+    lcd_bl_timer.freq_hz            =LCD_BL_FREQ_HZ;
+    lcd_bl_timer.clk_cfg            =LEDC_USE_XTAL_CLK;
+    ESP_ERROR_CHECK(ledc_timer_config(&lcd_bl_timer));
+
+    ledc_channel_config_t lcd_bl_channel={};
+    lcd_bl_channel.gpio_num       =LCD_BL_PIN;
+    lcd_bl_channel.speed_mode     =LCD_BL_LEDC_MODE;
+    lcd_bl_channel.channel        =LCD_BL_LEDC_CHANNEL;
+    lcd_bl_channel.intr_type      =LEDC_INTR_DISABLE;
+    lcd_bl_channel.timer_sel      =LCD_BL_LEDC_TIMER;
+    lcd_bl_channel.duty           =0;
+    lcd_bl_channel.hpoint         =0;
+    ESP_ERROR_CHECK(ledc_channel_config(&lcd_bl_channel));
 
 
     /*Bus init*/
+    spi_bus_config_t spi_bus_cfg={};
     spi_bus_cfg.sclk_io_num=LCD_CLK_PIN;
     spi_bus_cfg.mosi_io_num=LCD_DIN_PIN;
     spi_bus_cfg.miso_io_num=-1; //miso unused
@@ -86,7 +111,8 @@ void lcd_init()
     ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &spi_bus_cfg, SPI_DMA_CH_AUTO));
 
     /*I/O Pannel*/
-    lcd_io_handle=NULL;
+    esp_lcd_panel_io_handle_t lcd_io_handle=NULL;
+    esp_lcd_panel_io_spi_config_t lcd_io_cfg={};
     lcd_io_cfg.cs_gpio_num=LCD_CS_PIN;
     lcd_io_cfg.dc_gpio_num=LCD_DC_PIN;
     lcd_io_cfg.pclk_hz=LCD_CLOCK_HZ;
@@ -97,7 +123,7 @@ void lcd_init()
     ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)LCD_HOST, &lcd_io_cfg, &lcd_io_handle));
 
     /*Panel driver*/
-    lcd_handle=NULL;
+    esp_lcd_panel_dev_config_t lcd_dev_config={};
     lcd_dev_config.reset_gpio_num=LCD_RST_PIN;
     lcd_dev_config.rgb_ele_order=LCD_RGB_ELEMENT_ORDER_RGB;
     lcd_dev_config.data_endian=LCD_RGB_DATA_ENDIAN_LITTLE;
@@ -112,9 +138,9 @@ void lcd_init()
     /*Screensaver*/
     lcd_settings={
         .mutex=xSemaphoreCreateMutex(),
-        .ss_enabled=nvs_get_bool(NVS_GUI_SS_EN, GUI_SS_DEF_ENABLED),
+        .ss_enabled=nvs_get_bool(NVS_GUI_SS_EN, LCD_SS_DEF_ENABLED),
         .ss_state=false,
-        .ss_delay=nvs_get_float(NVS_GUI_SS_DELAY, GUI_SS_DEF_DELAY_S),
+        .ss_delay=nvs_get_float(NVS_GUI_SS_DELAY, LCD_SS_DEF_DELAY_S),
         .brightness=100,
     };
     if(lcd_settings.mutex==nullptr)
@@ -140,10 +166,21 @@ void lcd_init()
     /*Starting the panel*/
     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, true));
     ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(lcd_handle, true));
-
-    ESP_ERROR_CHECK(gpio_set_level(LCD_BL_PIN, LCD_BL_ON_LVL));//here be PWM
+    update_duty();
 }
 
+void update_duty()
+{
+    uint32_t duty=0;
+    if(lcd_settings.ss_state==true) duty=LCD_BL_DUTY_OFF;
+    else
+    {
+        duty=(uint32_t)(LCD_BL_DUTY_ON*lcd_settings.brightness)/100;
+    }
+
+    ledc_set_duty(LCD_BL_LEDC_MODE, LCD_BL_LEDC_CHANNEL, duty);
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, LCD_BL_LEDC_CHANNEL);
+}
 
 void update_settings()
 {
@@ -155,22 +192,7 @@ void update_settings()
     if(new_delay!=old_delay) xTimerChangePeriod(screensaver_timer, new_delay, 0);
     if(lcd_settings.ss_enabled) xTimerReset(screensaver_timer, 0);
 
-
-    // xSemaphoreTake(lcd_settings.mutex, portMAX_DELAY);
-
-    // xSemaphoreGive(screensaver_en.mutex);
-
-    // if(enabled==false) return;
-
-    // TickType_t old_period=xTimerGetPeriod(screensaver_timer);
-
-    // xSemaphoreTake(screensaver_delay.mutex, portMAX_DELAY);
-    // TickType_t new_period=pdMS_TO_TICKS((uint32_t)(screensaver_delay.var*1000));
-    // xSemaphoreGive(screensaver_delay.mutex);
-    
-    // if(new_period!=old_period) xTimerChangePeriod(screensaver_timer, new_period, 0);
-    
-    // xTimerReset(screensaver_timer, 0);
+    update_duty();
 }
 
 void screensaver_timer_callback(TimerHandle_t timer)

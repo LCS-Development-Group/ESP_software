@@ -150,10 +150,11 @@ void gui_controller::fill_fields()
 
     /*Display*/
     //brightness, timeout(?)
+    page_display->add_field_to_page(new float_io_field("Brightness", t_field_io_type::FIELD_IN, &(lcd_settings.brightness), &(lcd_settings.mutex), "%", 0, LCD_MAX_BRIGHT, LCD_MIN_BRIGHT));
     page_display->add_field_to_page(new text_field(""));
     page_display->add_field_to_page(new text_field("Screensaver:"));
     page_display->add_field_to_page(new bool_io_field("enabled", t_field_io_type::FIELD_IN, &(lcd_settings.ss_enabled), &(lcd_settings.mutex), "ON", "OFF"));
-    page_display->add_field_to_page(new float_io_field("Delay", t_field_io_type::FIELD_IN, &(lcd_settings.ss_delay), &(lcd_settings.mutex), "s", 0, GUI_SS_MAX_DELAY_S, GUI_SS_MIN_DELAY_S));
+    page_display->add_field_to_page(new float_io_field("Delay", t_field_io_type::FIELD_IN, &(lcd_settings.ss_delay), &(lcd_settings.mutex), "s", 0, LCD_SS_MAX_DELAY_S, LCD_SS_MIN_DELAY_S));
     
 
     /*About*/
