@@ -15,20 +15,26 @@ void task_regulator_main(void *args)
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
     if(DEBUG_TASK_ANOUNCE) ESP_LOGI("REG", "task_regulator started");
 
-    uint32_t ntcode=0x00;
+    uint8_t ntcode=0x00;
+    uint8_t sendval=0x00;
     while(true)
     {
-        if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
+        if(xQueueReceive(task_queue_list[REG_TASKID], &ntcode, portMAX_DELAY)==pdPASS)
         {
             switch(ntcode)
             {
             case REG_NTCODE_UPDATE:
                 if(update_reg())
                 {
+                    //isnt the main already do this check? yes xd NO really xd
                     xSemaphoreTake(gui_mutex, portMAX_DELAY);
                     send_redraw=(gui->check_if_displayed(&regulator.enabled) && !(gui->get_prim_lock()));
                     xSemaphoreGive(gui_mutex);
-                    if(send_redraw) xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, VIS_NTCODE_REDRAW_ALL_VALUES, eSetValueWithoutOverwrite);
+                    if(send_redraw)
+                    {
+                        sendval=VIS_NTCODE_REDRAW_ALL_VALUES;
+                        xQueueSend(task_queue_list[VIS_TASKID], &sendval, 0);
+                    }
                 }
                 break;
             
@@ -123,5 +129,7 @@ void set_membrane()
     act_membrane.enabled=regulator.CV;
     xSemaphoreGive(act_membrane.mutex);
     prev_cv=regulator.CV;
-    xTaskNotifyIndexed(task_handle_list[ACT_TASKID], 0, ACT_NTCODE_UPDATE_MEMB, eSetValueWithoutOverwrite);
+
+    uint8_t sendval=ACT_NTCODE_UPDATE_MEMB;
+    xQueueSend(task_queue_list[ACT_TASKID], &sendval, 0);
 }

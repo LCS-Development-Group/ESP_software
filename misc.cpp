@@ -31,7 +31,19 @@ void misc_init()
 void task_create_fail(uint8_t taskid)
 {
     ESP_LOGE("Setup", "Task id=%d creation failed\n", taskid);
+    vTaskDelay(pdMS_TO_TICKS(100));
     exit(-1);
+}
+
+void init_queue(uint8_t taskid, uint8_t depth)
+{
+    task_queue_list[taskid]=xQueueCreate(depth, sizeof(uint8_t));
+    if(task_queue_list[taskid]==NULL)
+    {
+        ESP_LOGE("Setup", "Task id=%d queue creation failed\n", taskid);
+        vTaskDelay(pdMS_TO_TICKS(100));
+        exit(-1);
+    }
 }
 
 void unstuck_i2c_bus(uint8_t port)

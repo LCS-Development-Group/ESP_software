@@ -13,10 +13,10 @@ void task_actuator_main(void *args)
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
     if(DEBUG_TASK_ANOUNCE) ESP_LOGI("ACT", "task_actuator started");
 
-    uint32_t ntcode=0x00;
+    uint8_t ntcode=0x00;
     while(true)
     {
-        if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
+        if(xQueueReceive(task_queue_list[ACT_TASKID], &ntcode, portMAX_DELAY)==pdPASS)
         {
             //ESP_LOGI("ACT", "Notified with %d", ntcode);
             switch(ntcode)

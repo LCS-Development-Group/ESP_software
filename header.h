@@ -24,6 +24,15 @@
 #define COM_TASKID 6
 #define LCD_TASKID 7
 
+#define ENC_QUEUE_DEPTH 2 //no point in more
+#define GUI_QUEUE_DEPTH 5
+#define VIS_QUEUE_DEPTH 2
+#define SEN_QUEUE_DEPTH 2
+#define ACT_QUEUE_DEPTH 3
+#define REG_QUEUE_DEPTH 2
+#define COM_QUEUE_DEPTH 2
+#define LCD_QUEUE_DEPTH 5
+
 #define TASK_START_SYNCBIT          (1<<23)
 #define APP_MAIN_EVBIT              (1<<22)
 #define SYSTEM_REBOOT_EVBIT         (1<<21)
@@ -33,12 +42,14 @@
 
 extern EventGroupHandle_t main_event_group;
 extern TaskHandle_t task_handle_list[TASK_NUM];
+extern QueueHandle_t task_queue_list[TASK_NUM];
 
 /*======================================================================================*/
 /* MISC                                                                                 */
 /*======================================================================================*/
 void misc_init();
 void task_create_fail(uint8_t taskid);
+void init_queue(uint8_t taskid, uint8_t depth);
 void unstuck_i2c_bus(uint8_t port);//possibly deprecated
 void system_gentle_reboot();
 void handle_missing_sensors();

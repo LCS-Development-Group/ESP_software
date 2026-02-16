@@ -18,9 +18,9 @@ enum t_field_io_type{FIELD_IN, FIELD_OUT};
 
 struct t_notify_package
 {
-    TaskHandle_t *task_to_notify;
-    uint32_t ntcode;
-    t_notify_package(TaskHandle_t *_task_to_notify, uint32_t _ntcode):task_to_notify(_task_to_notify), ntcode(_ntcode){}
+    uint8_t taskid;
+    uint8_t ntcode;
+    t_notify_package(uint8_t _taskid, uint8_t _ntcode):taskid(_taskid), ntcode(_ntcode){}
 };
 
 class basic_field

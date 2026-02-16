@@ -1,6 +1,5 @@
 #include "header.h"
 
-
 // ledc_timer_config_t lcd_bl_timer;
 // ledc_channel_config_t lcd_bl_channel;
 
@@ -13,6 +12,22 @@ esp_lcd_panel_handle_t lcd_handle;
 TimerHandle_t screensaver_timer;
 lcd_settings_t lcd_settings;
 
+#define BL_LUT_IDMAX 100
+uint16_t BL_LUT[]=
+{
+    0, 1, 2, 3, 5, 6, 7, 8, 9, 10,
+    12, 13, 14, 16, 18, 20, 21, 24, 26, 28,
+    31, 33, 36, 39, 42, 45, 49, 52, 56, 60,
+    64, 68, 72, 77, 82, 87, 92, 98, 103, 109,
+    115, 121, 128, 135, 142, 149, 156, 164, 172, 180,
+    188, 197, 206, 215, 225, 235, 245, 255, 266, 276,
+    288, 299, 311, 323, 336, 348, 361, 375, 388, 402,
+    417, 432, 447, 462, 478, 494, 510, 527, 544, 562,
+    580, 598, 617, 636, 655, 675, 696, 716, 737, 759,
+    781, 803, 826, 849, 872, 896, 921, 946, 971, 997,
+    1023,
+};
+
 void screensaver_timer_callback(TimerHandle_t timer);
 void update_settings();
 void update_duty();
@@ -20,16 +35,16 @@ void update_duty();
 void task_lcd_main(void *args)
 {
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
-    if(DEBUG_TASK_ANOUNCE) ESP_LOGI("LCD", "task_lcdstarted");
-    
+    if(DEBUG_TASK_ANOUNCE) ESP_LOGI("LCD", "task_lcd started");
+
     xSemaphoreTake(lcd_settings.mutex, portMAX_DELAY);
     if(lcd_settings.ss_enabled) xTimerStart(screensaver_timer, 0);
     xSemaphoreGive(lcd_settings.mutex);
     
-    uint32_t ntcode=0x00;
+    uint8_t ntcode=0x00;
     while(true)
     {
-        if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
+        if(xQueueReceive(task_queue_list[LCD_TASKID], &ntcode, portMAX_DELAY)==pdPASS)
         {
             xSemaphoreTake(lcd_settings.mutex, portMAX_DELAY);
             switch(ntcode)
@@ -41,8 +56,9 @@ void task_lcd_main(void *args)
                         if(lcd_settings.ss_state==true)
                         {
                             lcd_settings.ss_state=false;
-                            update_duty();
+                            
                             ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, true));
+                            update_duty();
                         }
                         xTimerReset(screensaver_timer, 0);
                     }
@@ -50,8 +66,9 @@ void task_lcd_main(void *args)
 
                 case LCD_NTCODE_ACTIVATE_SCREENSAVER:
                     lcd_settings.ss_state=true;
-                    update_duty();
+                    
                     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, false));
+                    update_duty();
                     break;
 
                 case LCD_NTCODE_UPDATE_SETTINGS:
@@ -172,10 +189,15 @@ void lcd_init()
 void update_duty()
 {
     uint32_t duty=0;
+    int8_t index=0;
     if(lcd_settings.ss_state==true) duty=LCD_BL_DUTY_OFF;
     else
     {
-        duty=(uint32_t)(LCD_BL_DUTY_ON*lcd_settings.brightness)/100;
+        index=lcd_settings.brightness;
+        if(index<0) index=0;
+        else if(index>BL_LUT_IDMAX) index=BL_LUT_IDMAX;
+        duty=(uint32_t)(BL_LUT[index]);
+        //duty=(uint32_t)(LCD_BL_DUTY_ON*lcd_settings.brightness)/100;
     }
 
     ledc_set_duty(LCD_BL_LEDC_MODE, LCD_BL_LEDC_CHANNEL, duty);
@@ -197,5 +219,6 @@ void update_settings()
 
 void screensaver_timer_callback(TimerHandle_t timer)
 {
-    xTaskNotifyIndexed(task_handle_list[LCD_TASKID], 0, LCD_NTCODE_ACTIVATE_SCREENSAVER, eSetValueWithoutOverwrite);
+    uint8_t sendval=LCD_NTCODE_ACTIVATE_SCREENSAVER;
+    xQueueSend(task_queue_list[LCD_TASKID], &sendval, 0);
 }

@@ -14,14 +14,21 @@ static bool counter_isr(pcnt_unit_handle_t unit, const pcnt_watch_event_data_t *
 {
     BaseType_t awoken_task=pdFALSE;
     pcnt_unit_stop(count);
-    if(xTaskNotifyIndexedFromISR(task_handle_list[ENC_TASKID], 0, ENC_NTCODE_ROT, eSetValueWithoutOverwrite, &awoken_task)==pdPASS) portYIELD_FROM_ISR(awoken_task);
+    uint8_t sendval=ENC_NTCODE_ROT;
+    if(xQueueSendFromISR(task_queue_list[ENC_TASKID], &sendval, &awoken_task)==pdPASS) portYIELD_FROM_ISR(awoken_task);
     return true;
 }
 
 void enc_sw_cb(button_t *btn, button_state_t state)
 {
-    if(state==BUTTON_CLICKED) xTaskNotifyIndexed(task_handle_list[ENC_TASKID], 0, ENC_NTCODE_SW_CLICK, eSetValueWithOverwrite);
-    else if(state==BUTTON_PRESSED_LONG) xTaskNotifyIndexed(task_handle_list[ENC_TASKID], 0, ENC_NTCODE_SW_PRESSED, eSetValueWithOverwrite);
+    uint8_t sendval=0x00;
+    if(state==BUTTON_CLICKED) sendval=ENC_NTCODE_SW_CLICK;
+    else 
+    {
+        if(state==BUTTON_PRESSED_LONG) sendval=ENC_NTCODE_SW_PRESSED;
+        else return;
+    }
+    xQueueSend(task_queue_list[ENC_TASKID], &sendval, 0);
 }
 
 void task_encoder_main(void *args)
@@ -33,11 +40,12 @@ void task_encoder_main(void *args)
     pcnt_unit_clear_count(count);
     pcnt_unit_start(count);
     
-    uint32_t ntcode=0x0;
+    uint8_t ntcode=0x0;
+    uint8_t sendval=0x00;
     int pos=0;
     while(true)
     {
-        if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
+        if(xQueueReceive(task_queue_list[ENC_TASKID], &ntcode, portMAX_DELAY)==pdPASS)
         {
             switch(ntcode)
             {
@@ -46,11 +54,13 @@ void task_encoder_main(void *args)
                 switch(pos)
                 {
                 case ENC_PCNT_HIGH:
-                    xTaskNotifyIndexed(task_handle_list[GUI_TASKID], 0, GUI_NTCODE_CUR_POS, eSetValueWithoutOverwrite);
+                    sendval=GUI_NTCODE_CUR_POS;
+                    xQueueSend(task_queue_list[GUI_TASKID], &sendval, 0);
                     break;
 
                 case ENC_PCNT_LOW:
-                    xTaskNotifyIndexed(task_handle_list[GUI_TASKID], 0, GUI_NTCODE_CUR_NEG, eSetValueWithoutOverwrite);
+                    sendval=GUI_NTCODE_CUR_NEG;
+                    xQueueSend(task_queue_list[GUI_TASKID], &sendval, 0);
                     break;
 
                 default:
@@ -62,11 +72,13 @@ void task_encoder_main(void *args)
                 break;
 
             case ENC_NTCODE_SW_CLICK:
-                xTaskNotifyIndexed(task_handle_list[GUI_TASKID], 0, GUI_NTCODE_CUR_ENT, eSetValueWithoutOverwrite);
+                sendval=GUI_NTCODE_CUR_ENT;
+                xQueueSend(task_queue_list[GUI_TASKID], &sendval, 0);
                 break;
 
             case ENC_NTCODE_SW_PRESSED:
-                xTaskNotifyIndexed(task_handle_list[GUI_TASKID], 0, GUI_NTCODE_CUR_BCK, eSetValueWithoutOverwrite);
+                sendval=GUI_NTCODE_CUR_BCK;
+                xQueueSend(task_queue_list[GUI_TASKID], &sendval, 0);
                 break;
                 
             default:

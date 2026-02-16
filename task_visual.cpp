@@ -3,8 +3,6 @@
 #include <sstream>
 #include <iomanip>
 
-
-
 vis_controller *vis;
 
 void task_visual_main(void *args)
@@ -14,10 +12,10 @@ void task_visual_main(void *args)
 
     vis->start();
     
-    uint32_t ntcode=0x00;
+    uint8_t ntcode=0x00;
     while(true)
     {
-        if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
+        if(xQueueReceive(task_queue_list[VIS_TASKID], &ntcode, portMAX_DELAY)==pdPASS)
         {
             switch(ntcode)
             {   

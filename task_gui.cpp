@@ -9,19 +9,22 @@ void task_gui_main(void *args)
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
     if(DEBUG_TASK_ANOUNCE) ESP_LOGI("GUI", "task_gui started");
 
-    uint32_t ntcode=0x00;
+    uint8_t ntcode=0x00;
+    uint8_t sendval=0x00;
     uint8_t retcode=GUI_RETCODE_DEFAULT;
     bool screensaver_lock;
 
     while(true)
     {
-        if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
+        if(xQueueReceive(task_queue_list[GUI_TASKID], &ntcode, portMAX_DELAY)==pdPASS)
         {
             xSemaphoreTake(lcd_settings.mutex, portMAX_DELAY);
             screensaver_lock=lcd_settings.ss_state;
             xSemaphoreGive(lcd_settings.mutex);
 
-            xTaskNotifyIndexed(task_handle_list[LCD_TASKID], 0, LCD_NTCODE_DEACTIVATE_SCREENSAVER, eSetValueWithoutOverwrite);
+            sendval=LCD_NTCODE_DEACTIVATE_SCREENSAVER;
+            xQueueSend(task_queue_list[LCD_TASKID], &sendval, 0);
+
             if(screensaver_lock) continue;//
 
             xSemaphoreTake(gui_mutex, portMAX_DELAY);
@@ -56,7 +59,7 @@ void task_gui_main(void *args)
 
             if(retcode!=GUI_RETCODE_DEFAULT)
             {
-                xTaskNotifyIndexed(task_handle_list[VIS_TASKID], 0, retcode, eSetValueWithoutOverwrite);
+                xQueueSend(task_queue_list[VIS_TASKID], &retcode, 0);
                 retcode=GUI_RETCODE_DEFAULT;
             }
         }
@@ -94,10 +97,10 @@ void gui_controller::fill_fields()
     /*Menu (Root)*/
     page* page_sensors=root->add_new_page("Sensors", nullptr);
     page* page_regulator=root->add_new_page("Regulation", nullptr);
-    page* page_membrane=root->add_new_page("Membrane", new t_notify_package(&task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_MEMB));
+    page* page_membrane=root->add_new_page("Membrane", new t_notify_package(ACT_TASKID, ACT_NTCODE_UPDATE_MEMB));
     page* page_servos=root->add_new_page("Servos", nullptr);//no ntpack?
     page* page_comm=root->add_new_page("Comms", nullptr);
-    page* page_display=root->add_new_page("Display", new t_notify_package(&task_handle_list[LCD_TASKID], LCD_NTCODE_UPDATE_SETTINGS));
+    page* page_display=root->add_new_page("Display", new t_notify_package(LCD_TASKID, LCD_NTCODE_UPDATE_SETTINGS));
     page* page_about=root->add_new_page("About", nullptr);
 
     /*Sensors*/
@@ -137,7 +140,7 @@ void gui_controller::fill_fields()
     // page* page_serv0=page_servos->add_new_page("Serwo 0", new t_notify_package(task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_SERV0));
     // page* page_serv1=page_servos->add_new_page("Serwo 1", new t_notify_package(task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_SERV1));
     // page* page_serv2=page_servos->add_new_page("Serwo 2", new t_notify_package(task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_SERV2));
-    page* page_serv3=page_servos->add_new_page("Serwo 3", new t_notify_package(&task_handle_list[ACT_TASKID], ACT_NTCODE_UPDATE_SERV3));
+    page* page_serv3=page_servos->add_new_page("Serwo 3", new t_notify_package(ACT_TASKID, ACT_NTCODE_UPDATE_SERV3));
 
     page_serv3->add_field_to_page(new bool_io_field("Enabled", t_field_io_type::FIELD_IN, &(servos[3].enabled), &(servos[3].mutex), "On ", "Off"));   
     page_serv3->add_field_to_page(new bool_io_field("Angle", t_field_io_type::FIELD_IN, &(servos[3].position), &(servos[3].mutex), "POS_1", "POS_0"));
@@ -628,6 +631,6 @@ void page::notify_associated_task()
 {
     if(ntpack!=nullptr)
     {
-        xTaskNotifyIndexed(*(ntpack->task_to_notify), 0, ntpack->ntcode, eSetValueWithoutOverwrite);
+        xQueueSend(task_queue_list[ntpack->taskid], &(ntpack->ntcode), 0);
     }
 }

@@ -9,10 +9,10 @@ void task_sensor_main(void *args)
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
     if(DEBUG_TASK_ANOUNCE) ESP_LOGI("SEN", "task_sensor started");
 
-    uint32_t ntcode=0x00;
+    uint8_t ntcode=0x00;
     while(true)
     {
-        if(xTaskNotifyWaitIndexed(0, 0x00, 0xff, &ntcode, portMAX_DELAY)==pdPASS)
+        if(xQueueReceive(task_queue_list[SEN_TASKID], &ntcode, portMAX_DELAY)==pdPASS)
         {
             switch(ntcode)
             {

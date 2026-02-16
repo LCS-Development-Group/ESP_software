@@ -4,6 +4,7 @@
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 #include "freertos/timers.h"
+#include "freertos/queue.h"
 
 #include "esp_chip_info.h"
 #include "esp_system.h"
