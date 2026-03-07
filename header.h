@@ -9,7 +9,8 @@
 #define DEBUG_TASK_ANOUNCE          false
 #define DEBUG_INVERT_LCD            true
 #define DEBUG_NVS_ERASE_ON_INIT     false
-#define DEBUG_COM_DISABLE_UART      true
+#define DEBUG_COM_DISABLE_UART      false
+#define DEBUG_COM_DISABLE_READINGS  false
 
 /*======================================================================================*/
 /* GENERAL                                                                              */
@@ -43,6 +44,10 @@
 extern EventGroupHandle_t main_event_group;
 extern TaskHandle_t task_handle_list[TASK_NUM];
 extern QueueHandle_t task_queue_list[TASK_NUM];
+
+#define DEFAULT_DEV_ID 0
+extern uint8_t dev_id;
+extern SemaphoreHandle_t dev_id_mutex;
 
 /*======================================================================================*/
 /* MISC                                                                                 */
@@ -190,7 +195,7 @@ void sen_init();
 extern t_RHT_sensor *RHT_int;
 #define SEN_RHT_INT_ADDR                0x44
 #define SEN_RHT_INT_PORT                I2C0_PORT
-#define SEN_RHT_INT_PROCEED_CONNFAIL    false //readings critical to the system (lack thereof = not much works)
+#define SEN_RHT_INT_PROCEED_CONNFAIL    true //readings critical to the system (lack thereof = not much works)
 
 /*SHT35 external*/
 extern t_RHT_sensor *RHT_ext;

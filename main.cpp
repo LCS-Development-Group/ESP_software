@@ -17,6 +17,9 @@ EventGroupHandle_t main_event_group;
 
 t_i2c_bus i2c_bus[I2C_BUS_NUMOF];
 
+uint8_t dev_id;
+SemaphoreHandle_t dev_id_mutex;
+
 void main_loop();
 void setup();
 

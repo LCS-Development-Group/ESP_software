@@ -26,6 +26,14 @@ void misc_init()
         ESP_LOGE("Main", "i2c%d_mutex creation failed", I2C1_PORT);
         exit(-1);
     }
+
+    dev_id=DEFAULT_DEV_ID;
+    dev_id_mutex=xSemaphoreCreateMutex();
+    if(dev_id_mutex==NULL)
+    {
+        ESP_LOGE("Main", "dev_id mutex creation failed");
+        exit(-1);
+    }
 }
 
 void task_create_fail(uint8_t taskid)
