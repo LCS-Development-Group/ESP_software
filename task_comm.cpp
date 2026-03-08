@@ -21,37 +21,11 @@ QueueHandle_t uart_queue;
 
 bool update_regulator, update_starter, update_membrane;
 
-//JSON codes
-#define JSON_TYPE           "JT"
-#define JSON_ID             "ID"
-
-#define JT_SEN              "sen"
-#define JSON_SEN_RH_INT     "HI"
-#define JSON_SEN_T_INT      "TI"
-#define JSON_SEN_RH_EXT     "HE"
-#define JSON_SEN_T_EXT      "TE"
-#define JSON_SEN_CURR       "MC"
-#define JSON_SEN_VOLT       "MV"
-#define JSON_SEN_POWR       "MP"
-
-#define JT_REG              "reg"
-#define JSON_REG_SP         "SP"
-#define JSON_REG_H          "HI"
-#define JSON_REG_EN         "EN"
-#define JSON_REG_MEMB_EN    "ME"
-
-#define JT_STA              "sta"
-#define JSON_STA_STATUS     "SS"
-#define JSON_STA_LASER      "LS"
-
-#define JSON_ON             "ON"
-#define JSON_OFF            "OFF"
-
-#define UART_QUEUE_DEPTH    6
 
 void send_readings();
+void send_regulator();
+void send_starter();
 void parse_incoming_json(char *json_string);
-
 
 void create_message();
 void clear_buff();
@@ -73,7 +47,9 @@ void task_comm_main(void *args)
     QueueSetMemberHandle_t activated_queue;
     uart_event_t event;
     uint8_t ntcode=0x00;
+    uint8_t send_code=0x00;
     int len;
+    bool update_gui;
     while(true)
     {
         //if(xQueueReceive(task_queue_list[COM_TASKID], &ntcode, portMAX_DELAY)==pdPASS)
@@ -85,11 +61,24 @@ void task_comm_main(void *args)
             {
                 switch(ntcode)
                 {
+                    case COM_NTCODE_SEND_SEN:
+                        if(!DEBUG_COM_DISABLE_READINGS) send_readings();
+                        break;
+                    
+                    case COM_NTCODE_SEND_REG:
+                        send_regulator();
+                        break;
+
+                    case COM_NTCODE_SEND_STA:
+                        send_regulator();
+                        send_starter();
+                        break;
+                    
                     case COM_NTCODE_SENDALL:
+                        send_starter();
                         // create_message();
                         // uart_write_bytes(COM_UART_PORT, COM_UART_START_MSG, COM_UART_START_LEN);
                         // uart_write_bytes(COM_UART_PORT, (const char *)uart_buffer, uart_buffer_idx);
-                        if(!DEBUG_COM_DISABLE_READINGS) send_readings();
                         break;
 
                     default:
@@ -125,7 +114,42 @@ void task_comm_main(void *args)
                 }
             }
         }
+
+        //other tasks
+        update_gui=update_regulator || update_membrane || update_starter;
+
+        if(update_membrane)
+        {
+            send_code=ACT_NTCODE_UPDATE_MEMB_NO_COM;
+            xQueueSend(task_queue_list[ACT_TASKID], &send_code , 0);
+            update_membrane=false;
+        }
+
+        if(update_regulator)
+        {
+            send_code=REG_NTCODE_UPDATE_NO_COM;
+            xQueueSend(task_queue_list[REG_TASKID], &send_code , 0);
+            update_regulator=false;
+        }
+
+        if(update_starter)
+        {
+            //here be some notification
+            update_starter=false;
+        }
+
+        if(update_gui)
+        {
+            send_code=VIS_NTCODE_REDRAW_ALL_VALUES;
+            xQueueSend(task_queue_list[VIS_TASKID], &send_code , 0);
+            update_gui=false;
+        }
     }
+}
+
+void com_send_deffault_values()
+{
+
 }
 
 void send_readings()
@@ -194,7 +218,7 @@ void handle_regulator_json(cJSON *root)
             xSemaphoreGive(regulator.mutex);
             update_regulator=true;
         }
-        else 
+        else // Histeresis
         if(strcmp(key, JSON_REG_H)==0)
         {
             xSemaphoreTake(regulator.mutex, portMAX_DELAY);
@@ -202,16 +226,22 @@ void handle_regulator_json(cJSON *root)
             xSemaphoreGive(regulator.mutex);
             update_regulator=true;
         }
-        else 
+        else //Regulator enable
         if(strcmp(key, JSON_REG_EN)==0)
         {
             xSemaphoreTake(regulator.mutex, portMAX_DELAY);
             if(strcmp(field->valuestring, JSON_ON)==0) regulator.enabled=true;
             else if(strcmp(field->valuestring, JSON_OFF)==0) regulator.enabled=false;
             xSemaphoreGive(regulator.mutex);
+
+            xSemaphoreTake(act_membrane.mutex, portMAX_DELAY);
+            act_membrane.enabled=false;
+            xSemaphoreGive(act_membrane.mutex);
+
             update_regulator=true;
+            update_membrane=true;
         }
-        else 
+        else //membrane manual control
         if(strcmp(key, JSON_REG_MEMB_EN)==0)
         {
             xSemaphoreTake(act_membrane.mutex, portMAX_DELAY);
@@ -272,7 +302,56 @@ void send_regulator()
 
 void handle_starter_json(cJSON *root)
 {
+    cJSON *field=NULL;
+    cJSON_ArrayForEach(field, root)
+    {
+        const char* key=field->string;
 
+        if(key==NULL) continue;
+        if(strcmp(key, JSON_TYPE)==0 || strcmp(key, JSON_ID)==0) continue;
+
+        //Starter enable
+        if(strcmp(key, JSON_STA_EN)==0)
+        {
+            xSemaphoreTake(starter_en.mutex, portMAX_DELAY);
+            if(strcmp(field->valuestring, JSON_ON)==0) starter_en.var=true;
+            else if(strcmp(field->valuestring, JSON_OFF)==0) starter_en.var=false;
+            xSemaphoreGive(starter_en.mutex);
+            update_starter=true;
+        }
+    }
+}
+
+void send_starter()
+{
+    bool temp;
+    const char *ls=NULL, *ss=NULL;
+
+    xSemaphoreTake(dev_id_mutex, portMAX_DELAY);
+    uint8_t id=dev_id;
+    xSemaphoreGive(dev_id_mutex);
+
+    xSemaphoreTake(starter_en.mutex, portMAX_DELAY);
+    temp=starter_en.var;
+    xSemaphoreGive(starter_en.mutex);
+
+    ss=temp ? JSON_ON: JSON_OFF;
+    ls="Mode-locked";
+    
+
+    int len=snprintf(output_buffer, COM_OUT_BUFSIZ,
+        "{\""
+        JSON_TYPE "\":\"" JT_REG "\",\"" 
+        JSON_ID "\":%d,\"" 
+        JSON_STA_EN "\":%s,\"" 
+        JSON_STA_LASER "\":%s,\"", 
+        id, ss, ls);
+        
+    if(len>0 && len<COM_OUT_BUFSIZ)
+    {
+        uart_write_bytes(COM_UART_PORT, output_buffer, len);
+    }
+    else ESP_LOGE("COM", "Json sta too large");
 }
 
 void parse_incoming_json(char *json_string)
@@ -289,7 +368,10 @@ void parse_incoming_json(char *json_string)
             send_regulator();
         }
         else if(strcmp(jt->valuestring, JT_STA)==0)
+        {
             handle_starter_json(root);
+            send_starter();
+        }
     }
 }
 

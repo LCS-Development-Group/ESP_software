@@ -155,11 +155,12 @@ extern t_servo servos[ACT_SERV_NUMOF];
 #define ACT_STEP_DIS_LVL        !(ACT_STEP_EN_LVL)
 #define ACT_STEP_DIR_DEF_LVL    0
 
-#define ACT_NTCODE_UPDATE_SERV0 0
-#define ACT_NTCODE_UPDATE_SERV1 1
-#define ACT_NTCODE_UPDATE_SERV2 2
-#define ACT_NTCODE_UPDATE_SERV3 3
-#define ACT_NTCODE_UPDATE_MEMB  4
+#define ACT_NTCODE_UPDATE_SERV0             0
+#define ACT_NTCODE_UPDATE_SERV1             1
+#define ACT_NTCODE_UPDATE_SERV2             2
+#define ACT_NTCODE_UPDATE_SERV3             3
+#define ACT_NTCODE_UPDATE_MEMB              4
+#define ACT_NTCODE_UPDATE_MEMB_NO_COM       5
 
 
 void act_init();
@@ -183,7 +184,8 @@ extern t_reg_var regulator;
 #define REG_DEF_VAL     0.0
 #define REG_DEF_BOOL    false
 
-#define REG_NTCODE_UPDATE   0
+#define REG_NTCODE_UPDATE           0
+#define REG_NTCODE_UPDATE_NO_COM    1
 
 /*======================================================================================*/
 /* Sensor                                                                               */
@@ -265,6 +267,34 @@ extern uint16_t uart_buffer_idx;
 #define COM_SEND_PERIOD_LOOPS_MIN   1
 extern float_mutex_t com_send_period;//float because gui needs to be able to edit
 
+//JSON codes
+#define JSON_TYPE           "JT"
+#define JSON_ID             "ID"
+
+#define JT_SEN              "sen"
+#define JSON_SEN_RH_INT     "HI"
+#define JSON_SEN_T_INT      "TI"
+#define JSON_SEN_RH_EXT     "HE"
+#define JSON_SEN_T_EXT      "TE"
+#define JSON_SEN_CURR       "MC"
+#define JSON_SEN_VOLT       "MV"
+#define JSON_SEN_POWR       "MP"
+
+#define JT_REG              "reg"
+#define JSON_REG_SP         "SP"
+#define JSON_REG_H          "HI"
+#define JSON_REG_EN         "EN"
+#define JSON_REG_MEMB_EN    "ME"
+
+#define JT_STA              "sta"
+#define JSON_STA_EN         "SS"
+#define JSON_STA_LASER      "LS"
+
+#define JSON_ON             "ON"
+#define JSON_OFF            "OFF"
+
+#define UART_QUEUE_DEPTH    6
+
 struct __attribute__((packed)) t_DataPacket
 {
     uint8_t id;
@@ -272,7 +302,17 @@ struct __attribute__((packed)) t_DataPacket
     uint8_t frc_part[COM_FRC_PART_LEN];
 };
 
-#define COM_NTCODE_SENDALL  0
+#define COM_NTCODE_SEND_SEN 0
+#define COM_NTCODE_SEND_REG 1
+#define COM_NTCODE_SEND_STA 2
+#define COM_NTCODE_SENDALL  4
+
+/*======================================================================================*/
+/* Starter                                                                              */
+/*======================================================================================*/
+
+extern bool_mutex_t starter_en;
+void starter_init(); //in misc.cpp for now
 
 /*======================================================================================*/
 /* LCD                                                                                  */

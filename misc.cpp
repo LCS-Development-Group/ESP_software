@@ -125,3 +125,15 @@ void handle_missing_sensors()
             CURSEN->get_proceed_when_fail(), 
             "CURSEN");
 }
+
+bool_mutex_t starter_en;
+void starter_init()
+{
+    starter_en.var=false;
+    starter_en.mutex=xSemaphoreCreateMutex();
+    if(starter_en.mutex==nullptr)
+    {
+        ESP_LOGE("STA", "starter mutex creation failed");
+        exit(-1);
+    }
+}

@@ -51,7 +51,7 @@ void main_loop()
 
         //update the regulator
         vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
-        sendval=REG_NTCODE_UPDATE;
+        sendval=REG_NTCODE_UPDATE_NO_COM;
         xQueueSend(task_queue_list[REG_TASKID], &sendval, 0);
 
         //send data to the pc - not every iteration
@@ -65,7 +65,7 @@ void main_loop()
                 com_counter=0;
                 if(!DEBUG_COM_DISABLE_UART)
                 {
-                    sendval=COM_NTCODE_SENDALL;
+                    sendval=COM_NTCODE_SEND_SEN;
                     xQueueSend(task_queue_list[COM_TASKID], &sendval, 0);
                 }
             }
