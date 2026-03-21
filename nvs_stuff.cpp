@@ -136,11 +136,6 @@ void nvs_save_values()
     if(save_float(NVS_REG_SP, regulator.SP)) commit=true; //setpoint
     xSemaphoreGive(regulator.mutex);
 
-    /*communicator*/
-    xSemaphoreTake(com_send_period.mutex, portMAX_DELAY);
-    if(save_float(NVS_COM_PERIOD, com_send_period.var)) commit=true;
-    xSemaphoreGive(com_send_period.mutex);
-
     /*LCD*/
     xSemaphoreTake(lcd_settings.mutex, portMAX_DELAY);
     if(save_float(NVS_GUI_SS_DELAY, lcd_settings.ss_delay)) commit=true;

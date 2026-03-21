@@ -96,10 +96,10 @@ void gui_controller::fill_fields()
 {
     /*Menu (Root)*/
     page* page_sensors=root->add_new_page("Sensors", nullptr);
-    page* page_regulator=root->add_new_page("Regulation", nullptr);
+    page* page_regulator=root->add_new_page("Regulation", new t_notify_package(COM_TASKID, COM_NTCODE_SEND_REG));
     page* page_membrane=root->add_new_page("Membrane", new t_notify_package(ACT_TASKID, ACT_NTCODE_UPDATE_MEMB));
     page* page_servos=root->add_new_page("Servos", nullptr);//no ntpack?
-    page* page_comm=root->add_new_page("Comms", nullptr);
+    //page* page_comm=root->add_new_page("Comms", nullptr);
     page* page_display=root->add_new_page("Display", new t_notify_package(LCD_TASKID, LCD_NTCODE_UPDATE_SETTINGS));
     page* page_about=root->add_new_page("About", nullptr);
 
@@ -149,7 +149,6 @@ void gui_controller::fill_fields()
     
 
     /*Comms*/
-    page_comm->add_field_to_page(new float_io_field("PERIOD", t_field_io_type::FIELD_IN, &(com_send_period.var), &(com_send_period.mutex), " S", 0, COM_SEND_PERIOD_LOOPS_MAX, COM_SEND_PERIOD_LOOPS_MIN));
 
     /*Display*/
     //brightness, timeout(?)

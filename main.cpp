@@ -27,7 +27,7 @@ extern "C" void app_main(void)
 {
     setup();
 
-    vTaskDelay(pdMS_TO_TICKS(100));
+    vTaskDelay(pdMS_TO_TICKS(500));
     xEventGroupSetBits(main_event_group, TASK_START_SYNCBIT);//start the tasks
     vTaskDelay(pdMS_TO_TICKS(100));
     xEventGroupClearBits(main_event_group, TASK_START_SYNCBIT);//safely clear the syncbit
@@ -38,7 +38,6 @@ void main_loop()
 {
     TickType_t last_wakeup=xTaskGetTickCount();
     uint8_t nvs_counter=0;
-    uint32_t com_counter=0, _com_counter;
     bool retval_rht, retval_cur;
     EventBits_t ev_retval;
     uint8_t sendval;
@@ -54,22 +53,12 @@ void main_loop()
         sendval=REG_NTCODE_UPDATE_NO_COM;
         xQueueSend(task_queue_list[REG_TASKID], &sendval, 0);
 
-        //send data to the pc - not every iteration
+        //send data to the pc - every iteration
         vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
-        if(xSemaphoreTake(com_send_period.mutex, pdMS_TO_TICKS(MAIN_LOOP_REDRAW_WAIT_MS))==pdTRUE)
+        if(!DEBUG_COM_DISABLE_UART)
         {
-            com_counter++;
-            _com_counter=(uint32_t)(com_send_period.var);
-            if(_com_counter<=com_counter)
-            {
-                com_counter=0;
-                if(!DEBUG_COM_DISABLE_UART)
-                {
-                    sendval=COM_NTCODE_SEND_SEN;
-                    xQueueSend(task_queue_list[COM_TASKID], &sendval, 0);
-                }
-            }
-            xSemaphoreGive(com_send_period.mutex);
+            sendval=COM_NTCODE_SEND_SEN;
+            xQueueSend(task_queue_list[COM_TASKID], &sendval, 0);
         }
 
         //check if the page with readings is displayed -> redraw it
@@ -119,6 +108,7 @@ void setup()
     sen_init();
     vTaskDelay(pdMS_TO_TICKS(100));
     reg_init();
+    starter_init();
     com_init();
 
     gui_init();

@@ -35,24 +35,25 @@ void task_regulator_main(void *args)
                         sendval=VIS_NTCODE_REDRAW_ALL_VALUES;
                         xQueueSend(task_queue_list[VIS_TASKID], &sendval, 0);
                     }
-                    sendval=COM_NTCODE_SEND_REG;
-                    xQueueSend(task_queue_list[COM_TASKID], &sendval, portMAX_DELAY);
                 }
+                /*respond regardless to the changes or lack thereof*/
+                sendval=COM_NTCODE_SEND_REG;
+                xQueueSend(task_queue_list[COM_TASKID], &sendval, portMAX_DELAY);
                 break;
 
             case REG_NTCODE_UPDATE_NO_COM:
-                if(update_reg())
-                {
-                    //isnt the main already do this check? yes xd NO really xd
-                    xSemaphoreTake(gui_mutex, portMAX_DELAY);
-                    send_redraw=(gui->check_if_displayed(&regulator.enabled) && !(gui->get_prim_lock()));
-                    xSemaphoreGive(gui_mutex);
-                    if(send_redraw)
-                    {
-                        sendval=VIS_NTCODE_REDRAW_ALL_VALUES;
-                        xQueueSend(task_queue_list[VIS_TASKID], &sendval, 0);
-                    }
-                }
+                // if(update_reg())
+                // {
+                //     //isnt the main already do this check? yes xd NO really xd
+                //     xSemaphoreTake(gui_mutex, portMAX_DELAY);
+                //     send_redraw=(gui->check_if_displayed(&regulator.enabled) && !(gui->get_prim_lock()));
+                //     xSemaphoreGive(gui_mutex);
+                //     if(send_redraw)
+                //     {
+                //         sendval=VIS_NTCODE_REDRAW_ALL_VALUES;
+                //         xQueueSend(task_queue_list[VIS_TASKID], &sendval, 0);
+                //     }
+                // }
                 break;
             
             
