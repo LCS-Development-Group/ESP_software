@@ -50,28 +50,31 @@ void task_comm_main(void *args)
         {
             if(xQueueReceive(task_queue_list[COM_TASKID], &ntcode, portMAX_DELAY)==pdPASS)
             {
-                switch(ntcode)
+                if(!DEBUG_COM_DISABLE_UART)
                 {
-                    case COM_NTCODE_SEND_SEN:
-                        if(!DEBUG_COM_DISABLE_READINGS) send_readings();
-                        break;
-                    
-                    case COM_NTCODE_SEND_REG:
-                        send_regulator();
-                        break;
+                    switch(ntcode)
+                    {
+                        case COM_NTCODE_SEND_SEN:
+                            if(!DEBUG_COM_DISABLE_READINGS) send_readings();
+                            break;
+                        
+                        case COM_NTCODE_SEND_REG:
+                            send_regulator();
+                            break;
 
-                    case COM_NTCODE_SEND_STA:
-                        send_starter();
-                        break;
-                    
-                    case COM_NTCODE_SENDALL:
-                        send_regulator();
-                        send_starter();
-                        break;
+                        case COM_NTCODE_SEND_STA:
+                            send_starter();
+                            break;
+                        
+                        case COM_NTCODE_SENDALL:
+                            send_regulator();
+                            send_starter();
+                            break;
 
-                    default:
-                        ESP_LOGW("COM", "Woken by unknown ntcode: %d", ntcode);
-                        break;
+                        default:
+                            ESP_LOGW("COM", "Woken by unknown ntcode: %d", ntcode);
+                            break;
+                    }
                 }
             }
         }

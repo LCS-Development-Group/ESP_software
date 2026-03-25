@@ -55,7 +55,7 @@ void main_loop()
 
         //send data to the pc - every iteration
         vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
-        if(!DEBUG_COM_DISABLE_UART)
+        if(!DEBUG_COM_DISABLE_READINGS)
         {
             sendval=COM_NTCODE_SEND_SEN;
             xQueueSend(task_queue_list[COM_TASKID], &sendval, 0);
