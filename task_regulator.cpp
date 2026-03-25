@@ -28,7 +28,7 @@ void task_regulator_main(void *args)
                 {
                     //isnt the main already do this check? yes xd NO really xd
                     xSemaphoreTake(gui_mutex, portMAX_DELAY);
-                    send_redraw=(gui->check_if_displayed(&regulator.enabled) && !(gui->get_prim_lock()));
+                    //send_redraw=(gui->check_if_displayed(&regulator.enabled) && !(gui->get_prim_lock()));
                     xSemaphoreGive(gui_mutex);
                     if(send_redraw)
                     {

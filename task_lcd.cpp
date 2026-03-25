@@ -1,13 +1,7 @@
 #include "header.h"
 
-// ledc_timer_config_t lcd_bl_timer;
-// ledc_channel_config_t lcd_bl_channel;
-
-// spi_bus_config_t spi_bus_cfg;
-// esp_lcd_panel_io_handle_t lcd_io_handle;
-// esp_lcd_panel_io_spi_config_t lcd_io_cfg;
+esp_lcd_panel_io_handle_t lcd_io_handle;
 esp_lcd_panel_handle_t lcd_handle;
-// esp_lcd_panel_dev_config_t lcd_dev_config;
 
 TimerHandle_t screensaver_timer;
 lcd_settings_t lcd_settings;
@@ -65,6 +59,7 @@ void task_lcd_main(void *args)
                     break;
 
                 case LCD_NTCODE_ACTIVATE_SCREENSAVER:
+                    break;//DEBUG
                     lcd_settings.ss_state=true;
                     
                     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, false));
@@ -84,18 +79,17 @@ void task_lcd_main(void *args)
     }
 }
 
+bool lcd_flushed_isr(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
+{
+    lv_display_t *disp = (lv_display_t *)user_ctx;
+    lv_display_flush_ready(disp);
+    return false;
+}
+
 void lcd_init()
 {
     /*Most of the confing taken from example code for ILI9341 EDP-IDF driver*/
     lcd_settings.brightness=LCD_DEF_BRIGHT;
-
-    /*BL gpio init*/
-    // lcd_bl_cfg.mode=GPIO_MODE_OUTPUT;
-    // lcd_bl_cfg.pin_bit_mask=1ULL<<LCD_BL_PIN;
-    // lcd_bl_cfg.pull_down_en=GPIO_PULLDOWN_DISABLE;
-    // lcd_bl_cfg.pull_up_en=GPIO_PULLUP_DISABLE;
-    // lcd_bl_cfg.intr_type=GPIO_INTR_DISABLE;
-    // ESP_ERROR_CHECK(gpio_config(&lcd_bl_cfg));
 
     /*Backlight PWM*/
     ledc_timer_config_t lcd_bl_timer={};
@@ -128,7 +122,7 @@ void lcd_init()
     ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &spi_bus_cfg, SPI_DMA_CH_AUTO));
 
     /*I/O Pannel*/
-    esp_lcd_panel_io_handle_t lcd_io_handle=NULL;
+    lcd_io_handle=NULL;
     esp_lcd_panel_io_spi_config_t lcd_io_cfg={};
     lcd_io_cfg.cs_gpio_num=LCD_CS_PIN;
     lcd_io_cfg.dc_gpio_num=LCD_DC_PIN;
@@ -142,7 +136,7 @@ void lcd_init()
     /*Panel driver*/
     esp_lcd_panel_dev_config_t lcd_dev_config={};
     lcd_dev_config.reset_gpio_num=LCD_RST_PIN;
-    lcd_dev_config.rgb_ele_order=LCD_RGB_ELEMENT_ORDER_RGB;
+    lcd_dev_config.rgb_ele_order=LCD_RGB_ELEMENT_ORDER_BGR;
     lcd_dev_config.data_endian=LCD_RGB_DATA_ENDIAN_LITTLE;
     lcd_dev_config.bits_per_pixel=LCD_BITS_PX;
     ESP_ERROR_CHECK(esp_lcd_new_panel_ili9341(lcd_io_handle, &lcd_dev_config, &lcd_handle));

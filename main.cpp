@@ -62,19 +62,19 @@ void main_loop()
         }
 
         //check if the page with readings is displayed -> redraw it
-        vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
-        if(xSemaphoreTake(gui_mutex, pdMS_TO_TICKS(MAIN_LOOP_REDRAW_WAIT_MS))==pdTRUE)
-        {
-            retval_rht=gui->check_if_displayed(RHT_int->get_T_ptr());
-            retval_cur=gui->check_if_displayed(CURSEN->get_current_ptr());
-            xSemaphoreGive(gui_mutex);
+        // vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
+        // if(xSemaphoreTake(gui_mutex, pdMS_TO_TICKS(MAIN_LOOP_REDRAW_WAIT_MS))==pdTRUE)
+        // {
+        //     retval_rht=gui->check_if_displayed(RHT_int->get_T_ptr());
+        //     retval_cur=gui->check_if_displayed(CURSEN->get_current_ptr());
+        //     xSemaphoreGive(gui_mutex);
 
-            if(retval_rht || retval_cur)
-            {
-                sendval=VIS_NTCODE_REDRAW_ALL_VALUES;
-                xQueueSend(task_queue_list[VIS_TASKID], &sendval, 0);
-            } 
-        }
+        //     if(retval_rht || retval_cur)
+        //     {
+        //         sendval=VIS_NTCODE_REDRAW_ALL_VALUES;
+        //         xQueueSend(task_queue_list[VIS_TASKID], &sendval, 0);
+        //     } 
+        // }
         
         //saving some values to NVS - not every iteration
         nvs_counter++;
@@ -112,7 +112,6 @@ void setup()
     com_init();
 
     gui_init();
-    vis_init();
 
     handle_missing_sensors();
 

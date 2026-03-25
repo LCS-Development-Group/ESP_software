@@ -24,3 +24,9 @@
 #include <sht3x.h>
 #include <mcp23x17.h>
 #include <ina219.h>
+
+#include "lvgl.h"
+#include "esp_lcd_panel_io.h"
+#include "esp_lcd_panel_vendor.h"
+#include "esp_lcd_panel_ops.h"
+#include "esp_lcd_ili9341.h"

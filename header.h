@@ -1,7 +1,5 @@
 #pragma once
 #include "common_includes.h"
-#include "gui_class.h"
-#include "vis_class.h"
 #include "act_class.h"
 #include "sen_class.h"
 #include "I2C.h"
@@ -300,7 +298,8 @@ struct lcd_settings_t{
 };
 extern lcd_settings_t lcd_settings;
 extern esp_lcd_panel_handle_t lcd_handle;
-
+extern esp_lcd_panel_io_handle_t lcd_io_handle;
+bool lcd_flushed_isr(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx);
 
 #define LCD_HOST                SPI2_HOST
 #define LCD_CLOCK_HZ            (10 * 1000 * 1000) //10MHz
@@ -315,6 +314,10 @@ extern esp_lcd_panel_handle_t lcd_handle;
 #define LCD_BITS_PX             16
 #define LCD_CMD_BITS            8
 #define LCD_PARAM_BITS          8
+
+//widths (after rotation)
+#define LCD_WIDTH               LCD_VRES
+#define LCD_HEIGHT              LCD_HRES
 
 #define LCD_BL_PIN              GPIO_NUM_16 //bl
 #define LCD_BL_LEDC_CHANNEL     LEDC_CHANNEL_4
@@ -344,7 +347,7 @@ extern esp_lcd_panel_handle_t lcd_handle;
 void task_visual_main(void *args);
 
 void vis_init();
-extern vis_controller *vis;
+//extern vis_controller *vis;
 
 /*Content stuff*/
 //in vis_class.h
@@ -379,7 +382,7 @@ void enc_pnct_init();
 /*======================================================================================*/
 void task_gui_main(void *args);
 
-extern gui_controller *gui;
+//extern gui_controller *gui;
 extern SemaphoreHandle_t gui_mutex;
 
 void gui_init();
@@ -413,3 +416,15 @@ extern const char* NVS_REG_SP;
 extern const char* NVS_COM_PERIOD;
 extern const char* NVS_GUI_SS_DELAY;
 extern const char* NVS_GUI_SS_EN;
+
+/*======================================================================================*/
+/* LVGL                                                                                 */
+/*======================================================================================*/
+#define LVGL_COLOR_DEPTH          16  // RGB565
+#define LVGL_USE_ANIMATION        0
+#define LVGL_USE_LABEL            1   // Only enable what you need
+#define LVGL_DRAW_SW_COMPLEX      0
+
+#define LCD_BUF_LINES            40
+extern lv_color_t lvgl_buffer[LCD_WIDTH*LCD_BUF_LINES];
+void gui2_init();

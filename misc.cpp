@@ -104,26 +104,26 @@ void system_gentle_reboot()
 
 void handle_missing_sensors()
 {
-    if(RHT_int->get_is_initialized()==false) 
-        vis->draw_missing_sensor_msg(
-            RHT_int->get_port(), 
-            RHT_int->get_addr(), 
-            RHT_int->get_proceed_when_fail(), 
-            "RHT_INT");
+    // if(RHT_int->get_is_initialized()==false) 
+    //     vis->draw_missing_sensor_msg(
+    //         RHT_int->get_port(), 
+    //         RHT_int->get_addr(), 
+    //         RHT_int->get_proceed_when_fail(), 
+    //         "RHT_INT");
 
-    if(RHT_ext->get_is_initialized()==false) 
-        vis->draw_missing_sensor_msg(
-            RHT_ext->get_port(), 
-            RHT_ext->get_addr(), 
-            RHT_ext->get_proceed_when_fail(), 
-            "RHT_ext");
+    // if(RHT_ext->get_is_initialized()==false) 
+    //     vis->draw_missing_sensor_msg(
+    //         RHT_ext->get_port(), 
+    //         RHT_ext->get_addr(), 
+    //         RHT_ext->get_proceed_when_fail(), 
+    //         "RHT_ext");
 
-    if(CURSEN->get_is_initialized()==false) 
-        vis->draw_missing_sensor_msg(
-            CURSEN->get_port(), 
-            CURSEN->get_addr(), 
-            CURSEN->get_proceed_when_fail(), 
-            "CURSEN");
+    // if(CURSEN->get_is_initialized()==false) 
+    //     vis->draw_missing_sensor_msg(
+    //         CURSEN->get_port(), 
+    //         CURSEN->get_addr(), 
+    //         CURSEN->get_proceed_when_fail(), 
+    //         "CURSEN");
 }
 
 bool_mutex_t starter_en;
