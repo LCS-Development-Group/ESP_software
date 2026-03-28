@@ -5,6 +5,8 @@
 #include "I2C.h"
 #include "000_gui.h"
 
+#define SOFTWARE_VERSION            "v2.0.0"
+
 #define DEBUG_TASK_ANOUNCE          false
 #define DEBUG_INVERT_LCD            true
 #define DEBUG_NVS_ERASE_ON_INIT     false
