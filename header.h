@@ -3,12 +3,16 @@
 #include "act_class.h"
 #include "sen_class.h"
 #include "I2C.h"
+#include "000_gui.h"
 
 #define DEBUG_TASK_ANOUNCE          false
 #define DEBUG_INVERT_LCD            true
 #define DEBUG_NVS_ERASE_ON_INIT     false
 #define DEBUG_COM_DISABLE_UART      true
 #define DEBUG_COM_DISABLE_READINGS  false
+
+extern bool DEBUG_BOOL;
+extern SemaphoreHandle_t DEBUG_BOOL_MUT;
 
 /*======================================================================================*/
 /* GENERAL                                                                              */
@@ -382,8 +386,7 @@ void enc_pnct_init();
 /*======================================================================================*/
 void task_gui_main(void *args);
 
-//extern gui_controller *gui;
-extern SemaphoreHandle_t gui_mutex;
+extern gui_controller_t *gui;
 
 void gui_init();
 
@@ -427,4 +430,3 @@ extern const char* NVS_GUI_SS_EN;
 
 #define LCD_BUF_LINES            40
 extern lv_color_t lvgl_buffer[LCD_WIDTH*LCD_BUF_LINES];
-void gui2_init();

@@ -1,27 +1,20 @@
 #include "header.h"
 #include "000_gui.h"
-#define GUI_RETCODE_DEFAULT 0
 
-SemaphoreHandle_t gui_mutex;
 lv_color_t lvgl_buffer[LCD_WIDTH*LCD_BUF_LINES];
 lv_display_t *display;
-void gui2_flush_display(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
+gui_controller_t *gui;
+lv_style_t *list_style_def;
+lv_style_t *list_style_sel;
+
 
 void task_gui_main(void *args)
 {
-    lv_obj_t *screen=lv_screen_active();
-    lv_obj_set_style_bg_color(screen, lv_color_hex(0x000000), 0);
-
-    bool temp=false;
-    gui_sw_field_t sw_field(gui_field_type_t::GUI_SW_BOOL, nullptr, screen, &temp, "test", 100, 100);
-    lv_refr_now(display);
-
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
     if(DEBUG_TASK_ANOUNCE) ESP_LOGI("GUI", "task_gui started");
 
     uint8_t ntcode=0x00;
     uint8_t sendval=0x00;
-    uint8_t retcode=GUI_RETCODE_DEFAULT;
     bool screensaver_lock;
 
     while(true)
@@ -37,82 +30,85 @@ void task_gui_main(void *args)
 
             if(screensaver_lock) continue;//
 
-            xSemaphoreTake(gui_mutex, portMAX_DELAY);
+            xSemaphoreTake(gui->get_mutex(), portMAX_DELAY);
             switch(ntcode)
             {
 
                 case GUI_NTCODE_CUR_NEG:
-                    //ESP_LOGI("GUI", "UP");
-                    //retcode=gui->move_cursor_down();
+                    gui->cmd_next();
                     break;
 
                 case GUI_NTCODE_CUR_POS:
-                    //ESP_LOGI("GUI", "DOWN");
-                    //retcode=gui->move_cursor_up();
+                    gui->cmd_prev();
                     break;
 
                 case GUI_NTCODE_CUR_ENT:
-                    sw_field.switch_state();
-                    lv_refr_now(display);
-                    //ESP_LOGI("GUI", "ENTER");
-                    //retcode=gui->enter();
+                    gui->cmd_enter();
                     break;
 
                 case GUI_NTCODE_CUR_BCK:
-                    //retcode=gui->go_back();
-                    //ESP_LOGI("GUI", "BACK");
+                    gui->cmd_back();
                     break;
 
                 default:
                     ESP_LOGW("GUI", "Woken by unknown ntcode: %d", ntcode);
                     break;
             }
-            xSemaphoreGive(gui_mutex);
-
-
-            if(retcode!=GUI_RETCODE_DEFAULT)
-            {
-                //xQueueSend(task_queue_list[VIS_TASKID], &retcode, 0);
-                retcode=GUI_RETCODE_DEFAULT;
-            }
+            xSemaphoreGive(gui->get_mutex());
+            lv_refr_now(display);
         }
     }
 }
 
+void gui_flush_display(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
+void gui_setup_global_styles();
 void gui_init()
 {
     lv_init();
     display=lv_display_create(LCD_WIDTH, LCD_HEIGHT);
     lv_display_set_buffers(display, lvgl_buffer, NULL, sizeof(lvgl_buffer), LV_DISPLAY_RENDER_MODE_PARTIAL);
     lv_display_set_color_format(display, LV_COLOR_FORMAT_RGB565);
-    lv_display_set_flush_cb(display, gui2_flush_display);
+    lv_display_set_flush_cb(display, gui_flush_display);
 
     const esp_lcd_panel_io_callbacks_t panel_cb={
         .on_color_trans_done=lcd_flushed_isr,
     };
     ESP_ERROR_CHECK(esp_lcd_panel_io_register_event_callbacks(lcd_io_handle, &panel_cb, display));
 
-    // if(gui==nullptr)
-    // {
-    //     gui=new gui_controller;
-    //     if(gui==nullptr)
-    //     {
-    //         ESP_LOGE("GUI", "gui_controller creation failed");
-    //         exit(-1);
-    //     }
-    // }
+    //styles
+    gui_setup_global_styles();
 
-    gui_mutex=xSemaphoreCreateMutex();
-    if(gui_mutex==nullptr)
+    gui=new gui_controller_t;
+    if(gui==nullptr)
     {
-        ESP_LOGE("GUI", "mutex creation failed");
+        ESP_LOGE("GUI", "GUI controller creation fail");
         exit(-1);
     }
-
-    //gui->fill_fields();
+    lv_refr_now(display);
 }
 
-void gui2_flush_display(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
+void gui_setup_global_styles()
+{
+    //menu list default
+    list_style_def=new lv_style_t;
+    lv_style_init(list_style_def);
+    lv_style_set_bg_color(list_style_def, GUI_LV_FIELD_BG_COLOR);
+    lv_style_set_bg_opa(list_style_def, LV_OPA_COVER);
+    lv_style_set_radius(list_style_def, 8);
+    lv_style_set_pad_all(list_style_def, 6);
+    lv_style_set_text_color(list_style_def, GUI_LV_TEXT_COLOR);
+
+    //menu list selected
+    list_style_sel=new lv_style_t;
+    lv_style_init(list_style_sel);
+    lv_style_set_bg_color(list_style_sel, GUI_LV_SELECT);
+    lv_style_set_bg_opa(list_style_sel, LV_OPA_COVER);
+    lv_style_set_radius(list_style_sel, 8);
+    lv_style_set_pad_all(list_style_sel, 6);
+    lv_style_set_text_color(list_style_sel, GUI_LV_TEXT_COLOR);
+}
+
+void gui_flush_display(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
 {
     uint32_t w=lv_area_get_width(area);
     uint32_t h=lv_area_get_height(area);
