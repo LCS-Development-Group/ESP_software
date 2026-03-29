@@ -3,12 +3,13 @@
 
 void gui_controller_t::fill_gui()
 {
+    page_list.push_back(new gui_page_t("Main", screen, gui_init_page_test));
     page_list.push_back(new gui_page_t("Readings", screen, gui_init_page_test));
     page_list.push_back(new gui_page_t("Regulation", screen, gui_init_page_test));
     page_list.push_back(new gui_page_t("Servos", screen, gui_init_page_test));
     page_list.push_back(new gui_page_t("Starter", screen, gui_init_page_test));
-    page_list.push_back(new gui_page_t("Settings", screen, gui_init_page_test));
-    page_list.push_back(new gui_page_t("e", screen, gui_init_page_test));
+    page_list.push_back(new gui_page_t("Comms", screen, gui_init_page_test));
+    page_list.push_back(new gui_page_t("Display", screen, gui_init_page_test));
     page_list.push_back(new gui_page_t("f", screen, gui_init_page_test));
     page_list.push_back(new gui_page_t("g", screen, gui_init_page_test));
     page_list.push_back(new gui_page_t("h", screen, gui_init_page_test));

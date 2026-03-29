@@ -1,4 +1,5 @@
 #include "../000_gui.h"
+#include "../header.h"
 
 gui_controller_t::gui_controller_t()
 {
@@ -16,6 +17,21 @@ gui_controller_t::gui_controller_t()
     //background
     screen=lv_obj_create(NULL);
     lv_obj_set_style_bg_color(screen, GUI_LV_PAGE_BG_COLOR, 0);
+
+    //info headers
+    uint8_t pos=(LCD_WIDTH-GUI_MENU_ENTRY_WIDTH_PX)/2+GUI_MENU_ENTRY_WIDTH_PX;
+    header=lv_label_create(screen);
+    lv_label_set_text(header, "Chamber " SETTING_CHAMBER_ID_STATIC);
+    lv_obj_set_style_text_color(header, GUI_LV_TEXT_COLOR, 0);
+     lv_obj_update_layout(header);
+    lv_obj_set_pos(header, pos-(lv_obj_get_width(header)/2), GUI_MENU_ENTRY_SPACING_PX);
+
+
+    soft_ver=lv_label_create(screen);
+    lv_label_set_text(soft_ver, "LCS " SETTING_SOFTWARE_VERSION);
+    lv_obj_set_style_text_color(soft_ver, GUI_LV_TEXT_COLOR, 0);
+    lv_obj_set_align(soft_ver, LV_ALIGN_BOTTOM_RIGHT);
+
 
     //finally
     this->fill_gui();
@@ -183,6 +199,7 @@ void gui_controller_t::enter_page()
     lv_screen_load(page_list[page_index]->get_screen_ptr());
     in_field=false;
     field_index=0;
+    page_list[page_index]->get_selectable_field(field_index)->select_field();
 }
 
 void gui_controller_t::leave_page()

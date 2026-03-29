@@ -15,7 +15,7 @@ inline lv_color_t GUI_LV_SW_KNOB            =lv_color_hex(0xffffff);
 
 #define GUI_MENU_ENTRY_NUM                  6
 #define GUI_MENU_ENTRY_SPACING_PX           40
-#define GUI_MENU_ENTRY_WIDTH_PX             160
+#define GUI_MENU_ENTRY_WIDTH_PX             120
 
 extern lv_style_t *list_style_def;
 extern lv_style_t *list_style_sel;
@@ -151,6 +151,8 @@ class gui_controller_t
 
     lv_obj_t *screen;
     uint8_t list_top;
+    lv_obj_t *header;
+    lv_obj_t *soft_ver;
 
 public:
     gui_controller_t();

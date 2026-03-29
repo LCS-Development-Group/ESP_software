@@ -84,6 +84,7 @@ void gui_init()
         ESP_LOGE("GUI", "GUI controller creation fail");
         exit(-1);
     }
+    if(SETTING_GUI_START_FROM_MAIN) gui->cmd_enter();
     lv_refr_now(display);
 }
 
