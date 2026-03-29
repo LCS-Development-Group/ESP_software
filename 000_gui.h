@@ -1,17 +1,31 @@
 #pragma once
 #include "common_includes.h"
-
 /*class definitions in 000_gui/ directory*/
 
 /*global values (colors, sizes, etc)*/
-inline lv_color_t GUI_LV_TEXT_COLOR         =lv_color_hex(0x9B9B9B);
-inline lv_color_t GUI_LV_FIELD_BG_COLOR     =lv_color_hex(0x1C1C1C);
-inline lv_color_t GUI_LV_SELECT             =lv_color_hex(0x8B0000);
-inline lv_color_t GUI_LV_PAGE_BG_COLOR      =lv_color_hex(0x000000);
-inline lv_color_t GUI_LV_SW_BG_ON           =lv_color_hex(0x1e90ff);
-inline lv_color_t GUI_LV_SW_BG_OFF          =lv_color_hex(0x666666);
-inline lv_color_t GUI_LV_SW_KNOB            =lv_color_hex(0xffffff);
-#define LABEL_OBJ_PADDING                   10
+inline lv_color_t GUI_COLOR_TEXT        =lv_color_hex(0xE1E1E1);
+inline lv_color_t GUI_COLOR_SELECT      =lv_color_hex(0x8B0000);//DarkRed
+inline lv_color_t GUI_COLOR_PAGE_BG     =lv_color_hex(0x000000);//Black
+inline lv_color_t GUI_COLOR_TILE_BG     =lv_color_hex(0x1c1c1c);
+inline lv_color_t GUI_COLOR_TILE_IN     =lv_color_hex(0x262626);
+
+inline lv_color_t GUI_COLOR_RH_INT      =lv_color_hex(0x1e90ff);//DodgerBlue
+inline lv_color_t GUI_COLOR_T_INT       =lv_color_hex(0xffa500);//Orange
+inline lv_color_t GUI_COLOR_RH_EXT      =lv_color_hex(0x6a5acd);//SlateBlue
+inline lv_color_t GUI_COLOR_T_EXT       =lv_color_hex(0xb22222);//fireBrick
+inline lv_color_t GUI_COLOR_SP          =lv_color_hex(0x32cd32);//LimeGreen
+
+inline lv_color_t GUI_COLOR_SW_KNOB     =lv_color_hex(0xE1E1E1);
+inline lv_color_t GUI_COLOR_SW_ON       =lv_color_hex(0x1e90ff);//DodgerBlue
+inline lv_color_t GUI_COLOR_SW_OFF      =lv_color_hex(0x666666);
+
+
+#define GUI_LABEL_OBJ_PADDING               5
+#define GUI_TILE_OBJECT_PADDING             8
+#define GUI_TILE_CORNER_RADIUS              8
+
+#define GUI_FLOAT_PRECISION_MAX             3
+#define GUI_UNIT_OFFSET_PX                  5
 
 #define GUI_MENU_ENTRY_NUM                  6
 #define GUI_MENU_ENTRY_SPACING_PX           40
@@ -19,8 +33,9 @@ inline lv_color_t GUI_LV_SW_KNOB            =lv_color_hex(0xffffff);
 
 extern lv_style_t *list_style_def;
 extern lv_style_t *list_style_sel;
+extern char gui_char_buf[16];
 
-enum gui_field_type_t{SW_BOOL, SW_POS, FLOAT_OUT, FLOAT_IN, INT16, TEXT, BACK_BTN};
+enum gui_field_type_t{SW_BOOL, SW_POS, FLOAT, INT16, TEXT, BACK_BTN};
 struct task_notify_pack_t
 {
     uint8_t task_id;
@@ -38,64 +53,127 @@ class gui_generic_field_t
 {
 protected:
     gui_field_type_t field_type;
-    task_notify_pack_t *ntpack;
-    SemaphoreHandle_t mutex;
+    bool updatable;
 
 public:
-     gui_generic_field_t(gui_field_type_t _field_type, task_notify_pack_t *_ntpack, SemaphoreHandle_t _mutex);
-    virtual ~gui_generic_field_t();
+    gui_generic_field_t(gui_field_type_t _field_type):field_type(_field_type)
+    {
+        switch(field_type)
+        {
+            case gui_field_type_t::FLOAT:       updatable=true; break;
+            case gui_field_type_t::SW_BOOL:     updatable=true; break;
+            case gui_field_type_t::SW_POS:      updatable=true; break;
+            case gui_field_type_t::INT16:       updatable=true; break;
+            case gui_field_type_t::TEXT:        updatable=false; break;
+            case gui_field_type_t::BACK_BTN:    updatable=false; break;
+            default: updatable=false; break;
+        }
+    }
+    virtual ~gui_generic_field_t(){}
 
     //getters
     gui_field_type_t get_field_type() const {return field_type;}
-    task_notify_pack_t* get_ntpack_ptr() const {return ntpack;}
-    SemaphoreHandle_t get_mutex() const {return mutex;}
-
+    bool get_updatable() const {return updatable;}
+    
     virtual void select_field()=0;
     virtual void unselect_field()=0;
 };
 
-class gui_sw_field_t :public gui_generic_field_t
+class gui_io_field_t: public gui_generic_field_t
 {
-    lv_obj_t *sw;
-    lv_obj_t *label;
-    lv_obj_t *bg;
-    bool *state;
-    std::string text;
+protected:
+    lv_obj_t *indicator;
 
-    uint16_t pos_x;
-    uint16_t pos_y;
+    task_notify_pack_t *ntpack;
+    SemaphoreHandle_t mutex;
 
 public:
-    gui_sw_field_t(
-        task_notify_pack_t *_ntpack,
-        lv_obj_t* screen,
-        bool *_state_var_ptr,
-        SemaphoreHandle_t _mutex,
-        std::string _text,
+    gui_io_field_t(
+        gui_field_type_t _field_type, 
+        task_notify_pack_t *_ntpack, 
+        SemaphoreHandle_t _mutex, 
+        lv_obj_t* parrent,
         uint16_t _pos_x,
         uint16_t _pos_y
     );
 
-    //setters
-    bool set_state(bool new_state);
-    bool switch_state();
-    void select_field() override {lv_obj_set_style_bg_color(sw, GUI_LV_SELECT, LV_PART_KNOB);}//think how to best show that
-    void unselect_field() override {lv_obj_set_style_bg_color(sw, GUI_LV_SW_KNOB, LV_PART_KNOB);}
+    task_notify_pack_t* get_ntpack_ptr() const {return ntpack;}
+    uint8_t get_ntpack_ntcode() const {return ntpack->ntcode;}
+    uint8_t get_ntpack_taskid() const {return ntpack->task_id;}
 
-    //getters - mutex taken externally
-    bool get_state() const {return *state;};
-    bool *get_state_var_ptr() {return state;}
+    SemaphoreHandle_t get_mutex() const {return mutex;}
+    virtual void update_state()=0;
 };
+
+class gui_sw_bool_field_t: public gui_io_field_t
+{
+    bool *var;
+
+public:
+    gui_sw_bool_field_t(
+        task_notify_pack_t *_ntpack, 
+        SemaphoreHandle_t _mutex, 
+        bool *var_ptr,
+        lv_obj_t* parrent,
+        uint16_t _pos_x,
+        uint16_t _pos_y
+    );
+
+    bool get_var() const {return *var;}
+    bool* get_var_ptr() {return var;}
+
+    void toggle();
+    void set_val(bool val);
+
+    void select_field() override;
+    void unselect_field() override;
+    void update_state() override {};
+};
+
+class gui_float_field_t: public gui_io_field_t
+{
+    float *var;
+    uint8_t digit_index;
+    bool in_digit;
+
+    lv_obj_t *unit;
+    lv_color_t def_color;
+    uint8_t float_prec;
+
+public:
+    gui_float_field_t(
+        task_notify_pack_t *_ntpack, 
+        SemaphoreHandle_t _mutex, 
+        float *var_ptr,
+        lv_obj_t* parrent,
+        uint16_t _pos_x,
+        uint16_t _pos_y,
+        lv_color_t _def_color,
+        char _unit,
+        uint8_t _float_prec
+    );
+
+    float get_var() const {return *var;}
+    float* get_var_ptr() {return var;}
+
+
+    void select_field() override;
+    void unselect_field() override;
+    void update_state() override;
+
+private:
+    char* float_to_string(uint8_t precision);
+};
+
 
 class gui_back_field_t: public gui_generic_field_t
 {
     lv_obj_t *back_button;
 public:
-    gui_back_field_t(lv_obj_t* screen);
+    gui_back_field_t(lv_obj_t* parrent);
     void select_field() override {lv_obj_add_state(back_button, LV_STATE_CHECKED);}
     void unselect_field() override {lv_obj_remove_state(back_button, LV_STATE_CHECKED);}
 };
-
 
 //===============================================
 // Page
@@ -115,23 +193,26 @@ class gui_page_t
     public:
     gui_page_t(
         std::string _name,
-        lv_obj_t* main_screen,
+        lv_obj_t* parrent,
         void (*init_func)(
             std::vector <gui_generic_field_t*>*,
             std::vector <gui_generic_field_t*>*,
             std::vector <lv_obj_t *>*,
             lv_obj_t*
     ));
-    ~gui_page_t();
+    ~gui_page_t(){}
 
 
 //getters
     lv_obj_t* get_screen_ptr() {return screen;}
     lv_obj_t* get_menu_label_ptr() {return menu_label;}
     std::string get_name() const {return name;}
-    uint8_t get_numof_selectable() const {return selectable.size();}
 
+    uint8_t get_numof_selectable() const {return selectable.size();}
     gui_generic_field_t *get_selectable_field(uint8_t idx);
+
+    uint8_t get_numof_unselectable() const {return unselectable.size();}
+    gui_generic_field_t *get_unselectable_field(uint8_t idx);
 };
 
 //===============================================
@@ -164,6 +245,7 @@ public:
     void cmd_enter();
     void cmd_back();
 
+    void cmd_update_page();
 
 //getters
     SemaphoreHandle_t get_mutex() const {return mutex;}
@@ -182,6 +264,11 @@ private:
 
 //menu page init functions definitions
 void gui_init_page_test(std::vector <gui_generic_field_t*>* selectable,
+    std::vector <gui_generic_field_t*>* unselectable,
+    std::vector <lv_obj_t *>* deco,
+    lv_obj_t* screen);
+
+void gui_init_page_readings(std::vector <gui_generic_field_t*>* selectable,
     std::vector <gui_generic_field_t*>* unselectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen);

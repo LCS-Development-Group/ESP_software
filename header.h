@@ -18,6 +18,9 @@
 extern bool DEBUG_BOOL;
 extern SemaphoreHandle_t DEBUG_BOOL_MUT;
 
+extern float DEBUG_FLOAT;
+extern SemaphoreHandle_t DEBUG_FLOAT_MUT;
+
 /*======================================================================================*/
 /* GENERAL                                                                              */
 /*======================================================================================*/
@@ -167,7 +170,6 @@ extern t_servo servos[ACT_SERV_NUMOF];
 #define ACT_NTCODE_UPDATE_SERV3             3
 #define ACT_NTCODE_UPDATE_MEMB              4
 #define ACT_NTCODE_UPDATE_MEMB_NO_COM       5
-
 
 void act_init();
 
@@ -355,18 +357,7 @@ bool lcd_flushed_isr(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_
 void task_visual_main(void *args);
 
 void vis_init();
-//extern vis_controller *vis;
 
-/*Content stuff*/
-//in vis_class.h
-
-/*Notification Codes*/
-#define VIS_NTCODE_REDRAW_ALL               0
-#define VIS_NTCODE_REDRAW_SELECT            1
-#define VIS_NTCODE_REDRAW_BAR               2
-#define VIS_NTCODE_REDRAW_VALUE             3
-#define VIS_NTCODE_REDRAW_ALL_VALUES        4
-#define VIS_NTCODE_REDRAW_VALUE_EDITMODE    5
 
 /*======================================================================================*/
 /* UI ROTATIONAL ENCODER                                                                */
@@ -399,8 +390,7 @@ void gui_init();
 #define GUI_NTCODE_CUR_NEG      1
 #define GUI_NTCODE_CUR_ENT      2
 #define GUI_NTCODE_CUR_BCK      3
-
-#define GUI_CURSOR_MAX_INDEX    255
+#define GUI_NTCODE_UPDATE_PAGE  4
 
 /*======================================================================================*/
 /* NVS                                                                                  */

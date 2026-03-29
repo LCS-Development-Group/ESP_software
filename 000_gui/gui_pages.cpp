@@ -11,7 +11,7 @@ void (*init_func)(
 )):name(_name)
 {
     screen=lv_obj_create(NULL);
-    lv_obj_set_style_bg_color(screen, GUI_LV_PAGE_BG_COLOR, 0);
+    lv_obj_set_style_bg_color(screen, GUI_COLOR_PAGE_BG, 0);
 
     //main menu label
     menu_label=lv_label_create(main_screen);
@@ -24,7 +24,7 @@ void (*init_func)(
     //name label
     name_label=lv_label_create(screen);
     lv_label_set_text(name_label, name.c_str());
-    lv_obj_set_style_text_color(name_label, GUI_LV_TEXT_COLOR, 0);
+    lv_obj_set_style_text_color(name_label, GUI_COLOR_TEXT, 0);
     lv_obj_set_align(name_label, LV_ALIGN_TOP_MID);
 
     //back button
@@ -44,14 +44,8 @@ gui_generic_field_t* gui_page_t::get_selectable_field(uint8_t idx)
     else return selectable[idx];
 }
 
-gui_page_t::~gui_page_t()
+gui_generic_field_t *gui_page_t::get_unselectable_field(uint8_t idx)
 {
-    // for(uint8_t i=0; i<selectable.size(); i++)
-    //     if(selectable[i]!=nullptr) delete selectable[i];
-
-    // for(uint8_t i=0; i<unselectable.size(); i++)
-    //     if(unselectable[i]!=nullptr) delete unselectable[i];
-
-    // for(uint8_t i=0; i<deco.size(); i++)
-    //     if(deco[i]!=nullptr) delete deco[i];
+    if(idx>=unselectable.size()) return unselectable[0];
+    else return unselectable[idx];
 }

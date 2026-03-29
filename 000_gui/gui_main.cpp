@@ -16,20 +16,20 @@ gui_controller_t::gui_controller_t()
 
     //background
     screen=lv_obj_create(NULL);
-    lv_obj_set_style_bg_color(screen, GUI_LV_PAGE_BG_COLOR, 0);
+    lv_obj_set_style_bg_color(screen, GUI_COLOR_PAGE_BG, 0);
 
     //info headers
     uint8_t pos=(LCD_WIDTH-GUI_MENU_ENTRY_WIDTH_PX)/2+GUI_MENU_ENTRY_WIDTH_PX;
     header=lv_label_create(screen);
     lv_label_set_text(header, "Chamber " SETTING_CHAMBER_ID_STATIC);
-    lv_obj_set_style_text_color(header, GUI_LV_TEXT_COLOR, 0);
+    lv_obj_set_style_text_color(header, GUI_COLOR_TEXT, 0);
      lv_obj_update_layout(header);
     lv_obj_set_pos(header, pos-(lv_obj_get_width(header)/2), GUI_MENU_ENTRY_SPACING_PX);
 
 
     soft_ver=lv_label_create(screen);
     lv_label_set_text(soft_ver, "LCS " SETTING_SOFTWARE_VERSION);
-    lv_obj_set_style_text_color(soft_ver, GUI_LV_TEXT_COLOR, 0);
+    lv_obj_set_style_text_color(soft_ver, GUI_COLOR_TEXT, 0);
     lv_obj_set_align(soft_ver, LV_ALIGN_BOTTOM_RIGHT);
 
 
@@ -54,7 +54,7 @@ void gui_controller_t::cmd_next()
         {
             if(field_index<(page_list[page_index]->get_numof_selectable()-1))
             {
-                page_list[page_index]->get_selectable_field(field_index)->unselect_field();
+                page_list[page_index]->get_selectable_field(field_index) ->unselect_field();
                 field_index++;
                 page_list[page_index]->get_selectable_field(field_index)->select_field();
             }
@@ -104,9 +104,9 @@ void gui_controller_t::cmd_enter()
             switch(field->get_field_type())
             {
                 case gui_field_type_t::SW_BOOL:{
-                    gui_sw_field_t* temp=static_cast<gui_sw_field_t*>(field);
+                    gui_sw_bool_field_t* temp=static_cast<gui_sw_bool_field_t*>(field);
                     xSemaphoreTake(temp->get_mutex(), portMAX_DELAY);
-                    temp->switch_state();
+                    temp->toggle();
                     xSemaphoreGive(temp->get_mutex());
                     break;}
 
@@ -114,8 +114,7 @@ void gui_controller_t::cmd_enter()
                     leave_page();
                     break;
 
-                case gui_field_type_t::FLOAT_IN:    break;
-                case gui_field_type_t::FLOAT_OUT:   break;
+                case gui_field_type_t::FLOAT:       break;
                 case gui_field_type_t::INT16:       break;
                 case gui_field_type_t::SW_POS:      break;
                 case gui_field_type_t::TEXT:        break;
@@ -204,6 +203,44 @@ void gui_controller_t::enter_page()
 
 void gui_controller_t::leave_page()
 {
+    page_list[page_index]->get_selectable_field(field_index)->unselect_field();
     in_page=false;
     lv_screen_load(screen);
+}
+
+void gui_controller_t::cmd_update_page()
+{///check if displayed tu trzeba
+    uint8_t i_max=page_list[page_index]->get_numof_selectable();
+    gui_generic_field_t *field_ptr;
+    gui_io_field_t *io_ptr;
+    SemaphoreHandle_t _mutex;
+
+    for(uint8_t i=0; i<i_max; i++)
+    {
+        field_ptr=page_list[page_index]->get_selectable_field(i);
+        if(field_ptr==nullptr) continue;
+        if(field_ptr->get_updatable())
+        {
+            io_ptr=static_cast<gui_io_field_t*>(field_ptr);
+            _mutex=io_ptr->get_mutex();
+            if(_mutex!=nullptr) xSemaphoreTake(_mutex, portMAX_DELAY);
+            io_ptr->update_state();
+            if(_mutex!=nullptr) xSemaphoreGive(_mutex);
+        }
+    }
+
+    i_max=page_list[page_index]->get_numof_unselectable();
+    for(uint8_t i=0; i<i_max; i++)
+    {
+        field_ptr=page_list[page_index]->get_unselectable_field(i);
+        if(field_ptr==nullptr) continue;
+        if(field_ptr->get_updatable())
+        {
+            io_ptr=static_cast<gui_io_field_t*>(field_ptr);
+            _mutex=io_ptr->get_mutex();
+            if(_mutex!=nullptr) xSemaphoreTake(_mutex, portMAX_DELAY);
+            io_ptr->update_state();
+            if(_mutex!=nullptr) xSemaphoreGive(_mutex);
+        }
+    }
 }

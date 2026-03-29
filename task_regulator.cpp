@@ -32,7 +32,7 @@ void task_regulator_main(void *args)
                     // xSemaphoreGive(gui_mutex);
                     if(send_redraw)
                     {
-                        sendval=VIS_NTCODE_REDRAW_ALL_VALUES;
+                        sendval=GUI_NTCODE_UPDATE_PAGE;
                         xQueueSend(task_queue_list[VIS_TASKID], &sendval, 0);
                     }
                 }

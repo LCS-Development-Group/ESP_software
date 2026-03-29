@@ -4,7 +4,7 @@
 bool DEBUG_BOOL=false;
 SemaphoreHandle_t DEBUG_BOOL_MUT=xSemaphoreCreateMutex();
 
-float DEBUG_FLOAT=21.65;
+float DEBUG_FLOAT=21.65341;
 SemaphoreHandle_t DEBUG_FLOAT_MUT=xSemaphoreCreateMutex();
 
 float DEBUG_FLOAT_2=15.3;
@@ -38,7 +38,6 @@ void main_loop()
 {
     TickType_t last_wakeup=xTaskGetTickCount();
     uint8_t nvs_counter=0;
-    bool retval_rht, retval_cur;
     EventBits_t ev_retval;
     uint8_t sendval;
     while(true)
@@ -60,6 +59,10 @@ void main_loop()
             sendval=COM_NTCODE_SEND_SEN;
             xQueueSend(task_queue_list[COM_TASKID], &sendval, 0);
         }
+
+        vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
+        sendval=GUI_NTCODE_UPDATE_PAGE;
+        xQueueSend(task_queue_list[GUI_TASKID], &sendval, 0);
 
         //check if the page with readings is displayed -> redraw it
         // vTaskDelay(pdMS_TO_TICKS(MAIN_LOOP_MINIDELAY_MS));
