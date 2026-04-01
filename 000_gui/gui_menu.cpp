@@ -38,7 +38,7 @@ void gui_init_page_test(std::vector <gui_generic_field_t*>* selectable,
     selectable->push_back(field_ptr);
 
 
-    field_ptr=new gui_float_field_t(nullptr, DEBUG_FLOAT_MUT, &DEBUG_FLOAT, screen, 50, 100, GUI_COLOR_SW_ON, '%', 3);
+    field_ptr=new gui_float_field_t(nullptr, DEBUG_FLOAT_MUT, &DEBUG_FLOAT, screen, 50, 100, GUI_COLOR_SW_ON, "%", 3);
     selectable->push_back(field_ptr);
 }
 
@@ -57,6 +57,7 @@ void gui_init_page_readings(std::vector <gui_generic_field_t*>* selectable,
     x=20; y=40;
     label=lv_label_create(screen);
     lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    
     lv_label_set_text(label, "Chamber");
     lv_obj_set_pos(label, x, y);
     lv_obj_update_layout(label);
@@ -66,17 +67,20 @@ void gui_init_page_readings(std::vector <gui_generic_field_t*>* selectable,
     lv_obj_set_style_bg_color(tile, GUI_COLOR_TILE_BG, 0);
     lv_obj_set_style_radius(tile, GUI_TILE_CORNER_RADIUS, 0);
     lv_obj_set_style_border_width(tile, 0, 0);
-    lv_obj_set_size(tile, 120, 56+3*GUI_TILE_OBJECT_PADDING);//2*font24+3*padding (incl. newline)
+    lv_obj_set_style_pad_all(tile, GUI_TILE_OBJECT_PADDING, 0);
+    lv_obj_set_size(tile, 120, 2*GUI_FONT20_HEIGHT+3*GUI_TILE_OBJECT_PADDING+4*GUI_BACKPLATE_OBJECT_PADDING);
     lv_obj_align_to(tile, label, LV_ALIGN_OUT_BOTTOM_LEFT, -GUI_TILE_OBJECT_PADDING, GUI_LABEL_OBJ_PADDING);
+    lv_obj_clear_flag(tile, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_scrollbar_mode(tile, LV_SCROLLBAR_MODE_OFF);
     deco->push_back(tile);
 
-    field_ptr=new gui_float_field_t(nullptr, *RHT_int->get_mutex_ptr(), RHT_int->get_RH_ptr(), screen, 
-    x, y+GUI_TILE_OBJECT_PADDING+GUI_LABEL_OBJ_PADDING+14, GUI_COLOR_RH_INT, '%', 3);
+    field_ptr=new gui_float_field_t(nullptr, *RHT_int->get_mutex_ptr(), RHT_int->get_RH_ptr(), tile, 
+    0, 0, GUI_COLOR_RH_INT, "%", 2);
     unselectable->push_back(field_ptr);
 
-    field_ptr=new gui_float_field_t(nullptr, *RHT_int->get_mutex_ptr(), RHT_int->get_T_ptr(), screen, 
-    x, y+2*GUI_TILE_OBJECT_PADDING+GUI_LABEL_OBJ_PADDING+28+14, GUI_COLOR_T_INT, 'C', 3);
-    unselectable->push_back(field_ptr);
+    field_ptr=new gui_float_field_t(nullptr, *RHT_int->get_mutex_ptr(), RHT_int->get_T_ptr(), tile, 
+    0, GUI_TILE_OBJECT_PADDING+GUI_FONT20_HEIGHT+2*GUI_BACKPLATE_OBJECT_PADDING, GUI_COLOR_T_INT, "°C", 2);
+    selectable->push_back(field_ptr);
 }
 /*=======================================================================================================================================*/
 /*=======================================================================================================================================*/

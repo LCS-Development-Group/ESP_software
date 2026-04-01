@@ -4,17 +4,14 @@ char gui_char_buf[16];
 
 
 //===============================================
-// io_field
+// generic field
 //===============================================
 
-gui_io_field_t::gui_io_field_t(
+gui_generic_field_t::gui_generic_field_t(
     gui_field_type_t _field_type, 
     task_notify_pack_t *_ntpack, 
-    SemaphoreHandle_t _mutex, 
-    lv_obj_t* parrent,
-    uint16_t _pos_x,
-    uint16_t _pos_y
-):gui_generic_field_t(_field_type), ntpack(_ntpack), mutex(_mutex){}
+    SemaphoreHandle_t _mutex
+):field_type(_field_type), ntpack(_ntpack), mutex(_mutex){}
 
 //===============================================
 // sw bool
@@ -25,13 +22,13 @@ gui_sw_bool_field_t::gui_sw_bool_field_t(
     SemaphoreHandle_t _mutex, 
     bool *var_ptr,
     lv_obj_t* parrent,
-    uint16_t _pos_x,
-    uint16_t _pos_y
-):gui_io_field_t(gui_field_type_t::SW_BOOL, _ntpack, _mutex, parrent, _pos_x, _pos_y)
+    uint16_t offset_x,
+    uint16_t offset_y
+):gui_generic_field_t(gui_field_type_t::SW_BOOL, _ntpack, _mutex)
 {
     indicator=lv_switch_create(parrent);
     
-    lv_obj_set_pos(indicator, _pos_x, _pos_y);
+    lv_obj_set_pos(indicator, offset_x, offset_y);
     lv_obj_set_style_bg_color(indicator, GUI_COLOR_SW_OFF, (uint32_t)LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(indicator, GUI_COLOR_SW_ON, (uint32_t)LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(indicator, GUI_COLOR_SW_KNOB, LV_PART_KNOB);
@@ -75,38 +72,51 @@ gui_float_field_t::gui_float_field_t(
     SemaphoreHandle_t _mutex, 
     float *var_ptr,
     lv_obj_t* parrent,
-    uint16_t _pos_x,
-    uint16_t _pos_y,
+    uint16_t offset_x,
+    uint16_t offset_y,
     lv_color_t _def_color,
-    char _unit,
+    const char *_unit,
     uint8_t _float_prec
-):gui_io_field_t(gui_field_type_t::FLOAT, _ntpack, _mutex, parrent, _pos_x, _pos_y), var(var_ptr), def_color(_def_color), float_prec(_float_prec)
+):gui_generic_field_t(gui_field_type_t::FLOAT, _ntpack, _mutex), var(var_ptr), def_color(_def_color), float_prec(_float_prec)
 {
     in_digit=false;
     digit_index=0;
 
-
     indicator=lv_label_create(parrent);
+    lv_obj_set_style_text_font(indicator, &lv_font_montserrat_20, 0);
     lv_obj_set_style_text_color(indicator, def_color, 0);
-    lv_obj_set_style_text_font(indicator, &lv_font_montserrat_28, 0);
-    lv_obj_set_pos(indicator, _pos_x, _pos_y);
+    lv_label_set_text(indicator, GUI_FLOAT_FIELD_DEF_VAL);
+
+    //bg
+    lv_obj_set_style_bg_color(indicator, GUI_COLOR_TILE_IN, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(indicator, LV_OPA_COVER, 0);
+    lv_obj_set_style_pad_all(indicator, GUI_BACKPLATE_OBJECT_PADDING, 0);
+    lv_obj_set_style_radius(indicator, GUI_TILE_CORNER_RADIUS, 0);
+
+    //fixed size
+    lv_obj_update_layout(indicator);
+    lv_obj_set_size(indicator, lv_obj_get_width(indicator), lv_obj_get_height(indicator));
+    lv_obj_align(indicator, LV_ALIGN_TOP_LEFT, offset_x, offset_y);
     
+    //unit
+    lv_obj_update_layout(indicator);
     unit=lv_label_create(parrent);
     lv_obj_set_style_text_color(unit, GUI_COLOR_TEXT, 0);
-    char temp[]={_unit, '\0'};
-    lv_label_set_text(unit, temp);
-
+    lv_label_set_text(unit, _unit);
+    lv_obj_align_to(unit, indicator, LV_ALIGN_OUT_RIGHT_MID, GUI_UNIT_OFFSET_PX, 0);
     this->update_state();
 }
 
 void gui_float_field_t::select_field()
 {
-    lv_obj_set_style_text_color(indicator, GUI_COLOR_SELECT, 0);
+    lv_obj_set_style_text_color(indicator, GUI_COLOR_TEXT, 0);
+    lv_obj_set_style_bg_color(indicator, GUI_COLOR_SELECT, 0);
 }
 
 void gui_float_field_t::unselect_field()
 {
     lv_obj_set_style_text_color(indicator, def_color, 0);
+    lv_obj_set_style_bg_color(indicator, GUI_COLOR_TILE_IN, 0);
 }
 
 void gui_float_field_t::update_state()
@@ -130,7 +140,7 @@ char* gui_float_field_t::float_to_string(uint8_t precision)
 //===============================================
 
 gui_back_field_t::gui_back_field_t(lv_obj_t* parrent)
-:gui_generic_field_t(gui_field_type_t::BACK_BTN)
+:gui_generic_field_t(gui_field_type_t::BACK_BTN, nullptr, NULL)
 {
     back_button=lv_label_create(parrent);
     lv_obj_add_style(back_button, list_style_def, LV_STATE_DEFAULT);

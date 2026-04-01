@@ -7,7 +7,7 @@ inline lv_color_t GUI_COLOR_TEXT        =lv_color_hex(0xE1E1E1);
 inline lv_color_t GUI_COLOR_SELECT      =lv_color_hex(0x8B0000);//DarkRed
 inline lv_color_t GUI_COLOR_PAGE_BG     =lv_color_hex(0x000000);//Black
 inline lv_color_t GUI_COLOR_TILE_BG     =lv_color_hex(0x1c1c1c);
-inline lv_color_t GUI_COLOR_TILE_IN     =lv_color_hex(0x262626);
+inline lv_color_t GUI_COLOR_TILE_IN     =lv_color_hex(0x333333);
 
 inline lv_color_t GUI_COLOR_RH_INT      =lv_color_hex(0x1e90ff);//DodgerBlue
 inline lv_color_t GUI_COLOR_T_INT       =lv_color_hex(0xffa500);//Orange
@@ -19,13 +19,19 @@ inline lv_color_t GUI_COLOR_SW_KNOB     =lv_color_hex(0xE1E1E1);
 inline lv_color_t GUI_COLOR_SW_ON       =lv_color_hex(0x1e90ff);//DodgerBlue
 inline lv_color_t GUI_COLOR_SW_OFF      =lv_color_hex(0x666666);
 
+#define GUI_FONT28_HEIGHT                   28
+#define GUI_FONT24_HEIGHT                   24
+#define GUI_FONT20_HEIGHT                   24//yeah, i know
+#define GUI_FONT14_HEIGHT                   14
 
 #define GUI_LABEL_OBJ_PADDING               5
-#define GUI_TILE_OBJECT_PADDING             8
+#define GUI_TILE_OBJECT_PADDING             10
+#define GUI_BACKPLATE_OBJECT_PADDING        5
 #define GUI_TILE_CORNER_RADIUS              8
+#define GUI_FLOAT_FIELD_DEF_VAL             "-88.88"
 
 #define GUI_FLOAT_PRECISION_MAX             3
-#define GUI_UNIT_OFFSET_PX                  5
+#define GUI_UNIT_OFFSET_PX                  8
 
 #define GUI_MENU_ENTRY_NUM                  6
 #define GUI_MENU_ENTRY_SPACING_PX           40
@@ -53,59 +59,34 @@ class gui_generic_field_t
 {
 protected:
     gui_field_type_t field_type;
-    bool updatable;
-
-public:
-    gui_generic_field_t(gui_field_type_t _field_type):field_type(_field_type)
-    {
-        switch(field_type)
-        {
-            case gui_field_type_t::FLOAT:       updatable=true; break;
-            case gui_field_type_t::SW_BOOL:     updatable=true; break;
-            case gui_field_type_t::SW_POS:      updatable=true; break;
-            case gui_field_type_t::INT16:       updatable=true; break;
-            case gui_field_type_t::TEXT:        updatable=false; break;
-            case gui_field_type_t::BACK_BTN:    updatable=false; break;
-            default: updatable=false; break;
-        }
-    }
-    virtual ~gui_generic_field_t(){}
-
-    //getters
-    gui_field_type_t get_field_type() const {return field_type;}
-    bool get_updatable() const {return updatable;}
-    
-    virtual void select_field()=0;
-    virtual void unselect_field()=0;
-};
-
-class gui_io_field_t: public gui_generic_field_t
-{
-protected:
     lv_obj_t *indicator;
 
     task_notify_pack_t *ntpack;
     SemaphoreHandle_t mutex;
 
 public:
-    gui_io_field_t(
+    gui_generic_field_t(
         gui_field_type_t _field_type, 
         task_notify_pack_t *_ntpack, 
-        SemaphoreHandle_t _mutex, 
-        lv_obj_t* parrent,
-        uint16_t _pos_x,
-        uint16_t _pos_y
-    );
+        SemaphoreHandle_t _mutex);
+
+    virtual ~gui_generic_field_t(){}
+
+    //getters
+    gui_field_type_t get_field_type() const {return field_type;}
+    
+    virtual void select_field()=0;
+    virtual void unselect_field()=0;
 
     task_notify_pack_t* get_ntpack_ptr() const {return ntpack;}
     uint8_t get_ntpack_ntcode() const {return ntpack->ntcode;}
     uint8_t get_ntpack_taskid() const {return ntpack->task_id;}
 
     SemaphoreHandle_t get_mutex() const {return mutex;}
-    virtual void update_state()=0;
+    virtual void update_state(){};
 };
 
-class gui_sw_bool_field_t: public gui_io_field_t
+class gui_sw_bool_field_t: public gui_generic_field_t
 {
     bool *var;
 
@@ -115,8 +96,8 @@ public:
         SemaphoreHandle_t _mutex, 
         bool *var_ptr,
         lv_obj_t* parrent,
-        uint16_t _pos_x,
-        uint16_t _pos_y
+        uint16_t offset_x,
+        uint16_t offset_y
     );
 
     bool get_var() const {return *var;}
@@ -130,7 +111,7 @@ public:
     void update_state() override {};
 };
 
-class gui_float_field_t: public gui_io_field_t
+class gui_float_field_t: public gui_generic_field_t
 {
     float *var;
     uint8_t digit_index;
@@ -146,10 +127,10 @@ public:
         SemaphoreHandle_t _mutex, 
         float *var_ptr,
         lv_obj_t* parrent,
-        uint16_t _pos_x,
-        uint16_t _pos_y,
+        uint16_t offset_x,
+        uint16_t offset_y,
         lv_color_t _def_color,
-        char _unit,
+        const char *_unit,
         uint8_t _float_prec
     );
 

@@ -25,7 +25,8 @@ void (*init_func)(
     name_label=lv_label_create(screen);
     lv_label_set_text(name_label, name.c_str());
     lv_obj_set_style_text_color(name_label, GUI_COLOR_TEXT, 0);
-    lv_obj_set_align(name_label, LV_ALIGN_TOP_MID);
+    //lv_obj_set_align(name_label, LV_ALIGN_TOP_MID);
+    lv_obj_set_pos(name_label, 30, 5);
 
     //back button
     selectable.push_back(new gui_back_field_t(screen));

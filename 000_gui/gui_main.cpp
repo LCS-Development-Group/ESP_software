@@ -210,22 +210,22 @@ void gui_controller_t::leave_page()
 
 void gui_controller_t::cmd_update_page()
 {///check if displayed tu trzeba
-    uint8_t i_max=page_list[page_index]->get_numof_selectable();
+    uint8_t i_max;
     gui_generic_field_t *field_ptr;
-    gui_io_field_t *io_ptr;
     SemaphoreHandle_t _mutex;
 
+    i_max=page_list[page_index]->get_numof_selectable();
     for(uint8_t i=0; i<i_max; i++)
     {
         field_ptr=page_list[page_index]->get_selectable_field(i);
         if(field_ptr==nullptr) continue;
-        if(field_ptr->get_updatable())
+        _mutex=field_ptr->get_mutex();
+        if(_mutex!=NULL) 
         {
-            io_ptr=static_cast<gui_io_field_t*>(field_ptr);
-            _mutex=io_ptr->get_mutex();
-            if(_mutex!=nullptr) xSemaphoreTake(_mutex, portMAX_DELAY);
-            io_ptr->update_state();
-            if(_mutex!=nullptr) xSemaphoreGive(_mutex);
+            //if field has no mutex then it is prolly not updatable - assumption
+            xSemaphoreTake(_mutex, portMAX_DELAY);
+            field_ptr->update_state();
+            xSemaphoreGive(_mutex);
         }
     }
 
@@ -234,13 +234,13 @@ void gui_controller_t::cmd_update_page()
     {
         field_ptr=page_list[page_index]->get_unselectable_field(i);
         if(field_ptr==nullptr) continue;
-        if(field_ptr->get_updatable())
+        _mutex=field_ptr->get_mutex();
+        if(_mutex!=NULL) 
         {
-            io_ptr=static_cast<gui_io_field_t*>(field_ptr);
-            _mutex=io_ptr->get_mutex();
-            if(_mutex!=nullptr) xSemaphoreTake(_mutex, portMAX_DELAY);
-            io_ptr->update_state();
-            if(_mutex!=nullptr) xSemaphoreGive(_mutex);
+            //if field has no mutex then it is prolly not updatable - assumption
+            xSemaphoreTake(_mutex, portMAX_DELAY);
+            field_ptr->update_state();
+            xSemaphoreGive(_mutex);
         }
     }
 }
