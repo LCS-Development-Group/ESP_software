@@ -1,7 +1,4 @@
 #include "../000_gui.h"
-char gui_char_buf[16];
-
-
 
 //===============================================
 // generic field
@@ -79,8 +76,7 @@ gui_float_field_t::gui_float_field_t(
     uint8_t _float_prec
 ):gui_generic_field_t(gui_field_type_t::FLOAT, _ntpack, _mutex), var(var_ptr), def_color(_def_color), float_prec(_float_prec)
 {
-    in_digit=false;
-    digit_index=0;
+    if(float_prec>GUI_FLOAT_PRECISION_MAX) float_prec=GUI_FLOAT_PRECISION_MAX;
 
     indicator=lv_label_create(parrent);
     lv_obj_set_style_text_font(indicator, &lv_font_montserrat_20, 0);
@@ -121,18 +117,16 @@ void gui_float_field_t::unselect_field()
 
 void gui_float_field_t::update_state()
 {
-    this->float_to_string(float_prec);
+    this->float_to_string();
     lv_label_set_text(indicator, gui_char_buf);
     lv_obj_update_layout(indicator);
 
     lv_obj_align_to(unit, indicator, LV_ALIGN_OUT_RIGHT_BOTTOM, GUI_UNIT_OFFSET_PX, 0);
 }
 
-char* gui_float_field_t::float_to_string(uint8_t precision)
+void gui_float_field_t::float_to_string()
 {
-    if(precision>GUI_FLOAT_PRECISION_MAX) precision=GUI_FLOAT_PRECISION_MAX;
-    snprintf(gui_char_buf, sizeof(gui_char_buf), "%.*f", precision, *var);
-    return gui_char_buf;
+    snprintf(gui_char_buf, sizeof(gui_char_buf), "%.*f", float_prec, *var);
 }
 
 //===============================================

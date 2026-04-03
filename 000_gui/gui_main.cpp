@@ -11,8 +11,8 @@ gui_controller_t::gui_controller_t()
     in_page=false;
     list_top=0;
 
-    field_index=0;
-    in_field=false;
+    editor_ptr=new gui_editor_t;
+    if(editor_ptr==nullptr) exit(-1);
 
     //background
     screen=lv_obj_create(NULL);
@@ -43,105 +43,54 @@ gui_controller_t::~gui_controller_t(){}
 
 void gui_controller_t::cmd_next()
 {
-    if(in_page==false)
-    {
-        if(page_index<(page_list.size()-1))
-            select_next_list_entry();
+    if(in_page==true)
+    {//on a page
+        page_list[page_index]->cmd_next();
     }
-    else//in a page
-    {
-        if(in_field==false)//jumping between fields
-        {
-            if(field_index<(page_list[page_index]->get_numof_selectable()-1))
-            {
-                page_list[page_index]->get_selectable_field(field_index) ->unselect_field();
-                field_index++;
-                page_list[page_index]->get_selectable_field(field_index)->select_field();
-            }
-        }
-        else
-        {
-
-        }
+    else
+    {//in menu
+        select_next_list_entry();
     }
 }
 
 void gui_controller_t::cmd_prev()
 {
-    if(in_page==false)
-    {
-        if(page_index>0)
-            select_prev_list_entry();
+    if(in_page==true)
+    {//on a page
+        page_list[page_index]->cmd_prev();
     }
-    else//in a page
-    {
-        if(in_field==false)//jumping between fields
-        {
-            if(field_index>0)
-            {
-                page_list[page_index]->get_selectable_field(field_index)->unselect_field();
-                field_index--;
-                page_list[page_index]->get_selectable_field(field_index)->select_field();
-            }
-        }
-        else
-        {
-            
-        }
+    else
+    {//in menu
+        select_prev_list_entry();
     }
 }
+
 void gui_controller_t::cmd_enter()
 {
-    if(in_page==false)
-    {
-        enter_page();
+    if(in_page==true)
+    {//on a page
+        if(page_list[page_index]->cmd_enter()==true)
+            leave_page();
     }
     else
-    {
-        if(in_field==false)//jumping between fields
-        {
-            gui_generic_field_t* field=page_list[page_index]->get_selectable_field(field_index);
-            switch(field->get_field_type())
-            {
-                case gui_field_type_t::SW_BOOL:{
-                    gui_sw_bool_field_t* temp=static_cast<gui_sw_bool_field_t*>(field);
-                    xSemaphoreTake(temp->get_mutex(), portMAX_DELAY);
-                    temp->toggle();
-                    xSemaphoreGive(temp->get_mutex());
-                    break;}
-
-                case gui_field_type_t::BACK_BTN:
-                    leave_page();
-                    break;
-
-                case gui_field_type_t::FLOAT:       break;
-                case gui_field_type_t::INT16:       break;
-                case gui_field_type_t::SW_POS:      break;
-                case gui_field_type_t::TEXT:        break;
-                default:
-                    break;
-            }
-        }    
-        else
-        {
-            
-        }
-    }
+    {//in menu
+        enter_page();
+    }    
 }
+
 void gui_controller_t::cmd_back()
 {
-    if(in_page==false)
-    {
-        
-    }
-    else
-    {
-        leave_page();
-    }
+    if(in_page==true)
+    {//on a page
+        if(page_list[page_index]->cmd_back()==true) 
+            leave_page();
+    } 
 }
 
 void gui_controller_t::select_next_list_entry()
 {
+    if(page_index==(page_list.size()-1)) return;
+    
     lv_obj_remove_state(page_list[page_index]->get_menu_label_ptr(), LV_STATE_CHECKED);
     page_index++;
     lv_obj_add_state(page_list[page_index]->get_menu_label_ptr(), LV_STATE_CHECKED);
@@ -162,6 +111,8 @@ void gui_controller_t::select_next_list_entry()
 }
 void gui_controller_t::select_prev_list_entry()
 {
+    if(page_index==0) return;
+
     lv_obj_remove_state(page_list[page_index]->get_menu_label_ptr(), LV_STATE_CHECKED);
     page_index--;
     lv_obj_add_state(page_list[page_index]->get_menu_label_ptr(), LV_STATE_CHECKED);
@@ -195,52 +146,17 @@ void gui_controller_t::show_list()
 void gui_controller_t::enter_page()
 {
     in_page=true;
-    lv_screen_load(page_list[page_index]->get_screen_ptr());
-    in_field=false;
-    field_index=0;
-    page_list[page_index]->get_selectable_field(field_index)->select_field();
+    page_list[page_index]->load_page();
 }
 
 void gui_controller_t::leave_page()
 {
-    page_list[page_index]->get_selectable_field(field_index)->unselect_field();
     in_page=false;
+    page_list[page_index]->unload_page();
     lv_screen_load(screen);
 }
 
 void gui_controller_t::cmd_update_page()
-{///check if displayed tu trzeba
-    uint8_t i_max;
-    gui_generic_field_t *field_ptr;
-    SemaphoreHandle_t _mutex;
-
-    i_max=page_list[page_index]->get_numof_selectable();
-    for(uint8_t i=0; i<i_max; i++)
-    {
-        field_ptr=page_list[page_index]->get_selectable_field(i);
-        if(field_ptr==nullptr) continue;
-        _mutex=field_ptr->get_mutex();
-        if(_mutex!=NULL) 
-        {
-            //if field has no mutex then it is prolly not updatable - assumption
-            xSemaphoreTake(_mutex, portMAX_DELAY);
-            field_ptr->update_state();
-            xSemaphoreGive(_mutex);
-        }
-    }
-
-    i_max=page_list[page_index]->get_numof_unselectable();
-    for(uint8_t i=0; i<i_max; i++)
-    {
-        field_ptr=page_list[page_index]->get_unselectable_field(i);
-        if(field_ptr==nullptr) continue;
-        _mutex=field_ptr->get_mutex();
-        if(_mutex!=NULL) 
-        {
-            //if field has no mutex then it is prolly not updatable - assumption
-            xSemaphoreTake(_mutex, portMAX_DELAY);
-            field_ptr->update_state();
-            xSemaphoreGive(_mutex);
-        }
-    }
+{
+    page_list[page_index]->cmd_update_page();  
 }

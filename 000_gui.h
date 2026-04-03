@@ -113,9 +113,8 @@ public:
 
 class gui_float_field_t: public gui_generic_field_t
 {
+    char gui_char_buf[16];
     float *var;
-    uint8_t digit_index;
-    bool in_digit;
 
     lv_obj_t *unit;
     lv_color_t def_color;
@@ -143,9 +142,8 @@ public:
     void update_state() override;
 
 private:
-    char* float_to_string(uint8_t precision);
+    void float_to_string();
 };
-
 
 class gui_back_field_t: public gui_generic_field_t
 {
@@ -154,6 +152,16 @@ public:
     gui_back_field_t(lv_obj_t* parrent);
     void select_field() override {lv_obj_add_state(back_button, LV_STATE_CHECKED);}
     void unselect_field() override {lv_obj_remove_state(back_button, LV_STATE_CHECKED);}
+};
+
+//===============================================
+// Editor
+//===============================================
+
+class gui_editor_t
+{
+public:
+    gui_editor_t();
 };
 
 //===============================================
@@ -171,10 +179,16 @@ class gui_page_t
     lv_obj_t *name_label;
     std::string name;
 
+    uint8_t field_index;
+    bool in_field;
+
+    gui_editor_t *editor_ptr;
+
     public:
     gui_page_t(
         std::string _name,
-        lv_obj_t* parrent,
+        lv_obj_t* main_screen,
+        gui_editor_t *_editor_ptr,
         void (*init_func)(
             std::vector <gui_generic_field_t*>*,
             std::vector <gui_generic_field_t*>*,
@@ -183,6 +197,14 @@ class gui_page_t
     ));
     ~gui_page_t(){}
 
+    void unload_page();
+    void load_page();
+
+    void cmd_next();
+    void cmd_prev();
+    bool cmd_enter();
+    bool cmd_back();
+    void cmd_update_page();
 
 //getters
     lv_obj_t* get_screen_ptr() {return screen;}
@@ -196,6 +218,7 @@ class gui_page_t
     gui_generic_field_t *get_unselectable_field(uint8_t idx);
 };
 
+
 //===============================================
 // Controller
 //===============================================
@@ -208,13 +231,12 @@ class gui_controller_t
     uint8_t page_index;
     bool in_page;
 
-    uint8_t field_index;
-    bool in_field;
-
     lv_obj_t *screen;
     uint8_t list_top;
     lv_obj_t *header;
     lv_obj_t *soft_ver;
+
+    gui_editor_t *editor_ptr;
 
 public:
     gui_controller_t();
@@ -253,3 +275,4 @@ void gui_init_page_readings(std::vector <gui_generic_field_t*>* selectable,
     std::vector <gui_generic_field_t*>* unselectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen);
+

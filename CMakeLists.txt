@@ -14,6 +14,7 @@ idf_component_register(SRCS  "main.cpp"
 "000_gui/gui_main.cpp"
 "000_gui/gui_pages.cpp"
 "000_gui/gui_menu.cpp"
+"000_gui/gui_editor.cpp"
 
 REQUIRES 
 spi_flash 

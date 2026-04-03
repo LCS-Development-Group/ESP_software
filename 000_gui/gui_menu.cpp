@@ -3,16 +3,17 @@
 
 void gui_controller_t::fill_gui()
 {
-    page_list.push_back(new gui_page_t("Main", screen, gui_init_page_readings));
-    page_list.push_back(new gui_page_t("Readings", screen, gui_init_page_test));
-    page_list.push_back(new gui_page_t("Regulation", screen, gui_init_page_test));
-    page_list.push_back(new gui_page_t("Servos", screen, gui_init_page_test));
-    page_list.push_back(new gui_page_t("Starter", screen, gui_init_page_test));
-    page_list.push_back(new gui_page_t("Comms", screen, gui_init_page_test));
-    page_list.push_back(new gui_page_t("Display", screen, gui_init_page_test));
-    page_list.push_back(new gui_page_t("f", screen, gui_init_page_test));
-    page_list.push_back(new gui_page_t("g", screen, gui_init_page_test));
-    page_list.push_back(new gui_page_t("h", screen, gui_init_page_test));
+    page_list.push_back(new gui_page_t("Readings", screen, editor_ptr, gui_init_page_test));
+    page_list.push_back(new gui_page_t("Main", screen, editor_ptr, gui_init_page_readings));
+    
+    page_list.push_back(new gui_page_t("Regulation", screen, editor_ptr, gui_init_page_test));
+    page_list.push_back(new gui_page_t("Servos", screen, editor_ptr, gui_init_page_test));
+    page_list.push_back(new gui_page_t("Starter", screen, editor_ptr, gui_init_page_test));
+    page_list.push_back(new gui_page_t("Comms", screen, editor_ptr, gui_init_page_test));
+    page_list.push_back(new gui_page_t("Display", screen, editor_ptr, gui_init_page_test));
+    page_list.push_back(new gui_page_t("f", screen, editor_ptr, gui_init_page_test));
+    page_list.push_back(new gui_page_t("g", screen, editor_ptr, gui_init_page_test));
+    page_list.push_back(new gui_page_t("h", screen, editor_ptr, gui_init_page_test));
 }
 
 /*=======================================================================================================================================*/
