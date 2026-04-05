@@ -21,13 +21,15 @@ inline lv_color_t GUI_COLOR_SW_OFF      =lv_color_hex(0x666666);
 
 #define GUI_FONT28_HEIGHT                   28
 #define GUI_FONT24_HEIGHT                   24
-#define GUI_FONT20_HEIGHT                   24//yeah, i know
+#define GUI_FONT20_HEIGHT                   20//yeah, i know
 #define GUI_FONT14_HEIGHT                   14
 
 #define GUI_LABEL_OBJ_PADDING               5
 #define GUI_TILE_OBJECT_PADDING             10
 #define GUI_BACKPLATE_OBJECT_PADDING        5
 #define GUI_TILE_CORNER_RADIUS              8
+#define GUI_SW_WIDTH                        40
+#define GUI_SW_HEIGHT                       20
 #define GUI_FLOAT_FIELD_DEF_VAL             "-88.88"
 
 #define GUI_FLOAT_PRECISION_MAX             3
@@ -37,9 +39,11 @@ inline lv_color_t GUI_COLOR_SW_OFF      =lv_color_hex(0x666666);
 #define GUI_MENU_ENTRY_SPACING_PX           40
 #define GUI_MENU_ENTRY_WIDTH_PX             120
 
-extern lv_style_t *list_style_def;
-extern lv_style_t *list_style_sel;
-extern char gui_char_buf[16];
+extern lv_style_t *gui_style_menu_def;
+extern lv_style_t *gui_style_menu_sel;
+extern lv_style_t *gui_style_bg_tile;
+void gui_setup_global_styles();
+extern char gui_char_buf[16];//this bad
 
 enum gui_field_type_t{SW_BOOL, SW_POS, FLOAT, INT16, TEXT, BACK_BTN};
 struct task_notify_pack_t
@@ -86,9 +90,11 @@ public:
     virtual void update_state(){};
 };
 
+
 class gui_sw_bool_field_t: public gui_generic_field_t
 {
     bool *var;
+    bool color_states;
 
 public:
     gui_sw_bool_field_t(
@@ -97,7 +103,8 @@ public:
         bool *var_ptr,
         lv_obj_t* parrent,
         uint16_t offset_x,
-        uint16_t offset_y
+        uint16_t offset_y,
+        bool _color_states
     );
 
     bool get_var() const {return *var;}
@@ -276,3 +283,7 @@ void gui_init_page_readings(std::vector <gui_generic_field_t*>* selectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen);
 
+void gui_init_page_servos(std::vector <gui_generic_field_t*>* selectable,
+    std::vector <gui_generic_field_t*>* unselectable,
+    std::vector <lv_obj_t *>* deco,
+    lv_obj_t* screen);

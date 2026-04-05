@@ -1,6 +1,40 @@
 #include "../000_gui.h"
 #include "../header.h"
 
+lv_style_t *gui_style_menu_def;
+lv_style_t *gui_style_menu_sel;
+lv_style_t *gui_style_bg_tile;
+void gui_setup_global_styles()
+{
+    //menu list default
+    gui_style_menu_def=new lv_style_t;
+    lv_style_init(gui_style_menu_def);
+    lv_style_set_bg_color(gui_style_menu_def, GUI_COLOR_TILE_BG);
+    lv_style_set_bg_opa(gui_style_menu_def, LV_OPA_COVER);
+    lv_style_set_radius(gui_style_menu_def, GUI_TILE_CORNER_RADIUS);
+    lv_style_set_pad_all(gui_style_menu_def, 6);
+    lv_style_set_text_color(gui_style_menu_def, GUI_COLOR_TEXT);
+
+    //menu list selected
+    gui_style_menu_sel=new lv_style_t;
+    lv_style_init(gui_style_menu_sel);
+    lv_style_set_bg_color(gui_style_menu_sel, GUI_COLOR_SELECT);
+    lv_style_set_bg_opa(gui_style_menu_sel, LV_OPA_COVER);
+    lv_style_set_radius(gui_style_menu_sel, GUI_TILE_CORNER_RADIUS);
+    lv_style_set_pad_all(gui_style_menu_sel, 6);
+    lv_style_set_text_color(gui_style_menu_sel, GUI_COLOR_TEXT);
+
+    //background tile
+    gui_style_bg_tile=new lv_style_t;
+    lv_style_init(gui_style_bg_tile);
+    lv_style_set_pad_all(gui_style_bg_tile, GUI_TILE_OBJECT_PADDING);
+    lv_style_set_radius(gui_style_bg_tile, GUI_TILE_CORNER_RADIUS);
+    lv_style_set_bg_color(gui_style_bg_tile, GUI_COLOR_TILE_BG);
+    lv_style_set_border_width(gui_style_bg_tile, 0);
+}
+
+
+
 gui_controller_t::gui_controller_t()
 {
     //vars

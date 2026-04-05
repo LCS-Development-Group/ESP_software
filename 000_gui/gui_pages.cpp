@@ -19,8 +19,8 @@ void (*init_func)(
 
     //main menu label
     menu_label=lv_label_create(main_screen);
-    lv_obj_add_style(menu_label, list_style_def, LV_STATE_DEFAULT);
-    lv_obj_add_style(menu_label, list_style_sel, LV_STATE_CHECKED);
+    lv_obj_add_style(menu_label, gui_style_menu_def, LV_STATE_DEFAULT);
+    lv_obj_add_style(menu_label, gui_style_menu_sel, LV_STATE_CHECKED);
     lv_label_set_text(menu_label, name.c_str());
     lv_obj_add_flag(menu_label, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_width(menu_label, GUI_MENU_ENTRY_WIDTH_PX);

@@ -4,8 +4,7 @@
 lv_color_t lvgl_buffer[LCD_WIDTH*LCD_BUF_LINES];
 lv_display_t *display;
 gui_controller_t *gui;
-lv_style_t *list_style_def;
-lv_style_t *list_style_sel;
+
 
 
 void task_gui_main(void *args)
@@ -76,7 +75,6 @@ void task_gui_main(void *args)
 }
 
 void gui_flush_display(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
-void gui_setup_global_styles();
 void gui_init()
 {
     lv_init();
@@ -101,27 +99,6 @@ void gui_init()
     }
     if(SETTING_GUI_START_FROM_MAIN) gui->cmd_enter();
     lv_refr_now(display);
-}
-
-void gui_setup_global_styles()
-{
-    //menu list default
-    list_style_def=new lv_style_t;
-    lv_style_init(list_style_def);
-    lv_style_set_bg_color(list_style_def, GUI_COLOR_TILE_BG);
-    lv_style_set_bg_opa(list_style_def, LV_OPA_COVER);
-    lv_style_set_radius(list_style_def, GUI_TILE_CORNER_RADIUS);
-    lv_style_set_pad_all(list_style_def, 6);
-    lv_style_set_text_color(list_style_def, GUI_COLOR_TEXT);
-
-    //menu list selected
-    list_style_sel=new lv_style_t;
-    lv_style_init(list_style_sel);
-    lv_style_set_bg_color(list_style_sel, GUI_COLOR_SELECT);
-    lv_style_set_bg_opa(list_style_sel, LV_OPA_COVER);
-    lv_style_set_radius(list_style_sel, GUI_TILE_CORNER_RADIUS);
-    lv_style_set_pad_all(list_style_sel, 6);
-    lv_style_set_text_color(list_style_sel, GUI_COLOR_TEXT);
 }
 
 void gui_flush_display(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
