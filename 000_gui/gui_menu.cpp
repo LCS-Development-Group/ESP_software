@@ -94,7 +94,8 @@ void gui_init_page_servos(std::vector <gui_generic_field_t*>* selectable,
     gui_generic_field_t* field_ptr;
     uint8_t y[]={80, 120, 160, 205};
     uint8_t x[]={0, 50, 130, 190, 250};
-    uint8_t ntcodes[]={ACT_NTCODE_UPDATE_SERV0, ACT_NTCODE_UPDATE_SERV1, ACT_NTCODE_UPDATE_SERV2, ACT_NTCODE_UPDATE_SERV3};
+    //uint8_t ntcodes[]={ACT_NTCODE_UPDATE_SERV0, ACT_NTCODE_UPDATE_SERV1, ACT_NTCODE_UPDATE_SERV2, ACT_NTCODE_UPDATE_SERV3};
+    uint8_t ntcodes[]={6, 7, 8, ACT_NTCODE_UPDATE_SERV3};//for safety - remove in board v2
     const char* text[]={"S0", "S1", "S2", "S3"};
     const char* POS0[]={"P_0_0", "P_0_1", "P_0_2", "P_0_3"};
     const char* POS1[]={"P_1_0", "P_1_1", "P_1_2", "P_1_3"};
@@ -143,7 +144,7 @@ void gui_init_page_servos(std::vector <gui_generic_field_t*>* selectable,
 
         /*EN swithes*/
         field_ptr=new gui_sw_bool_field_t(
-            new task_notify_pack_t(ACT_TASKID, ntcodes[i]), 
+            new task_notify_pack_t(task_queue_list[ACT_TASKID], ntcodes[i]), 
             servos[i].mutex, &(servos[i].enabled), screen, x[1], y[i], true);
         selectable->push_back(field_ptr);
 
@@ -156,7 +157,7 @@ void gui_init_page_servos(std::vector <gui_generic_field_t*>* selectable,
 
         /*pos swithes*/
         field_ptr=new gui_sw_bool_field_t(
-            new task_notify_pack_t(ACT_TASKID, ntcodes[i]), 
+            new task_notify_pack_t(task_queue_list[ACT_TASKID], ntcodes[i]), 
             servos[i].mutex, &(servos[i].position), screen, x[3], y[i], false);
         selectable->push_back(field_ptr);
 

@@ -99,6 +99,15 @@ void main_loop()
 
 void setup()
 {
+    init_queue(ENC_TASKID, ENC_QUEUE_DEPTH);
+    init_queue(GUI_TASKID, GUI_QUEUE_DEPTH);
+    init_queue(VIS_TASKID, VIS_QUEUE_DEPTH);
+    init_queue(SEN_TASKID, SEN_QUEUE_DEPTH);
+    init_queue(ACT_TASKID, ACT_QUEUE_DEPTH);
+    init_queue(REG_TASKID, REG_QUEUE_DEPTH);
+    init_queue(COM_TASKID, COM_QUEUE_DEPTH);
+    init_queue(LCD_TASKID, LCD_QUEUE_DEPTH);
+
     misc_init();
     exp_init();
     init_nvs();
@@ -133,14 +142,5 @@ void setup()
     if(xTaskCreate(task_regulator_main, "task_regulator", 2048, NULL, 1, &task_handle_list[REG_TASKID])!=pdPASS) task_create_fail(REG_TASKID);
     if(xTaskCreate(task_comm_main, "task_comm", 4096, NULL, 1, &task_handle_list[COM_TASKID])!=pdPASS) task_create_fail(COM_TASKID);
     if(xTaskCreate(task_lcd_main, "task_lcd", 4096, NULL, 1, &task_handle_list[LCD_TASKID])!=pdPASS) task_create_fail(LCD_TASKID);
-
-    init_queue(ENC_TASKID, ENC_QUEUE_DEPTH);
-    init_queue(GUI_TASKID, GUI_QUEUE_DEPTH);
-    init_queue(VIS_TASKID, VIS_QUEUE_DEPTH);
-    init_queue(SEN_TASKID, SEN_QUEUE_DEPTH);
-    init_queue(ACT_TASKID, ACT_QUEUE_DEPTH);
-    init_queue(REG_TASKID, REG_QUEUE_DEPTH);
-    init_queue(COM_TASKID, COM_QUEUE_DEPTH);
-    init_queue(LCD_TASKID, LCD_QUEUE_DEPTH);
 }
 

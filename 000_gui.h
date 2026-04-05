@@ -21,7 +21,7 @@ inline lv_color_t GUI_COLOR_SW_OFF      =lv_color_hex(0x666666);
 
 #define GUI_FONT28_HEIGHT                   28
 #define GUI_FONT24_HEIGHT                   24
-#define GUI_FONT20_HEIGHT                   20//yeah, i know
+#define GUI_FONT20_HEIGHT                   20
 #define GUI_FONT14_HEIGHT                   14
 
 #define GUI_LABEL_OBJ_PADDING               5
@@ -48,11 +48,11 @@ extern char gui_char_buf[16];//this bad
 enum gui_field_type_t{SW_BOOL, SW_POS, FLOAT, INT16, TEXT, BACK_BTN};
 struct task_notify_pack_t
 {
-    uint8_t task_id;
+    QueueHandle_t task_queue;
     uint8_t ntcode;
     task_notify_pack_t(
-        uint8_t _task_id,uint8_t _ntcode)
-        :task_id(_task_id), ntcode(_ntcode){}
+        QueueHandle_t _task_queue, uint8_t _ntcode)
+        :task_queue(_task_queue), ntcode(_ntcode){}
 };
 
 //===============================================
@@ -84,10 +84,16 @@ public:
 
     task_notify_pack_t* get_ntpack_ptr() const {return ntpack;}
     uint8_t get_ntpack_ntcode() const {return ntpack->ntcode;}
-    uint8_t get_ntpack_taskid() const {return ntpack->task_id;}
+    QueueHandle_t get_ntpack_task_queue() const {return ntpack->task_queue;}
 
     SemaphoreHandle_t get_mutex() const {return mutex;}
     virtual void update_state(){};
+    void send_ntcode()
+    {
+        if(ntpack==nullptr) return;
+        uint8_t sendval=ntpack->ntcode;
+        xQueueSend(ntpack->task_queue, &sendval, 0);
+    }
 };
 
 
@@ -115,7 +121,7 @@ public:
 
     void select_field() override;
     void unselect_field() override;
-    void update_state() override {};
+    void update_state() override {};// ? why is it an empty override?
 };
 
 class gui_float_field_t: public gui_generic_field_t

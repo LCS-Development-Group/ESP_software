@@ -48,7 +48,7 @@ void task_actuator_main(void *args)
                     break;
 
                 default:
-                    ESP_LOGW("ACT", "Woken by unknown ntcode: %d", ntcode);
+                    //ESP_LOGW("ACT", "Woken by unknown ntcode: %d", ntcode);
                     break;
             }
         }

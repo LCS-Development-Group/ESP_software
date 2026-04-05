@@ -52,6 +52,7 @@ void gui_sw_bool_field_t::toggle()
         *var=true;
         lv_obj_add_state(indicator, LV_STATE_CHECKED);
     }
+    send_ntcode();
 }
 void gui_sw_bool_field_t::set_val(bool val)
 {
