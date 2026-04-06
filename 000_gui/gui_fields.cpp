@@ -81,8 +81,10 @@ gui_float_field_t::gui_float_field_t(
     uint16_t offset_y,
     lv_color_t _def_color,
     const char *_unit,
+    const char *_name,
     uint8_t _float_prec
-):gui_generic_field_t(gui_field_type_t::FLOAT, _ntpack, _mutex), var(var_ptr), def_color(_def_color), float_prec(_float_prec)
+):gui_generic_field_t(gui_field_type_t::FLOAT, _ntpack, _mutex), 
+var(var_ptr), def_color(_def_color), unit_ptr(_unit), name(_name), float_prec(_float_prec)
 {
     if(float_prec>GUI_FLOAT_PRECISION_MAX) float_prec=GUI_FLOAT_PRECISION_MAX;
 
@@ -106,7 +108,7 @@ gui_float_field_t::gui_float_field_t(
     lv_obj_update_layout(indicator);
     unit=lv_label_create(parrent);
     lv_obj_set_style_text_color(unit, GUI_COLOR_TEXT, 0);
-    lv_label_set_text(unit, _unit);
+    lv_label_set_text(unit, unit_ptr);
     lv_obj_align_to(unit, indicator, LV_ALIGN_OUT_RIGHT_MID, GUI_UNIT_OFFSET_PX, 0);
     this->update_state();
 }

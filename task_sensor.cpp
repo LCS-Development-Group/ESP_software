@@ -130,7 +130,7 @@ void t_RHT_sensor::take_readings()
             ESP_LOGW("SEN", "RHT [0x%02X at %d] failed to take readings (%s)", addr, port, esp_err_to_name(err));
             reset_variable_without_mutex();
             xEventGroupSetBits(main_event_group, SYSTEM_REBOOT_EVBIT);
-            ESP_LOGW("SEN", "REEBOOT");
+            ESP_LOGW("SEN", "REBOOT");
         }
         xSemaphoreGive(i2c_bus[port].mutex);
         xSemaphoreGive(mutex);

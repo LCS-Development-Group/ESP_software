@@ -39,6 +39,14 @@ inline lv_color_t GUI_COLOR_SW_OFF      =lv_color_hex(0x666666);
 #define GUI_MENU_ENTRY_SPACING_PX           40
 #define GUI_MENU_ENTRY_WIDTH_PX             120
 
+#define GUI_EDIT_AFTER_DOT                  3
+#define GUI_EDIT_BEFORE_DOT                 3
+#define GUI_EDIT_INDICATORS_Y               100
+#define GUI_EDIT_INDICATOR_MON28_W          (2*GUI_BACKPLATE_OBJECT_PADDING+18)
+#define GUI_EDIT_INDICATOR_MON28_H          (2*GUI_BACKPLATE_OBJECT_PADDING+28)
+#define GUI_EDIT_TOTAL_DIGITS               (GUI_EDIT_BEFORE_DOT+GUI_EDIT_AFTER_DOT)
+#define GUI_EDIT_BACK_IDX                   255
+
 extern lv_style_t *gui_style_menu_def;
 extern lv_style_t *gui_style_menu_sel;
 extern lv_style_t *gui_style_bg_tile;
@@ -121,7 +129,7 @@ public:
 
     void select_field() override;
     void unselect_field() override;
-    void update_state() override {};// ? why is it an empty override?
+    void update_state() override {}// ? why is it an empty override?
 };
 
 class gui_float_field_t: public gui_generic_field_t
@@ -129,8 +137,10 @@ class gui_float_field_t: public gui_generic_field_t
     char gui_char_buf[16];
     float *var;
 
-    lv_obj_t *unit;
     lv_color_t def_color;
+    lv_obj_t *unit;
+    const char *unit_ptr;
+    const char *name;
     uint8_t float_prec;
 
 public:
@@ -143,6 +153,7 @@ public:
         uint16_t offset_y,
         lv_color_t _def_color,
         const char *_unit,
+        const char *_name,
         uint8_t _float_prec
     );
 
@@ -153,7 +164,8 @@ public:
     void select_field() override;
     void unselect_field() override;
     void update_state() override;
-
+    const char *get_unit_ptr() {return unit_ptr;}
+    const char *get_name() {return name;}
 private:
     void float_to_string();
 };
@@ -173,8 +185,35 @@ public:
 
 class gui_editor_t
 {
+    gui_float_field_t *field_ptr;
+    float edited_value;
+    std::vector <uint8_t> digits;
+    uint8_t prim_idx, sec_idx;
+    bool in_digit;
+
+    lv_obj_t *screen;
+    lv_style_t *indicator_style;
+    lv_style_t *indicator_style_sel;
+    lv_style_t *indicator_style_lock;
+    std::vector <lv_obj_t*> indicators; 
+    lv_obj_t *tile;
+    lv_obj_t *dot;
+    lv_obj_t *unit;
+    lv_obj_t *name;
+    gui_back_field_t *back_button;
+
 public:
     gui_editor_t();
+
+    void start_edit(gui_float_field_t *_field_ptr);
+    void save_edit();
+    
+    void cmd_next();
+    void cmd_prev();
+    bool cmd_enter(); //true - resulted in leaving editor
+
+private:
+
 };
 
 //===============================================

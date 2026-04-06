@@ -38,8 +38,7 @@ void gui_init_page_test(std::vector <gui_generic_field_t*>* selectable,
     field_ptr=new gui_sw_bool_field_t(nullptr, DEBUG_BOOL_MUT, &DEBUG_BOOL, screen, x, y, true);
     selectable->push_back(field_ptr);
 
-
-    field_ptr=new gui_float_field_t(nullptr, DEBUG_FLOAT_MUT, &DEBUG_FLOAT, screen, 50, 100, GUI_COLOR_SW_ON, "%", 3);
+    field_ptr=new gui_float_field_t(nullptr, DEBUG_FLOAT_MUT, &DEBUG_FLOAT, screen, 50, 100, GUI_COLOR_SW_ON, "%", "Debug float", 3);
     selectable->push_back(field_ptr);
 }
 
@@ -75,11 +74,11 @@ void gui_init_page_readings(std::vector <gui_generic_field_t*>* selectable,
     deco->push_back(tile);
 
     field_ptr=new gui_float_field_t(nullptr, *RHT_int->get_mutex_ptr(), RHT_int->get_RH_ptr(), tile, 
-    0, 0, GUI_COLOR_RH_INT, "%", 2);
+    0, 0, GUI_COLOR_RH_INT, "%", "Chamber RH", 2);
     unselectable->push_back(field_ptr);
 
     field_ptr=new gui_float_field_t(nullptr, *RHT_int->get_mutex_ptr(), RHT_int->get_T_ptr(), tile, 
-    0, GUI_TILE_OBJECT_PADDING+GUI_FONT20_HEIGHT+2*GUI_BACKPLATE_OBJECT_PADDING, GUI_COLOR_T_INT, "°C", 2);
+    0, GUI_TILE_OBJECT_PADDING+GUI_FONT20_HEIGHT+2*GUI_BACKPLATE_OBJECT_PADDING, GUI_COLOR_T_INT, "°C", "Chamber Temp.", 2);
     selectable->push_back(field_ptr);
 }
 

@@ -9,7 +9,7 @@ void (*init_func)(
     std::vector <gui_generic_field_t*>*,
     std::vector <lv_obj_t *>*,
     lv_obj_t*
-)):name(_name)
+)):name(_name), editor_ptr(_editor_ptr)
 {
     field_index=0;
     in_field=false;
@@ -49,14 +49,14 @@ void gui_page_t::cmd_next()
     {
         if(field_index<selectable.size()-1)
         {
-                selectable[field_index]->unselect_field();
-                field_index++;
-                selectable[field_index]->select_field();
+            selectable[field_index]->unselect_field();
+            field_index++;
+            selectable[field_index]->select_field();
         }
     }
     else
     {
-        //here be edit
+        editor_ptr->cmd_next();
     }
 }
 
@@ -73,7 +73,7 @@ void gui_page_t::cmd_prev()
     }
     else
     {
-        //here be edit
+        editor_ptr->cmd_prev();
     }
 }
 
@@ -96,8 +96,8 @@ bool gui_page_t::cmd_enter()
                 break;
 
             case gui_field_type_t::FLOAT:{
-            gui_float_field_t *temp=static_cast<gui_float_field_t*>(selectable[field_index]);    
-                
+                gui_float_field_t *temp=static_cast<gui_float_field_t*>(selectable[field_index]);    
+                editor_ptr->start_edit(temp);
                 in_field=true;
                 break;}
 
@@ -110,7 +110,13 @@ bool gui_page_t::cmd_enter()
     }    
     else
     {
-        //here be entering/leaving digits in the editor
+        //editor
+        if(editor_ptr->cmd_enter())//true - enter resulted in leaving
+        {
+            in_field=false;
+            editor_ptr->save_edit();
+            lv_screen_load(screen);
+        }
     }
     return false;
 }
@@ -125,6 +131,7 @@ bool gui_page_t::cmd_back()
     else
     {
         in_field=false;
+        editor_ptr->save_edit();
         lv_screen_load(screen);
         return false;
     }
