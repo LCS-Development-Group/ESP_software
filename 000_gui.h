@@ -332,3 +332,8 @@ void gui_init_page_servos(std::vector <gui_generic_field_t*>* selectable,
     std::vector <gui_generic_field_t*>* unselectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen);
+
+void gui_init_page_placeholder(std::vector <gui_generic_field_t*>* selectable,
+    std::vector <gui_generic_field_t*>* unselectable,
+    std::vector <lv_obj_t *>* deco,
+    lv_obj_t* screen);

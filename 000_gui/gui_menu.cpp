@@ -3,17 +3,17 @@
 
 void gui_controller_t::fill_gui()
 {
-    page_list.push_back(new gui_page_t("Readings", screen, editor_ptr, gui_init_page_test));
+    page_list.push_back(new gui_page_t("Test", screen, editor_ptr, gui_init_page_test));
     page_list.push_back(new gui_page_t("Main", screen, editor_ptr, gui_init_page_readings));
-    page_list.push_back(new gui_page_t("Regulation", screen, editor_ptr, gui_init_page_test));
+    page_list.push_back(new gui_page_t("Regulation", screen, editor_ptr, gui_init_page_placeholder));
+    page_list.push_back(new gui_page_t("Starter", screen, editor_ptr, gui_init_page_placeholder));
     page_list.push_back(new gui_page_t("Servo control", screen, editor_ptr, gui_init_page_servos));
-    page_list.push_back(new gui_page_t("Servo settings", screen, editor_ptr, gui_init_page_test));
-    page_list.push_back(new gui_page_t("Starter", screen, editor_ptr, gui_init_page_test));
-    page_list.push_back(new gui_page_t("Comms", screen, editor_ptr, gui_init_page_test));
-    page_list.push_back(new gui_page_t("Display", screen, editor_ptr, gui_init_page_test));
-    page_list.push_back(new gui_page_t("f", screen, editor_ptr, gui_init_page_test));
-    page_list.push_back(new gui_page_t("g", screen, editor_ptr, gui_init_page_test));
-    page_list.push_back(new gui_page_t("h", screen, editor_ptr, gui_init_page_test));
+    page_list.push_back(new gui_page_t("Servo settings", screen, editor_ptr, gui_init_page_placeholder));
+    page_list.push_back(new gui_page_t("Display", screen, editor_ptr, gui_init_page_placeholder));
+    page_list.push_back(new gui_page_t("Comms", screen, editor_ptr, gui_init_page_placeholder));
+    page_list.push_back(new gui_page_t("f", screen, editor_ptr, gui_init_page_placeholder));
+    page_list.push_back(new gui_page_t("g", screen, editor_ptr, gui_init_page_placeholder));
+    page_list.push_back(new gui_page_t("h", screen, editor_ptr, gui_init_page_placeholder));
 }
 
 /*=======================================================================================================================================*/
@@ -79,7 +79,7 @@ void gui_init_page_readings(std::vector <gui_generic_field_t*>* selectable,
 
     field_ptr=new gui_float_field_t(nullptr, *RHT_int->get_mutex_ptr(), RHT_int->get_T_ptr(), tile, 
     0, GUI_TILE_OBJECT_PADDING+GUI_FONT20_HEIGHT+2*GUI_BACKPLATE_OBJECT_PADDING, GUI_COLOR_T_INT, "°C", "Chamber Temp.", 2);
-    selectable->push_back(field_ptr);
+    unselectable->push_back(field_ptr);
 }
 
 /*=======================================================================================================================================*/
@@ -170,6 +170,20 @@ void gui_init_page_servos(std::vector <gui_generic_field_t*>* selectable,
 }
 
 /*=======================================================================================================================================*/
+
+void gui_init_page_placeholder(std::vector <gui_generic_field_t*>* selectable,
+    std::vector <gui_generic_field_t*>* unselectable,
+    std::vector <lv_obj_t *>* deco,
+    lv_obj_t* screen)
+{
+    lv_obj_t *object;
+    object=lv_label_create(screen);
+    lv_label_set_text(object, "Placeholder");
+    lv_obj_set_style_text_color(object, GUI_COLOR_TEXT, 0);
+    lv_obj_align(object, LV_ALIGN_CENTER, 0, 0);
+    deco->push_back(object);
+}
+
 /*=======================================================================================================================================*/
 /*=======================================================================================================================================*/
 /*=======================================================================================================================================*/
