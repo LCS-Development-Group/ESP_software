@@ -12,7 +12,7 @@
 #define DEBUG_TASK_ANOUNCE          false
 #define DEBUG_INVERT_LCD            true
 #define DEBUG_NVS_ERASE_ON_INIT     false
-#define DEBUG_COM_DISABLE_UART      true
+#define DEBUG_COM_DISABLE_UART      false
 #define DEBUG_COM_DISABLE_READINGS  false
 
 extern bool DEBUG_BOOL;

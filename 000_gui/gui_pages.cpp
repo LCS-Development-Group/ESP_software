@@ -115,6 +115,8 @@ bool gui_page_t::cmd_enter()
         {
             in_field=false;
             editor_ptr->save_edit();
+            
+            cmd_update_page();
             lv_screen_load(screen);
         }
     }

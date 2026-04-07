@@ -159,7 +159,7 @@ public:
 
     float get_var() const {return *var;}
     float* get_var_ptr() {return var;}
-
+    void set_var(float _var) {*var=_var;}
 
     void select_field() override;
     void unselect_field() override;
@@ -213,7 +213,9 @@ public:
     bool cmd_enter(); //true - resulted in leaving editor
 
 private:
-
+    void decompose();
+    void recompose();
+    void update_digits();
 };
 
 //===============================================

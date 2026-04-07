@@ -66,6 +66,7 @@ gui_editor_t::gui_editor_t()
         lv_obj_set_pos(indicator, x, 0);
         x+=(GUI_EDIT_INDICATOR_MON28_W+GUI_BACKPLATE_OBJECT_PADDING);
         indicators.push_back(indicator);
+        digits.push_back(0);
     }
     x+=GUI_TILE_OBJECT_PADDING;//splitting into two coz of this line
     for(uint8_t i=0; i<GUI_EDIT_AFTER_DOT; i++)
@@ -79,6 +80,7 @@ gui_editor_t::gui_editor_t()
         lv_obj_set_pos(indicator, x, 0);
         x+=(GUI_EDIT_INDICATOR_MON28_W+GUI_BACKPLATE_OBJECT_PADDING);
         indicators.push_back(indicator);
+        digits.push_back(0);
     }
 
     /*back button*/
@@ -107,18 +109,46 @@ void gui_editor_t::start_edit(gui_float_field_t *_field_ptr)
     prim_idx=GUI_EDIT_BACK_IDX;
     back_button->select_field();
     in_digit=false;   
+
+    decompose();
+    update_digits();
+    //ESP_LOGI("EDT", "IN: %f", edited_value);
+
     lv_screen_load(screen);
 }
 void gui_editor_t::save_edit()
 {
+    if(prim_idx!=255)
+    {
+        lv_obj_remove_state(indicators[prim_idx], LV_STATE_CHECKED);
+        lv_obj_remove_state(indicators[prim_idx], LV_STATE_USER_1);
+    }
+    recompose();
+    //ESP_LOGI("EDT", "OUT: %f", edited_value);
 
+    SemaphoreHandle_t mutex=field_ptr->get_mutex();
+    if(mutex!=NULL)
+    {
+        xSemaphoreTake(mutex, portMAX_DELAY);
+        field_ptr->set_var(edited_value);
+        xSemaphoreGive(mutex);
+    }
+    else field_ptr->set_var(edited_value);
+
+    field_ptr->send_ntcode();
 }
 
 void gui_editor_t::cmd_next()
 {
     if(in_digit)
     {
-
+        if(digits[prim_idx]<9)
+        {
+            digits[prim_idx]++;
+            char buf[2];
+            itoa(digits[prim_idx], buf, 10);
+            lv_label_set_text(indicators[prim_idx], buf);
+        }
     }
     else
     {
@@ -134,7 +164,13 @@ void gui_editor_t::cmd_prev()
 {
     if(in_digit)
     {
-
+        if(digits[prim_idx]>0)
+        {
+            digits[prim_idx]--;
+            char buf[2];
+            itoa(digits[prim_idx], buf, 10);
+            lv_label_set_text(indicators[prim_idx], buf);
+        }
     }
     else
     {
@@ -163,4 +199,33 @@ bool gui_editor_t::cmd_enter()
         lv_obj_add_state(indicators[prim_idx], LV_STATE_USER_1);
     }
     return false;
+}
+
+void gui_editor_t::decompose()
+{
+    int temp=(int)(edited_value*pow(10, GUI_EDIT_AFTER_DOT)+0.5f);
+    for(int8_t i=GUI_EDIT_TOTAL_DIGITS-1; i>=0; i--)
+    {
+        digits[i]=temp%10;
+        temp/=10;
+    }
+}
+
+void gui_editor_t::recompose()
+{
+    edited_value=0.0f;
+    for(uint8_t i=0; i<GUI_EDIT_TOTAL_DIGITS; i++)
+        edited_value=(edited_value*10.0f)+digits[i];
+
+    edited_value/=pow(10, GUI_EDIT_AFTER_DOT);
+}
+
+void gui_editor_t::update_digits()
+{
+    char buf[2];
+    for(uint8_t i=0; i<GUI_EDIT_TOTAL_DIGITS; i++)
+    {
+        itoa(digits[i], buf, 10);
+        lv_label_set_text(indicators[i], buf);
+    }
 }
