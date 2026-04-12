@@ -41,6 +41,9 @@ inline lv_color_t GUI_COLOR_SW_OFF      =lv_color_hex(0x666666);
 #define GUI_MENU_ENTRY_SPACING_PX           40
 #define GUI_MENU_ENTRY_WIDTH_PX             120
 
+#define GUI_ENTER_BACK_EVENT                254
+#define GUI_ENTER_NO_EVENT                  255
+
 #define GUI_EDIT_AFTER_DOT                  3
 #define GUI_EDIT_BEFORE_DOT                 3
 #define GUI_EDIT_INDICATORS_Y               100
@@ -55,7 +58,7 @@ extern lv_style_t *gui_style_bg_tile;
 void gui_setup_global_styles();
 extern char gui_char_buf[16];//this bad
 
-enum gui_field_type_t{SW_BOOL, SW_POS, FLOAT, INT16, TEXT, BACK_BTN};
+enum gui_field_type_t{SW_BOOL, SW_POS, FLOAT, INT16, TEXT, BACK_BTN, JUMP_BTN};
 struct task_notify_pack_t
 {
     QueueHandle_t task_queue;
@@ -175,11 +178,22 @@ private:
 
 class gui_back_field_t: public gui_generic_field_t
 {
-    lv_obj_t *back_button;
+    lv_obj_t *button;
 public:
     gui_back_field_t(lv_obj_t* parrent);
-    void select_field() override {lv_obj_add_state(back_button, LV_STATE_CHECKED);}
-    void unselect_field() override {lv_obj_remove_state(back_button, LV_STATE_CHECKED);}
+    void select_field() override {lv_obj_add_state(button, LV_STATE_CHECKED);}
+    void unselect_field() override {lv_obj_remove_state(button, LV_STATE_CHECKED);}
+};
+
+class gui_jump_field_t: public gui_generic_field_t
+{
+    lv_obj_t *button;
+    uint8_t jump_idx;
+public:
+    gui_jump_field_t(lv_obj_t* parrent, uint8_t _jump_idx);
+    void select_field() override {lv_obj_add_state(button, LV_STATE_CHECKED);}
+    void unselect_field() override {lv_obj_remove_state(button, LV_STATE_CHECKED);}
+    uint8_t get_jump_idx() const {return jump_idx;}
 };
 
 //===============================================
@@ -259,7 +273,7 @@ class gui_page_t
 
     void cmd_next();
     void cmd_prev();
-    bool cmd_enter();
+    uint8_t cmd_enter();
     bool cmd_back();
     void cmd_update_page();
 

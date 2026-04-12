@@ -148,9 +148,24 @@ void gui_float_field_t::float_to_string()
 gui_back_field_t::gui_back_field_t(lv_obj_t* parrent)
 :gui_generic_field_t(gui_field_type_t::BACK_BTN, nullptr, NULL)
 {
-    back_button=lv_label_create(parrent);
-    lv_obj_add_style(back_button, gui_style_menu_def, LV_STATE_DEFAULT);
-    lv_obj_add_style(back_button, gui_style_menu_sel, LV_STATE_CHECKED);
-    lv_label_set_text(back_button, LV_SYMBOL_LEFT);
-    lv_obj_set_pos(back_button, 0, 0);
+    button=lv_label_create(parrent);
+    lv_obj_add_style(button, gui_style_menu_def, LV_STATE_DEFAULT);
+    lv_obj_add_style(button, gui_style_menu_sel, LV_STATE_CHECKED);
+    lv_label_set_text(button, LV_SYMBOL_LEFT);
+    lv_obj_set_pos(button, 0, 0);
+}
+
+//===============================================
+// jump button
+//===============================================
+
+gui_jump_field_t::gui_jump_field_t(lv_obj_t* parrent, uint8_t _jump_idx)
+:gui_generic_field_t(gui_field_type_t::JUMP_BTN, nullptr, NULL), jump_idx(_jump_idx)
+{
+    button=lv_label_create(parrent);
+    lv_obj_add_style(button, gui_style_menu_def, LV_STATE_DEFAULT);
+    lv_obj_add_style(button, gui_style_menu_sel, LV_STATE_CHECKED);
+    lv_label_set_text(button, LV_SYMBOL_RIGHT);
+    lv_obj_update_layout(button);
+    lv_obj_align(button, LV_ALIGN_TOP_RIGHT, 0, 0);
 }

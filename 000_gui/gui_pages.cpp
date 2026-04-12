@@ -47,10 +47,18 @@ void gui_page_t::cmd_next()
 {
     if(in_field==false)//jumping between fields
     {
+        if(selectable.size()==1) return;
+        
         if(field_index<selectable.size()-1)
         {
             selectable[field_index]->unselect_field();
             field_index++;
+            selectable[field_index]->select_field();
+        } 
+        else//loop back
+        {
+            selectable[field_index]->unselect_field();
+            field_index=0;
             selectable[field_index]->select_field();
         }
     }
@@ -64,10 +72,18 @@ void gui_page_t::cmd_prev()
 {
     if(in_field==false)//jumping between fields
     {
+        if(selectable.size()==1) return;
+
         if(field_index>0)
         {
             selectable[field_index]->unselect_field();
             field_index--;
+            selectable[field_index]->select_field();
+        }
+        else//loop back
+        {
+            selectable[field_index]->unselect_field();
+            field_index=selectable.size()-1;
             selectable[field_index]->select_field();
         }
     }
@@ -77,7 +93,7 @@ void gui_page_t::cmd_prev()
     }
 }
 
-bool gui_page_t::cmd_enter()
+uint8_t gui_page_t::cmd_enter()
 {
     if(in_field==false)//jumping between fields
     {
@@ -92,7 +108,7 @@ bool gui_page_t::cmd_enter()
 
             case gui_field_type_t::BACK_BTN:
                 selectable[field_index]->unselect_field();
-                return true;
+                return GUI_ENTER_BACK_EVENT;
                 break;
 
             case gui_field_type_t::FLOAT:{
@@ -100,6 +116,12 @@ bool gui_page_t::cmd_enter()
                 editor_ptr->start_edit(temp);
                 in_field=true;
                 break;}
+            
+            case gui_field_type_t::JUMP_BTN:{
+                gui_jump_field_t *temp=static_cast<gui_jump_field_t*>(selectable[field_index]);    
+                selectable[field_index]->unselect_field();
+                return temp->get_jump_idx();
+            }
 
             case gui_field_type_t::INT16:       break;
             case gui_field_type_t::SW_POS:      break;
@@ -120,7 +142,7 @@ bool gui_page_t::cmd_enter()
             lv_screen_load(screen);
         }
     }
-    return false;
+    return GUI_ENTER_NO_EVENT;
 }
 
 bool gui_page_t::cmd_back()

@@ -103,8 +103,17 @@ void gui_controller_t::cmd_enter()
 {
     if(in_page==true)
     {//on a page
-        if(page_list[page_index]->cmd_enter()==true)
-            leave_page();
+        uint8_t code=page_list[page_index]->cmd_enter();
+        if(code!=GUI_ENTER_NO_EVENT)
+        {
+            if(code==GUI_ENTER_BACK_EVENT) leave_page();
+            else
+            {
+                leave_page();
+                set_page_index(code);
+                enter_page();
+            }
+        }
     }
     else
     {//in menu

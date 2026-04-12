@@ -1,6 +1,14 @@
 #include "../000_gui.h"
 #include "../header.h"
 
+#define GUI_MENU_PAGEID_MAIN        0
+#define GUI_MENU_PAGEID_REGULATOR   1
+#define GUI_MENU_PAGEID_STARTER     2
+#define GUI_MENU_PAGEID_SERV_CON    3
+#define GUI_MENU_PAGEID_SERV_SET    4
+#define GUI_MENU_PAGEID_DISPLAY     5
+#define GUI_MENU_PAGEID_MISC        6
+
 void gui_controller_t::fill_gui()
 {
     page_list.push_back(new gui_page_t("Main", screen, editor_ptr, gui_init_page_readings));
@@ -180,6 +188,14 @@ void gui_init_page_servos(std::vector <gui_generic_field_t*>* selectable,
         lv_obj_set_pos(label, x[4], y[i]); 
         deco->push_back(label);
     }
+
+    field_ptr=new gui_jump_field_t(screen, GUI_MENU_PAGEID_SERV_SET);
+    selectable->push_back(field_ptr);
+    label=lv_label_create(screen);
+    lv_label_set_text(label, "Edit");
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_obj_update_layout(label);
+    lv_obj_align(label, LV_ALIGN_TOP_RIGHT, -30, 5);
 }
 
 /*=======================================================================================================================================*/
@@ -282,6 +298,14 @@ void gui_init_page_servos_cfg(std::vector <gui_generic_field_t*>* selectable,
         lv_obj_align_to(label, tile, LV_ALIGN_TOP_LEFT, 0, GUI_TILE_OBJECT_PADDING+3*GUI_BACKPLATE_OBJECT_PADDING+GUI_FONT14_HEIGHT);
         deco->push_back(label);
     }
+
+    field_ptr=new gui_jump_field_t(screen, GUI_MENU_PAGEID_SERV_CON);
+    selectable->push_back(field_ptr);
+    label=lv_label_create(screen);
+    lv_label_set_text(label, "Control");
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_obj_update_layout(label);
+    lv_obj_align(label, LV_ALIGN_TOP_RIGHT, -30, 5);
 }
 
 /*=======================================================================================================================================*/
