@@ -83,9 +83,11 @@ gui_float_field_t::gui_float_field_t(
     uint8_t indicator_size,
     const char *_unit,
     const char *_name,
-    uint8_t _float_prec
+    uint8_t _float_prec,
+    float _max,
+    float _min
 ):gui_generic_field_t(gui_field_type_t::FLOAT, _ntpack, _mutex), 
-var(var_ptr), def_color(_def_color), unit_ptr(_unit), name(_name), float_prec(_float_prec)
+var(var_ptr), def_color(_def_color), unit_ptr(_unit), name(_name), float_prec(_float_prec), max(_max), min(_min)
 {
     if(float_prec>GUI_FLOAT_PRECISION_MAX) float_prec=GUI_FLOAT_PRECISION_MAX;
 

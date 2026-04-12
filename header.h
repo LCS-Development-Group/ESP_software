@@ -150,6 +150,7 @@ extern t_servo servos[ACT_SERV_NUMOF];
 #define ACT_SERV_EN_LVL         1
 #define ACT_SERV_DIS_LVL        !(ACT_SERV_EN_LVL)
 #define ACT_SERV_FREQ_HZ        50
+#define ACT_SERV_MIN_ANGLE_DEG  0
 #define ACT_SERV_MAX_ANGLE_DEG  180
 #define ACT_SERV_MIN_WIDTH_US   500
 #define ACT_SERV_MAX_WIDTH_US   2500

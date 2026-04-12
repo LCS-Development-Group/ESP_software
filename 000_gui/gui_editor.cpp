@@ -85,6 +85,16 @@ gui_editor_t::gui_editor_t()
 
     /*back button*/
     back_button=new gui_back_field_t(screen);
+
+    /*min*/
+    min=lv_label_create(screen);
+    lv_obj_set_style_text_color(min, GUI_COLOR_TEXT, 0);
+    lv_obj_align_to(min, tile, LV_ALIGN_OUT_BOTTOM_LEFT, GUI_TILE_OBJECT_PADDING, GUI_TILE_OBJECT_PADDING);
+
+    /*max*/
+    max=lv_label_create(screen);
+    lv_obj_set_style_text_color(max, GUI_COLOR_TEXT, 0);
+    lv_obj_align_to(max, tile, LV_ALIGN_OUT_BOTTOM_LEFT, GUI_TILE_OBJECT_PADDING, 2*GUI_TILE_OBJECT_PADDING+GUI_FONT14_HEIGHT);
 }
 
 void gui_editor_t::start_edit(gui_float_field_t *_field_ptr)
@@ -114,6 +124,12 @@ void gui_editor_t::start_edit(gui_float_field_t *_field_ptr)
     update_digits();
     //ESP_LOGI("EDT", "IN: %f", edited_value);
 
+    snprintf(buf, sizeof(buf), "Min: %.*f", field_ptr->get_float_prec(), field_ptr->get_min());
+    lv_label_set_text(min, buf);
+
+    snprintf(buf, sizeof(buf), "Max: %.*f", field_ptr->get_float_prec(), field_ptr->get_max());
+    lv_label_set_text(max, buf);
+
     lv_screen_load(screen);
 }
 void gui_editor_t::save_edit()
@@ -126,6 +142,9 @@ void gui_editor_t::save_edit()
     recompose();
     //ESP_LOGI("EDT", "OUT: %f", edited_value);
 
+    if(edited_value>field_ptr->get_max()) edited_value=field_ptr->get_max();
+    else if(edited_value<field_ptr->get_min()) edited_value=field_ptr->get_min();
+    
     SemaphoreHandle_t mutex=field_ptr->get_mutex();
     if(mutex!=NULL)
     {
@@ -149,6 +168,17 @@ void gui_editor_t::cmd_next()
             itoa(digits[prim_idx], buf, 10);
             lv_label_set_text(indicators[prim_idx], buf);
         }
+        else if(digits[prim_idx]==9 && prim_idx>0 && digits[prim_idx-1]<9)
+        {
+            digits[prim_idx]=0;
+            char buf[2];
+            itoa(digits[prim_idx], buf, 10);
+            lv_label_set_text(indicators[prim_idx], buf);
+
+            digits[prim_idx-1]++;
+            itoa(digits[prim_idx-1], buf, 10);
+            lv_label_set_text(indicators[prim_idx-1], buf);
+        }
     }
     else
     {
@@ -170,6 +200,17 @@ void gui_editor_t::cmd_prev()
             char buf[2];
             itoa(digits[prim_idx], buf, 10);
             lv_label_set_text(indicators[prim_idx], buf);
+        }
+        else if(digits[prim_idx]==0 && prim_idx>0 && digits[prim_idx-1]>0)
+        {
+            digits[prim_idx]=9;
+            char buf[2];
+            itoa(digits[prim_idx], buf, 10);
+            lv_label_set_text(indicators[prim_idx], buf);
+
+            digits[prim_idx-1]--;
+            itoa(digits[prim_idx-1], buf, 10);
+            lv_label_set_text(indicators[prim_idx-1], buf);
         }
     }
     else

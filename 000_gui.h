@@ -148,6 +148,9 @@ class gui_float_field_t: public gui_generic_field_t
     const char *name;
     uint8_t float_prec;
 
+    float max;
+    float min;
+
 public:
     gui_float_field_t(
         task_notify_pack_t *_ntpack, 
@@ -160,18 +163,24 @@ public:
         uint8_t indicator_size,
         const char *_unit,
         const char *_name,
-        uint8_t _float_prec
+        uint8_t _float_prec,
+        float _max,
+        float _min
     );
 
     float get_var() const {return *var;}
     float* get_var_ptr() {return var;}
     void set_var(float _var) {*var=_var;}
+    uint8_t get_float_prec() const {return float_prec;}
 
     void select_field() override;
     void unselect_field() override;
     void update_state() override;
     const char *get_unit_ptr() {return unit_ptr;}
     const char *get_name() {return name;}
+
+    float get_max() const {return max;}
+    float get_min() const {return min;}
 private:
     void float_to_string();
 };
@@ -218,6 +227,10 @@ class gui_editor_t
     lv_obj_t *unit;
     lv_obj_t *name;
     gui_back_field_t *back_button;
+
+    lv_obj_t *min;
+    lv_obj_t *max;
+    char buf[12];
 
 public:
     gui_editor_t();

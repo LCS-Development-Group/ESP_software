@@ -42,7 +42,7 @@ void gui_init_page_test(std::vector <gui_generic_field_t*>* selectable,
     field_ptr=new gui_sw_bool_field_t(nullptr, DEBUG_BOOL_MUT, &DEBUG_BOOL, screen, x, y, true);
     selectable->push_back(field_ptr);
 
-    field_ptr=new gui_float_field_t(nullptr, DEBUG_FLOAT_MUT, &DEBUG_FLOAT, screen, 50, 100, GUI_COLOR_SW_ON, 1, "%", "Debug float", 3);
+    field_ptr=new gui_float_field_t(nullptr, DEBUG_FLOAT_MUT, &DEBUG_FLOAT, screen, 50, 100, GUI_COLOR_SW_ON, 1, "%", "Debug float", 3, 100, 0);
     selectable->push_back(field_ptr);
 }
 
@@ -78,11 +78,11 @@ void gui_init_page_readings(std::vector <gui_generic_field_t*>* selectable,
     deco->push_back(tile);
 
     field_ptr=new gui_float_field_t(nullptr, *RHT_int->get_mutex_ptr(), RHT_int->get_RH_ptr(), tile, 
-    0, 0, GUI_COLOR_RH_INT, 1, "%", "Chamber RH", 2);
+    0, 0, GUI_COLOR_RH_INT, 1, "%", "Chamber RH", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL);
     unselectable->push_back(field_ptr);
 
     field_ptr=new gui_float_field_t(nullptr, *RHT_int->get_mutex_ptr(), RHT_int->get_T_ptr(), tile, 
-    0, GUI_TILE_OBJECT_PADDING+GUI_FONT20_HEIGHT+2*GUI_BACKPLATE_OBJECT_PADDING, GUI_COLOR_T_INT, 1, "°C", "Chamber Temp.", 2);
+    0, GUI_TILE_OBJECT_PADDING+GUI_FONT20_HEIGHT+2*GUI_BACKPLATE_OBJECT_PADDING, GUI_COLOR_T_INT, 1, "°C", "Chamber Temp.", 2, SEN_T_MAX_VAL, SEN_MIN_VAL);
     unselectable->push_back(field_ptr);
 }
 
@@ -235,7 +235,7 @@ void gui_init_page_servos_cfg(std::vector <gui_generic_field_t*>* selectable,
     // deco->push_back(label);
     
     const char* names[]={"Servo 0 position 0", "Servo 1 position 0", "Servo 1 position 0", "Servo 1 position 0", "Servo 0 position 1", "Servo 1 position 1", "Servo 1 position 1", "Servo 1 position 1"};
-    const char* short_names[]={"Pos. 0", "Pos. 1", "Pos. 0", "Pos. 1", "Pos. 0", "Pos. 1", "Pos. 0", "Pos. 1"};
+    const char* short_names[]={"Pos. 0", "Pos. 0", "Pos. 0", "Pos. 0", "Pos. 1", "Pos. 1", "Pos. 1", "Pos. 1"};
 
     uint8_t field_x[]={70, 230};
     uint8_t panel_x[]={0, 160};
@@ -270,7 +270,7 @@ void gui_init_page_servos_cfg(std::vector <gui_generic_field_t*>* selectable,
             servos[row+col].mutex, &(servos[2*row+col].angle[0]), screen, 
             field_x[col]+GUI_TILE_OBJECT_PADDING, 
             panel_y[row]+GUI_TILE_OBJECT_PADDING, 
-            GUI_COLOR_TEXT, 0, "°", names[2*row+col], 1);
+            GUI_COLOR_TEXT, 0, "°", names[2*row+col], 1, ACT_SERV_MAX_ANGLE_DEG, ACT_SERV_MIN_ANGLE_DEG);
         selectable->push_back(field_ptr);
 
         /*angle 0 label*/
@@ -287,7 +287,7 @@ void gui_init_page_servos_cfg(std::vector <gui_generic_field_t*>* selectable,
             servos[row+col].mutex, &(servos[2*row+col].angle[1]), screen, 
             field_x[col]+GUI_TILE_OBJECT_PADDING, 
             panel_y[row]+2*GUI_TILE_OBJECT_PADDING+GUI_FONT14_HEIGHT+2*GUI_BACKPLATE_OBJECT_PADDING, 
-            GUI_COLOR_TEXT, 0, "°", names[2*row+col+4], 1);
+            GUI_COLOR_TEXT, 0, "°", names[2*row+col+4], 1, ACT_SERV_MAX_ANGLE_DEG, ACT_SERV_MIN_ANGLE_DEG);
         selectable->push_back(field_ptr);
 
         /*angle 1 label*/
