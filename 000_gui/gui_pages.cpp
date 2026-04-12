@@ -66,9 +66,9 @@ void gui_page_t::cmd_prev()
     {
         if(field_index>0)
         {
-                selectable[field_index]->unselect_field();
-                field_index--;
-                selectable[field_index]->select_field();
+            selectable[field_index]->unselect_field();
+            field_index--;
+            selectable[field_index]->select_field();
         }
     }
     else

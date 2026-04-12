@@ -80,6 +80,7 @@ gui_float_field_t::gui_float_field_t(
     uint16_t offset_x,
     uint16_t offset_y,
     lv_color_t _def_color,
+    uint8_t indicator_size,
     const char *_unit,
     const char *_name,
     uint8_t _float_prec
@@ -89,7 +90,7 @@ var(var_ptr), def_color(_def_color), unit_ptr(_unit), name(_name), float_prec(_f
     if(float_prec>GUI_FLOAT_PRECISION_MAX) float_prec=GUI_FLOAT_PRECISION_MAX;
 
     indicator=lv_label_create(parrent);
-    lv_obj_set_style_text_font(indicator, &lv_font_montserrat_20, 0);
+    if(indicator_size==1) lv_obj_set_style_text_font(indicator, &lv_font_montserrat_20, 0);
     lv_obj_set_style_text_color(indicator, def_color, 0);
     lv_label_set_text(indicator, GUI_FLOAT_FIELD_DEF_VAL);
 
@@ -109,7 +110,8 @@ var(var_ptr), def_color(_def_color), unit_ptr(_unit), name(_name), float_prec(_f
     unit=lv_label_create(parrent);
     lv_obj_set_style_text_color(unit, GUI_COLOR_TEXT, 0);
     lv_label_set_text(unit, unit_ptr);
-    lv_obj_align_to(unit, indicator, LV_ALIGN_OUT_RIGHT_MID, GUI_UNIT_OFFSET_PX, 0);
+    lv_obj_set_pos(unit, offset_x+GUI_UNIT_OFFSET_PX+GUI_BACKPLATE_OBJECT_PADDING, 0);
+    //lv_obj_align_to(unit, indicator, LV_ALIGN_OUT_RIGHT_MID, GUI_UNIT_OFFSET_PX, 0);
     this->update_state();
 }
 

@@ -7,12 +7,12 @@
 
 #define SETTING_SOFTWARE_VERSION        "v2.0.0"
 #define SETTING_CHAMBER_ID_STATIC       "0"
-#define SETTING_GUI_START_FROM_MAIN     true
+#define SETTING_GUI_START_FROM_PAGE     4// -1 for disabled; 0, 1, ... for page numbers
 
 #define DEBUG_TASK_ANOUNCE          false
 #define DEBUG_INVERT_LCD            true
 #define DEBUG_NVS_ERASE_ON_INIT     false
-#define DEBUG_COM_DISABLE_UART      false
+#define DEBUG_COM_DISABLE_UART      true
 #define DEBUG_COM_DISABLE_READINGS  false
 
 extern bool DEBUG_BOOL;

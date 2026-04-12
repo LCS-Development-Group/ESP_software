@@ -6,8 +6,10 @@
 inline lv_color_t GUI_COLOR_TEXT        =lv_color_hex(0xE1E1E1);
 inline lv_color_t GUI_COLOR_SELECT      =lv_color_hex(0x8B0000);//DarkRed
 inline lv_color_t GUI_COLOR_PAGE_BG     =lv_color_hex(0x000000);//Black
-inline lv_color_t GUI_COLOR_TILE_BG     =lv_color_hex(0x1c1c1c);
-inline lv_color_t GUI_COLOR_TILE_IN     =lv_color_hex(0x333333);
+// inline lv_color_t GUI_COLOR_TILE_BG     =lv_color_hex(0x1c1c1c);
+// inline lv_color_t GUI_COLOR_TILE_IN     =lv_color_hex(0x333333);
+inline lv_color_t GUI_COLOR_TILE_BG     =lv_color_hex(0x333333);
+inline lv_color_t GUI_COLOR_TILE_IN     =lv_color_hex(0x4D4D4D);
 
 inline lv_color_t GUI_COLOR_RH_INT      =lv_color_hex(0x1e90ff);//DodgerBlue
 inline lv_color_t GUI_COLOR_T_INT       =lv_color_hex(0xffa500);//Orange
@@ -33,7 +35,7 @@ inline lv_color_t GUI_COLOR_SW_OFF      =lv_color_hex(0x666666);
 #define GUI_FLOAT_FIELD_DEF_VAL             "-88.88"
 
 #define GUI_FLOAT_PRECISION_MAX             3
-#define GUI_UNIT_OFFSET_PX                  8
+#define GUI_UNIT_OFFSET_PX                  3
 
 #define GUI_MENU_ENTRY_NUM                  6
 #define GUI_MENU_ENTRY_SPACING_PX           40
@@ -152,6 +154,7 @@ public:
         uint16_t offset_x,
         uint16_t offset_y,
         lv_color_t _def_color,
+        uint8_t indicator_size,
         const char *_unit,
         const char *_name,
         uint8_t _float_prec
@@ -307,6 +310,7 @@ public:
 //getters
     SemaphoreHandle_t get_mutex() const {return mutex;}
     uint8_t get_page_index() const {return page_index;}
+    void set_page_index(uint8_t index) {if(index<page_list.size()) page_index=index;}
 
 private:
     void show_list();
@@ -331,6 +335,31 @@ void gui_init_page_readings(std::vector <gui_generic_field_t*>* selectable,
     lv_obj_t* screen);
 
 void gui_init_page_servos(std::vector <gui_generic_field_t*>* selectable,
+    std::vector <gui_generic_field_t*>* unselectable,
+    std::vector <lv_obj_t *>* deco,
+    lv_obj_t* screen);
+
+void gui_init_page_regulation(std::vector <gui_generic_field_t*>* selectable,
+    std::vector <gui_generic_field_t*>* unselectable,
+    std::vector <lv_obj_t *>* deco,
+    lv_obj_t* screen);
+
+void gui_init_page_starter(std::vector <gui_generic_field_t*>* selectable,
+    std::vector <gui_generic_field_t*>* unselectable,
+    std::vector <lv_obj_t *>* deco,
+    lv_obj_t* screen);
+
+void gui_init_page_servos_cfg(std::vector <gui_generic_field_t*>* selectable,
+    std::vector <gui_generic_field_t*>* unselectable,
+    std::vector <lv_obj_t *>* deco,
+    lv_obj_t* screen);
+
+void gui_init_page_display(std::vector <gui_generic_field_t*>* selectable,
+    std::vector <gui_generic_field_t*>* unselectable,
+    std::vector <lv_obj_t *>* deco,
+    lv_obj_t* screen);
+
+void gui_init_page_misc_settings(std::vector <gui_generic_field_t*>* selectable,
     std::vector <gui_generic_field_t*>* unselectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen);
