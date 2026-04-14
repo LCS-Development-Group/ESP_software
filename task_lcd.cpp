@@ -51,7 +51,7 @@ void task_lcd_main(void *args)
                         {
                             lcd_settings.ss_state=false;
                             
-                            ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, true));
+                            esp_lcd_panel_disp_on_off(lcd_handle, true);
                             update_duty();
                         }
                         xTimerReset(screensaver_timer, 0);
@@ -59,10 +59,8 @@ void task_lcd_main(void *args)
                     break;
 
                 case LCD_NTCODE_ACTIVATE_SCREENSAVER:
-                    break;//DEBUG
                     lcd_settings.ss_state=true;
-                    
-                    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(lcd_handle, false));
+                    esp_lcd_panel_disp_on_off(lcd_handle, false);
                     update_duty();
                     break;
 

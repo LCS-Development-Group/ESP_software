@@ -1,6 +1,5 @@
 idf_component_register(SRCS  "main.cpp" 
-"task_encoder.cpp" 
-"task_visual.cpp" 
+"task_encoder.cpp"  
 "task_gui.cpp" 
 "task_lcd.cpp" 
 "task_sensor.cpp" 

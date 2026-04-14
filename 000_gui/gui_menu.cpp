@@ -5,9 +5,9 @@
 #define GUI_MENU_PAGEID_REGULATOR   1
 #define GUI_MENU_PAGEID_STARTER     2
 #define GUI_MENU_PAGEID_SERV_CON    3
-#define GUI_MENU_PAGEID_SERV_SET    4
-#define GUI_MENU_PAGEID_DISPLAY     5
-#define GUI_MENU_PAGEID_MISC        6
+#define GUI_MENU_PAGEID_MISC        4
+#define GUI_MENU_PAGEID_INFO        5
+#define GUI_MENU_PAGEID_SERV_SET    6
 
 void gui_controller_t::fill_gui()
 {
@@ -15,9 +15,9 @@ void gui_controller_t::fill_gui()
     page_list.push_back(new gui_page_t("Regulation", screen, editor_ptr, gui_init_page_placeholder));
     page_list.push_back(new gui_page_t("Starter", screen, editor_ptr, gui_init_page_placeholder));
     page_list.push_back(new gui_page_t("Servo control", screen, editor_ptr, gui_init_page_servos));
-    page_list.push_back(new gui_page_t("Servo settings", screen, editor_ptr, gui_init_page_servos_cfg));
-    page_list.push_back(new gui_page_t("Display", screen, editor_ptr, gui_init_page_placeholder));
-    page_list.push_back(new gui_page_t("Misc. settings", screen, editor_ptr, gui_init_page_placeholder));
+    page_list.push_back(new gui_page_t("Settings", screen, editor_ptr, gui_init_page_misc_settings));
+    page_list.push_back(new gui_page_t("Info", screen, editor_ptr, gui_init_page_placeholder));
+    page_list.push_back(new gui_page_t("Servo positions", screen, editor_ptr, gui_init_page_servos_cfg));
 }
 
 /*=======================================================================================================================================*/
@@ -101,7 +101,10 @@ void gui_init_page_regulation(std::vector <gui_generic_field_t*>* selectable,
 void gui_init_page_starter(std::vector <gui_generic_field_t*>* selectable,
     std::vector <gui_generic_field_t*>* unselectable,
     std::vector <lv_obj_t *>* deco,
-    lv_obj_t* screen);
+    lv_obj_t* screen)
+{
+
+}
 
 /*=======================================================================================================================================*/
 
@@ -286,7 +289,7 @@ void gui_init_page_servos_cfg(std::vector <gui_generic_field_t*>* selectable,
 
 /*=======================================================================================================================================*/
 
-void gui_init_page_misc_display(std::vector <gui_generic_field_t*>* selectable,
+void gui_init_page_info(std::vector <gui_generic_field_t*>* selectable,
     std::vector <gui_generic_field_t*>* unselectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen)
@@ -301,7 +304,80 @@ void gui_init_page_misc_settings(std::vector <gui_generic_field_t*>* selectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen)
 {
-    
+    lv_obj_t *label, *tile;
+    uint8_t y, x, xfield, tile_height, tile_width;
+    gui_generic_field_t* field_ptr;
+
+    /*=======Screensaver======*/
+    y=70; x=0; xfield=105; tile_width=175;
+    tile_height=3*GUI_TILE_OBJECT_PADDING+2*GUI_FONT14_HEIGHT+4*GUI_BACKPLATE_OBJECT_PADDING;
+    uint8_t yfield[]={
+        GUI_TILE_OBJECT_PADDING, 
+        2*GUI_TILE_OBJECT_PADDING+2*GUI_BACKPLATE_OBJECT_PADDING+GUI_FONT14_HEIGHT};
+
+    tile=lv_obj_create(screen);
+    lv_obj_add_style(tile, gui_style_bg_tile, LV_STATE_DEFAULT);
+    lv_obj_set_size(tile, 
+        tile_width,
+        tile_height);
+    lv_obj_set_pos(tile, x, y);
+    deco->push_back(tile);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Screensaver");
+    lv_obj_align_to(label, tile, LV_ALIGN_OUT_TOP_MID, 0, -GUI_LABEL_OBJ_PADDING);
+    deco->push_back(label);
+
+    field_ptr=new gui_float_field_t(
+        new task_notify_pack_t(task_queue_list[LCD_TASKID], LCD_NTCODE_UPDATE_SETTINGS), lcd_settings.mutex, &(lcd_settings.ss_delay),
+        screen, xfield, y+yfield[0], GUI_COLOR_TEXT, 0, "s", "Screensaver delay", 0, LCD_SS_MAX_DELAY_S, LCD_SS_MIN_DELAY_S);
+    selectable->push_back(field_ptr);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Delay");
+    lv_obj_set_pos(label, GUI_TILE_OBJECT_PADDING, y+yfield[0]+GUI_BACKPLATE_OBJECT_PADDING);
+    deco->push_back(label);
+
+    field_ptr=new gui_sw_bool_field_t(
+        new task_notify_pack_t(task_queue_list[LCD_TASKID], LCD_NTCODE_UPDATE_SETTINGS), lcd_settings.mutex, &(lcd_settings.ss_enabled),
+        screen, xfield+GUI_TILE_OBJECT_PADDING, y+yfield[1], true);
+    selectable->push_back(field_ptr);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Enabled");
+    lv_obj_set_pos(label, GUI_TILE_OBJECT_PADDING, y+yfield[1]+GUI_BACKPLATE_OBJECT_PADDING);
+    deco->push_back(label);
+
+    /*=======Brightness======*/
+    y+=tile_height+GUI_FONT14_HEIGHT+GUI_LABEL_OBJ_PADDING+2*GUI_TILE_OBJECT_PADDING; 
+
+    tile=lv_obj_create(screen);
+    lv_obj_add_style(tile, gui_style_bg_tile, LV_STATE_DEFAULT);
+    lv_obj_set_size(tile, 
+        tile_width,
+        2*GUI_TILE_OBJECT_PADDING+GUI_FONT14_HEIGHT+2*GUI_BACKPLATE_OBJECT_PADDING);
+    lv_obj_set_pos(tile, x, y);
+    deco->push_back(tile);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Display");
+    lv_obj_align_to(label, tile, LV_ALIGN_OUT_TOP_MID, 0, -GUI_LABEL_OBJ_PADDING);
+    deco->push_back(label);
+
+    field_ptr=new gui_float_field_t(
+        new task_notify_pack_t(task_queue_list[LCD_TASKID], LCD_NTCODE_UPDATE_SETTINGS), lcd_settings.mutex, &(lcd_settings.brightness),
+        screen, xfield, y+yfield[0], GUI_COLOR_TEXT, 0, "%", "Display Brightness", 0, LCD_MAX_BRIGHT, LCD_MIN_BRIGHT);
+    selectable->push_back(field_ptr);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Brightness");
+    lv_obj_set_pos(label, GUI_TILE_OBJECT_PADDING, y+yfield[0]+GUI_BACKPLATE_OBJECT_PADDING);
+    deco->push_back(label);
 }
 
 /*=======================================================================================================================================*/

@@ -27,14 +27,19 @@ gui_sw_bool_field_t::gui_sw_bool_field_t(
     indicator=lv_switch_create(parrent);
     
     lv_obj_set_pos(indicator, offset_x, offset_y);
-    if(color_states)
+
+    if(color_states) 
     {
-        lv_obj_set_style_bg_color(indicator, GUI_COLOR_SW_OFF, (uint32_t)LV_PART_MAIN|LV_STATE_DEFAULT);
         lv_obj_set_style_bg_color(indicator, GUI_COLOR_SW_ON, (uint32_t)LV_PART_MAIN|LV_STATE_CHECKED);
+        lv_obj_set_style_bg_color(indicator, GUI_COLOR_SW_OFF, (uint32_t)LV_PART_KNOB|LV_STATE_USER_1|LV_STATE_CHECKED);
     }
-    else lv_obj_set_style_bg_color(indicator, GUI_COLOR_SW_OFF, LV_PART_MAIN);
-    
+
+    //default
+    lv_obj_set_style_bg_color(indicator, GUI_COLOR_SW_OFF, LV_PART_MAIN);
     lv_obj_set_style_bg_color(indicator, GUI_COLOR_SW_KNOB, LV_PART_KNOB);
+
+    lv_obj_set_style_bg_color(indicator, GUI_COLOR_SELECT, (uint32_t)LV_PART_MAIN|LV_STATE_USER_1);
+    
     lv_obj_set_size(indicator, GUI_SW_WIDTH, GUI_SW_HEIGHT);
 
     if(*var) lv_obj_add_state(indicator, LV_STATE_CHECKED);
@@ -62,11 +67,11 @@ void gui_sw_bool_field_t::set_val(bool val)
 
 void gui_sw_bool_field_t::select_field()
 {
-    lv_obj_set_style_bg_color(indicator, GUI_COLOR_SELECT, LV_PART_KNOB);
+    lv_obj_add_state(indicator, LV_STATE_USER_1);
 }
 void gui_sw_bool_field_t::unselect_field()
 {
-    lv_obj_set_style_bg_color(indicator, GUI_COLOR_SW_KNOB, LV_PART_KNOB);
+    lv_obj_remove_state(indicator, LV_STATE_USER_1);
 }
 
 //===============================================

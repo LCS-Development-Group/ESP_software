@@ -24,16 +24,17 @@ void task_gui_main(void *args)
             screensaver_lock=lcd_settings.ss_state;
             xSemaphoreGive(lcd_settings.mutex);
 
-
-            sendval=LCD_NTCODE_DEACTIVATE_SCREENSAVER;
-            xQueueSend(task_queue_list[LCD_TASKID], &sendval, 0);
-            if(screensaver_lock) 
+            if(ntcode==GUI_NTCODE_UPDATE_PAGE) 
             {
-                continue;//
-                if(!update_scheduled && ntcode==GUI_NTCODE_UPDATE_PAGE)  update_scheduled=true;
+                if(screensaver_lock) update_scheduled=true;
             }
+            else
+            {
+                sendval=LCD_NTCODE_DEACTIVATE_SCREENSAVER;
+                xQueueSend(task_queue_list[LCD_TASKID], &sendval, 0);
 
-            
+                if(screensaver_lock) continue;
+            }
 
             xSemaphoreTake(gui->get_mutex(), portMAX_DELAY);
             if(update_scheduled)
@@ -41,7 +42,6 @@ void task_gui_main(void *args)
                 gui->cmd_update_page();
                 update_scheduled=false;
             }
-            
             switch(ntcode)
             {
                 case GUI_NTCODE_UPDATE_PAGE:

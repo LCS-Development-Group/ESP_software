@@ -381,12 +381,12 @@ void gui_init_page_servos_cfg(std::vector <gui_generic_field_t*>* selectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen);
 
-void gui_init_page_display(std::vector <gui_generic_field_t*>* selectable,
+void gui_init_page_misc_settings(std::vector <gui_generic_field_t*>* selectable,
     std::vector <gui_generic_field_t*>* unselectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen);
 
-void gui_init_page_misc_settings(std::vector <gui_generic_field_t*>* selectable,
+void gui_init_page_info(std::vector <gui_generic_field_t*>* selectable,
     std::vector <gui_generic_field_t*>* unselectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen);
