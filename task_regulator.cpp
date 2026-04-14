@@ -13,7 +13,6 @@ void set_membrane();
 void task_regulator_main(void *args)
 {
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
-    if(DEBUG_TASK_ANOUNCE) ESP_LOGI("REG", "task_regulator started");
 
     uint8_t ntcode=0x00;
     uint8_t sendval=0x00;

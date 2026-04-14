@@ -11,7 +11,6 @@ void update_basic_actuator(t_basic_actuator *actuator);
 void task_actuator_main(void *args)
 {
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
-    if(DEBUG_TASK_ANOUNCE) ESP_LOGI("ACT", "task_actuator started");
 
     uint8_t ntcode=0x00, sendval=0x00;
     while(true)

@@ -29,7 +29,6 @@ void update_duty();
 void task_lcd_main(void *args)
 {
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
-    if(DEBUG_TASK_ANOUNCE) ESP_LOGI("LCD", "task_lcd started");
 
     xSemaphoreTake(lcd_settings.mutex, portMAX_DELAY);
     if(lcd_settings.ss_enabled) xTimerStart(screensaver_timer, 0);
