@@ -209,30 +209,6 @@ void gui_init_page_servos_cfg(std::vector <gui_generic_field_t*>* selectable,
     gui_generic_field_t* field_ptr;
     uint8_t ntcodes[]={ACT_NTCODE_UPDATE_SERV0, ACT_NTCODE_UPDATE_SERV1, ACT_NTCODE_UPDATE_SERV2, ACT_NTCODE_UPDATE_SERV3};
     const char* servo_labels[]={"Servo 0", "Servo 1", "Servo 2", "Servo 3"};
-
-    /*bg tile enabled*/
-    // tile=lv_obj_create(screen);
-    // lv_obj_add_style(tile, gui_style_bg_tile, LV_STATE_DEFAULT);
-    // lv_obj_set_size(tile, 
-    //     2*GUI_TILE_OBJECT_PADDING+GUI_SW_WIDTH,
-    //     2*GUI_TILE_OBJECT_PADDING+y[3]-y[0]+GUI_SW_HEIGHT);
-    // lv_obj_set_pos(tile, x[1]-GUI_TILE_OBJECT_PADDING, y[0]-GUI_TILE_OBJECT_PADDING);
-    // deco->push_back(tile);
-
-    /*labels*/
-    // label=lv_label_create(screen);
-    // lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
-    // lv_label_set_text(label, "Power"); 
-    // lv_obj_update_layout(label);
-    // lv_obj_set_pos(label, x[1]+GUI_SW_WIDTH/2-lv_obj_get_width(label)/2, y[0]-GUI_TILE_OBJECT_PADDING-GUI_LABEL_OBJ_PADDING-GUI_FONT14_HEIGHT);
-    // deco->push_back(label);
-
-    // label=lv_label_create(screen);
-    // lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
-    // lv_label_set_text(label, "Positions"); 
-    // lv_obj_update_layout(label);
-    // lv_obj_set_pos(label, x[3]+GUI_SW_WIDTH/2-lv_obj_get_width(label)/2, y[0]-GUI_TILE_OBJECT_PADDING-GUI_LABEL_OBJ_PADDING-GUI_FONT14_HEIGHT);
-    // deco->push_back(label);
     
     const char* names[]={"Servo 0 position 0", "Servo 1 position 0", "Servo 1 position 0", "Servo 1 position 0", "Servo 0 position 1", "Servo 1 position 1", "Servo 1 position 1", "Servo 1 position 1"};
     const char* short_names[]={"Pos. 0", "Pos. 0", "Pos. 0", "Pos. 0", "Pos. 1", "Pos. 1", "Pos. 1", "Pos. 1"};

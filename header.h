@@ -24,19 +24,17 @@ extern SemaphoreHandle_t DEBUG_FLOAT_MUT;
 /*======================================================================================*/
 /* GENERAL                                                                              */
 /*======================================================================================*/
-#define TASK_NUM 8
+#define TASK_NUM 7
 #define ENC_TASKID 0
 #define GUI_TASKID 1
-#define VIS_TASKID 2
-#define SEN_TASKID 3
-#define ACT_TASKID 4
-#define REG_TASKID 5
-#define COM_TASKID 6
-#define LCD_TASKID 7
+#define SEN_TASKID 2
+#define ACT_TASKID 3
+#define REG_TASKID 4
+#define COM_TASKID 5
+#define LCD_TASKID 6
 
 #define ENC_QUEUE_DEPTH 2 //no point in more
 #define GUI_QUEUE_DEPTH 5
-#define VIS_QUEUE_DEPTH 2
 #define SEN_QUEUE_DEPTH 2
 #define ACT_QUEUE_DEPTH 3
 #define REG_QUEUE_DEPTH 2
@@ -351,14 +349,6 @@ bool lcd_flushed_isr(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_
 #define LCD_NTCODE_UPDATE_SETTINGS          0
 #define LCD_NTCODE_ACTIVATE_SCREENSAVER     1
 #define LCD_NTCODE_DEACTIVATE_SCREENSAVER   2
-
-/*======================================================================================*/
-/* Visual                                                                               */
-/*======================================================================================*/
-void task_visual_main(void *args);
-
-void vis_init();
-
 
 /*======================================================================================*/
 /* UI ROTATIONAL ENCODER                                                                */

@@ -101,7 +101,6 @@ void setup()
 {
     init_queue(ENC_TASKID, ENC_QUEUE_DEPTH);
     init_queue(GUI_TASKID, GUI_QUEUE_DEPTH);
-    init_queue(VIS_TASKID, VIS_QUEUE_DEPTH);
     init_queue(SEN_TASKID, SEN_QUEUE_DEPTH);
     init_queue(ACT_TASKID, ACT_QUEUE_DEPTH);
     init_queue(REG_TASKID, REG_QUEUE_DEPTH);
@@ -136,7 +135,6 @@ void setup()
 
     if(xTaskCreate(task_encoder_main, "task_encoder", 2048, NULL, 1, &task_handle_list[ENC_TASKID])!=pdPASS) task_create_fail(ENC_TASKID);
     if(xTaskCreate(task_gui_main, "task_gui", 4096, NULL, 1, &task_handle_list[GUI_TASKID])!=pdPASS) task_create_fail(GUI_TASKID);
-    if(xTaskCreate(task_visual_main, "task_visual", 8192, NULL, 1, &task_handle_list[VIS_TASKID])!=pdPASS) task_create_fail(VIS_TASKID);
     if(xTaskCreate(task_sensor_main, "task_sensor", 4096, NULL, 1, &task_handle_list[SEN_TASKID])!=pdPASS) task_create_fail(SEN_TASKID);
     if(xTaskCreate(task_actuator_main, "task_actuator", 2048, NULL, 1, &task_handle_list[ACT_TASKID])!=pdPASS) task_create_fail(ACT_TASKID);
     if(xTaskCreate(task_regulator_main, "task_regulator", 2048, NULL, 1, &task_handle_list[REG_TASKID])!=pdPASS) task_create_fail(REG_TASKID);
