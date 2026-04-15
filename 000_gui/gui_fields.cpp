@@ -94,6 +94,28 @@ gui_float_field_t::gui_float_field_t(
 ):gui_generic_field_t(gui_field_type_t::FLOAT, _ntpack, _mutex), 
 var(var_ptr), def_color(_def_color), unit_ptr(_unit), name(_name), float_prec(_float_prec), max(_max), min(_min)
 {
+    this->common_constructor(indicator_size, parrent, offset_x, offset_y);
+}
+
+gui_float_field_t::gui_float_field_t(
+    task_notify_pack_t *_ntpack, 
+    SemaphoreHandle_t _mutex, 
+    float *var_ptr,
+    lv_obj_t* parrent,
+    uint16_t offset_x,
+    uint16_t offset_y,
+    lv_color_t _def_color,
+    uint8_t indicator_size,
+    const char *_unit,
+    uint8_t _float_prec
+):gui_generic_field_t(gui_field_type_t::FLOAT, _ntpack, _mutex), 
+var(var_ptr), def_color(_def_color), unit_ptr(_unit), name(" "), float_prec(_float_prec), max(0.0), min(0.0)
+{
+    this->common_constructor(indicator_size, parrent, offset_x, offset_y);
+}
+
+void gui_float_field_t::common_constructor(uint8_t indicator_size, lv_obj_t* parrent, uint16_t offset_x, uint16_t offset_y)
+{
     if(float_prec>GUI_FLOAT_PRECISION_MAX) float_prec=GUI_FLOAT_PRECISION_MAX;
 
     indicator=lv_label_create(parrent);

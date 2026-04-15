@@ -12,7 +12,7 @@ void task_actuator_main(void *args)
 {
     xEventGroupWaitBits(main_event_group, TASK_START_SYNCBIT, pdFALSE, pdFALSE, portMAX_DELAY);
 
-    uint8_t ntcode=0x00, sendval=0x00;
+    uint8_t ntcode=0x00;//sendval=0x00;
     while(true)
     {
         if(xQueueReceive(task_queue_list[ACT_TASKID], &ntcode, portMAX_DELAY)==pdPASS)
@@ -22,8 +22,8 @@ void task_actuator_main(void *args)
             {
                 case ACT_NTCODE_UPDATE_MEMB:
                     update_basic_actuator(&act_membrane);
-                    sendval=COM_NTCODE_SEND_REG;
-                    xQueueSend(task_queue_list[COM_TASKID], &sendval, portMAX_DELAY);
+                    //sendval=COM_NTCODE_SEND_REG;
+                    //xQueueSend(task_queue_list[COM_TASKID], &sendval, portMAX_DELAY);
                     break;
                 
                 case ACT_NTCODE_UPDATE_MEMB_NO_COM:

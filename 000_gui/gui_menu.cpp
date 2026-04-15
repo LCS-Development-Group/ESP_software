@@ -12,7 +12,7 @@
 void gui_controller_t::fill_gui()
 {
     page_list.push_back(new gui_page_t("Main", screen, editor_ptr, gui_init_page_readings));
-    page_list.push_back(new gui_page_t("Regulation", screen, editor_ptr, gui_init_page_placeholder));
+    page_list.push_back(new gui_page_t("Regulation", screen, editor_ptr, gui_init_page_regulation));
     page_list.push_back(new gui_page_t("Starter", screen, editor_ptr, gui_init_page_placeholder));
     page_list.push_back(new gui_page_t("Servo control", screen, editor_ptr, gui_init_page_servos));
     page_list.push_back(new gui_page_t("Settings", screen, editor_ptr, gui_init_page_misc_settings));
@@ -56,34 +56,159 @@ void gui_init_page_readings(std::vector <gui_generic_field_t*>* selectable,
     lv_obj_t *label, *tile;
     gui_generic_field_t* field_ptr;
     uint8_t x, y;
-    
 
+    uint8_t height=3*GUI_TILE_OBJECT_PADDING+4*GUI_BACKPLATE_OBJECT_PADDING+2*GUI_FONT14_HEIGHT;
+    uint8_t width=90;
     /*Chamber RHT*/
-    x=20; y=40;
-    label=lv_label_create(screen);
-    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
-    
-    lv_label_set_text(label, "Chamber");
-    lv_obj_set_pos(label, x, y);
-    lv_obj_update_layout(label);
-    deco->push_back(label);
-
+    x=0; y=60;
     tile=lv_obj_create(screen);
-    lv_obj_add_style(tile, gui_style_bg_tile, LV_STATE_DEFAULT);
-    
-    lv_obj_set_size(tile, 120, 2*GUI_FONT20_HEIGHT+3*GUI_TILE_OBJECT_PADDING+4*GUI_BACKPLATE_OBJECT_PADDING);
-    lv_obj_align_to(tile, label, LV_ALIGN_OUT_BOTTOM_LEFT, -GUI_TILE_OBJECT_PADDING, GUI_LABEL_OBJ_PADDING);
-    lv_obj_clear_flag(tile, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_scrollbar_mode(tile, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_style(tile, gui_style_bg_tile, 0);
+    lv_obj_set_size(tile,
+    width,
+    height);
+    lv_obj_set_pos(tile, x, y);
     deco->push_back(tile);
 
-    field_ptr=new gui_float_field_t(nullptr, *RHT_int->get_mutex_ptr(), RHT_int->get_RH_ptr(), tile, 
-    0, 0, GUI_COLOR_RH_INT, 1, "%", "Chamber RH", 2, SEN_RH_MAX_VAL, SEN_MIN_VAL);
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Chamber");
+    lv_obj_align_to(label, tile, LV_ALIGN_OUT_TOP_MID, 0, -GUI_LABEL_OBJ_PADDING);
+    deco->push_back(label);
+
+    field_ptr=new gui_float_field_t(
+        nullptr, RHT_int->get_mutex(), RHT_int->get_RH_ptr(), screen, 
+        x+GUI_TILE_OBJECT_PADDING,
+        y+GUI_TILE_OBJECT_PADDING,
+        GUI_COLOR_RH_INT, 0, "%", 2);
     unselectable->push_back(field_ptr);
 
-    field_ptr=new gui_float_field_t(nullptr, *RHT_int->get_mutex_ptr(), RHT_int->get_T_ptr(), tile, 
-    0, GUI_TILE_OBJECT_PADDING+GUI_FONT20_HEIGHT+2*GUI_BACKPLATE_OBJECT_PADDING, GUI_COLOR_T_INT, 1, "°C", "Chamber Temp.", 2, SEN_T_MAX_VAL, SEN_MIN_VAL);
+    field_ptr=new gui_float_field_t(
+        nullptr, RHT_int->get_mutex(), RHT_int->get_T_ptr(), screen, 
+        x+GUI_TILE_OBJECT_PADDING,
+        y+GUI_TILE_OBJECT_PADDING+3*GUI_BACKPLATE_OBJECT_PADDING+GUI_FONT20_HEIGHT,
+        GUI_COLOR_T_INT, 0, "°C", 2);
     unselectable->push_back(field_ptr);
+
+    /*mini Regulator*/
+    x=width+GUI_TILE_OBJECT_PADDING;
+    uint8_t width2=LCD_WIDTH-2*(width+GUI_TILE_OBJECT_PADDING);
+    tile=lv_obj_create(screen);
+    lv_obj_add_style(tile, gui_style_bg_tile, 0);
+    lv_obj_set_size(tile,
+    width2,
+    height);
+    lv_obj_set_pos(tile, x, y);
+    deco->push_back(tile);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Regulation");
+    lv_obj_align_to(label, tile, LV_ALIGN_OUT_TOP_MID, 0, -GUI_LABEL_OBJ_PADDING);
+    deco->push_back(label);
+
+    field_ptr=new gui_float_field_t(
+        new task_notify_pack_t(task_queue_list[REG_TASKID], REG_NTCODE_UPDATE), 
+        regulator.mutex, &(regulator.SP), screen, 
+        x+width2-GUI_TILE_OBJECT_PADDING-65,
+        y+GUI_TILE_OBJECT_PADDING,
+        GUI_COLOR_SP, 0, "%", "Chamber RH setpoint", 2, REG_MAX_SP, REG_MIN_SP);
+
+    selectable->push_back(field_ptr);
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "SP");
+    lv_obj_set_pos(label, 
+    x+GUI_TILE_OBJECT_PADDING,
+    y+GUI_TILE_OBJECT_PADDING+GUI_BACKPLATE_OBJECT_PADDING);
+    deco->push_back(label);
+
+    field_ptr=new gui_sw_bool_field_t(
+        new task_notify_pack_t(task_queue_list[REG_TASKID], REG_NTCODE_UPDATE),
+        regulator.mutex, &(regulator.enabled), screen,
+        x+width2-GUI_TILE_OBJECT_PADDING-GUI_SW_WIDTH,
+        y+2*GUI_TILE_OBJECT_PADDING+3*GUI_BACKPLATE_OBJECT_PADDING+GUI_FONT14_HEIGHT,
+        true);
+    selectable->push_back(field_ptr);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Status");
+    lv_obj_set_pos(label, 
+    x+GUI_TILE_OBJECT_PADDING,
+    y+2*GUI_TILE_OBJECT_PADDING+3*GUI_BACKPLATE_OBJECT_PADDING+GUI_FONT14_HEIGHT+(GUI_SW_HEIGHT-GUI_FONT14_HEIGHT)/2);
+    deco->push_back(label);
+
+    /*External RHT*/
+    x=LCD_WIDTH-width;
+    tile=lv_obj_create(screen);
+    lv_obj_add_style(tile, gui_style_bg_tile, 0);
+    lv_obj_set_size(tile,
+    width,
+    height);
+    lv_obj_set_pos(tile, x, y);
+    deco->push_back(tile);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Exterior");
+    lv_obj_align_to(label, tile, LV_ALIGN_OUT_TOP_MID, 0, -GUI_LABEL_OBJ_PADDING);
+    deco->push_back(label);
+
+    field_ptr=new gui_float_field_t(
+        nullptr, RHT_ext->get_mutex(), RHT_ext->get_RH_ptr(), screen, 
+        x+GUI_TILE_OBJECT_PADDING,
+        y+GUI_TILE_OBJECT_PADDING,
+        GUI_COLOR_RH_EXT, 0, "%", 2);
+    unselectable->push_back(field_ptr);
+
+    field_ptr=new gui_float_field_t(
+        nullptr, RHT_ext->get_mutex(), RHT_ext->get_T_ptr(), screen, 
+        x+GUI_TILE_OBJECT_PADDING,
+        y+GUI_TILE_OBJECT_PADDING+3*GUI_BACKPLATE_OBJECT_PADDING+GUI_FONT20_HEIGHT,
+        GUI_COLOR_T_EXT, 0, "°C", 2);
+    unselectable->push_back(field_ptr);
+
+    /*laser status*/
+    x=0; y+=height+GUI_TILE_OBJECT_PADDING+GUI_LABEL_OBJ_PADDING+GUI_FONT14_HEIGHT;
+    width=155; height=70;
+    tile=lv_obj_create(screen);
+    lv_obj_add_style(tile, gui_style_bg_tile, 0);
+    lv_obj_set_size(tile,
+    width,
+    height);
+    lv_obj_set_pos(tile, x, y);
+    deco->push_back(tile);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Laser Status");
+    lv_obj_align_to(label, tile, LV_ALIGN_OUT_TOP_MID, 0, -GUI_LABEL_OBJ_PADDING);
+    deco->push_back(label);
+
+    /*mini starter*/
+    x+=width+GUI_TILE_OBJECT_PADDING;
+    tile=lv_obj_create(screen);
+    lv_obj_add_style(tile, gui_style_bg_tile, 0);
+    lv_obj_set_size(tile,
+    width,
+    height);
+    lv_obj_set_pos(tile, x, y);
+    deco->push_back(tile);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Starter");
+    lv_obj_align_to(label, tile, LV_ALIGN_OUT_TOP_MID, 0, -GUI_LABEL_OBJ_PADDING);
+    deco->push_back(label);
+
+    /*link to regulator page*/
+    field_ptr=new gui_jump_field_t(screen, GUI_MENU_PAGEID_REGULATOR);
+    selectable->push_back(field_ptr);
+    label=lv_label_create(screen);
+    lv_label_set_text(label, "Regulator");
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_obj_update_layout(label);
+    lv_obj_align(label, LV_ALIGN_TOP_RIGHT, -30, 5);
 }
 
 /*=======================================================================================================================================*/
@@ -93,7 +218,162 @@ void gui_init_page_regulation(std::vector <gui_generic_field_t*>* selectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen)
 {
-    
+    lv_obj_t *label, *tile;
+    gui_generic_field_t* field_ptr;
+    uint8_t x, y;
+
+    uint8_t height=2*GUI_TILE_OBJECT_PADDING+3*(2*GUI_BACKPLATE_OBJECT_PADDING+GUI_FONT14_HEIGHT)+2*GUI_BACKPLATE_OBJECT_PADDING;
+    uint8_t width=155;
+    int32_t xlabel[2]={GUI_TILE_OBJECT_PADDING, 2*GUI_TILE_OBJECT_PADDING+width};
+    int32_t xfield[2]={width-90+GUI_TILE_OBJECT_PADDING, LCD_WIDTH-90+GUI_TILE_OBJECT_PADDING};
+
+    /*Settings===========================================================================================*/
+    x=0; y=60;
+    tile=lv_obj_create(screen);
+    lv_obj_add_style(tile, gui_style_bg_tile, 0);
+    lv_obj_set_size(tile, width, height);
+    lv_obj_set_pos(tile, x, y);
+    deco->push_back(tile);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Settings");
+    lv_obj_align_to(label, tile, LV_ALIGN_OUT_TOP_MID, 0, -GUI_LABEL_OBJ_PADDING);
+    deco->push_back(label);
+
+    {
+    //sp
+    uint32_t y3=y+GUI_TILE_OBJECT_PADDING;
+    field_ptr=new gui_float_field_t(
+        new task_notify_pack_t(task_queue_list[REG_TASKID], REG_NTCODE_UPDATE), 
+        regulator.mutex, &(regulator.SP), screen, 
+        xfield[0],
+        y3,
+        GUI_COLOR_SP, 0, "%", "Chamber RH setpoint", 2, REG_MAX_SP, REG_MIN_SP);
+    selectable->push_back(field_ptr);
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Set RH");
+    lv_obj_set_pos(label, xlabel[0], y3+GUI_BACKPLATE_OBJECT_PADDING);
+    deco->push_back(label);
+
+    //enabled
+    y3+=(3*GUI_BACKPLATE_OBJECT_PADDING+GUI_FONT14_HEIGHT);
+    field_ptr=new gui_sw_bool_field_t(
+        new task_notify_pack_t(task_queue_list[REG_TASKID], REG_NTCODE_UPDATE),
+        regulator.mutex, &(regulator.enabled), screen,
+        xfield[0],
+        y3+2,
+        true);
+    selectable->push_back(field_ptr);
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Enabled");
+    lv_obj_set_pos(label, xlabel[0], y3+GUI_BACKPLATE_OBJECT_PADDING);
+    deco->push_back(label);
+
+    //Histeresis
+    y3+=(3*GUI_BACKPLATE_OBJECT_PADDING+GUI_FONT14_HEIGHT);
+    field_ptr=new gui_float_field_t(
+        new task_notify_pack_t(task_queue_list[REG_TASKID], REG_NTCODE_UPDATE), 
+        regulator.mutex, &(regulator.H), screen, 
+        xfield[0],
+        y3,
+        GUI_COLOR_TEXT, 0, "%", "Regulation histeresis", 2, REG_MAX_H, REG_MIN_H);
+    selectable->push_back(field_ptr);
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Hister.");
+    lv_obj_set_pos(label, xlabel[0], y3+GUI_BACKPLATE_OBJECT_PADDING);
+    deco->push_back(label);
+    }
+
+    /*RH/error===========================================================================================*/
+    uint16_t height2=2*GUI_TILE_OBJECT_PADDING+2*GUI_BACKPLATE_OBJECT_PADDING+GUI_FONT14_HEIGHT;
+    uint16_t width2=LCD_WIDTH;
+    x=0; uint8_t y2=y+height+GUI_LABEL_SPACE;
+    tile=lv_obj_create(screen);
+    lv_obj_add_style(tile, gui_style_bg_tile, 0);
+    lv_obj_set_size(tile, width2, height2);
+    lv_obj_set_pos(tile, x, y2);
+    deco->push_back(tile);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Chamber");
+    lv_obj_align_to(label, tile, LV_ALIGN_OUT_TOP_MID, 0, -GUI_LABEL_OBJ_PADDING);
+    deco->push_back(label);
+
+    //RH
+    field_ptr=new gui_float_field_t(
+        nullptr, RHT_int->get_mutex(), RHT_int->get_RH_ptr(), screen, 
+        xfield[0],
+        y2+GUI_TILE_OBJECT_PADDING,
+        GUI_COLOR_RH_INT, 0, "%", 2);
+    unselectable->push_back(field_ptr);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "RH");
+    lv_obj_set_pos(label, 
+    xlabel[0],
+    y2+GUI_TILE_OBJECT_PADDING+GUI_BACKPLATE_OBJECT_PADDING);
+    deco->push_back(label);
+
+    //ERROR
+    field_ptr=new gui_float_field_t(
+        nullptr, regulator.mutex, &(regulator.E), screen, 
+        xfield[1],
+        y2+GUI_TILE_OBJECT_PADDING,
+        GUI_COLOR_TEXT, 0, "%", 2);
+    unselectable->push_back(field_ptr);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Error");
+    lv_obj_set_pos(label, 
+    xlabel[1],
+    y2+GUI_TILE_OBJECT_PADDING+GUI_BACKPLATE_OBJECT_PADDING);
+    deco->push_back(label);
+
+    /*Membrane===========================================================================================*/
+    x=width+GUI_TILE_OBJECT_PADDING;
+    tile=lv_obj_create(screen);
+    lv_obj_add_style(tile, gui_style_bg_tile, 0);
+    lv_obj_set_size(tile, width, height);
+    lv_obj_set_pos(tile, x, y);
+    deco->push_back(tile);
+
+    label=lv_label_create(screen);
+    lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+    lv_label_set_text(label, "Membrane");
+    lv_obj_align_to(label, tile, LV_ALIGN_OUT_TOP_MID, 0, -GUI_LABEL_OBJ_PADDING);
+    deco->push_back(label);
+
+    const char* name[]={"Current", "Power", "Voltage"};
+    const char* unit[]={"A", "W", "V"};
+    float *var_ptr[]={CURSEN->get_current_ptr(),  CURSEN->get_power_ptr(),  CURSEN->get_voltage_ptr()};
+    uint32_t y3=y+GUI_TILE_OBJECT_PADDING;
+
+    for(uint8_t i=0; i<3; i++)
+    {
+        field_ptr=new gui_float_field_t(
+        nullptr, CURSEN->get_mutex(), var_ptr[i], screen, 
+        xfield[1],
+        y3,
+        GUI_COLOR_TEXT, 0, unit[i], 3);
+        unselectable->push_back(field_ptr);
+
+        label=lv_label_create(screen);
+        lv_obj_set_style_text_color(label, GUI_COLOR_TEXT, 0);
+        lv_label_set_text(label, name[i]);
+        lv_obj_set_pos(label, 
+        xlabel[1],
+        y3+GUI_BACKPLATE_OBJECT_PADDING);
+        deco->push_back(label);
+
+        y3+=3*GUI_BACKPLATE_OBJECT_PADDING+GUI_FONT14_HEIGHT;
+    }
 }
 
 /*=======================================================================================================================================*/
@@ -378,6 +658,17 @@ void gui_init_page_misc_settings(std::vector <gui_generic_field_t*>* selectable,
     lv_label_set_text(label, "Brightness");
     lv_obj_set_pos(label, GUI_TILE_OBJECT_PADDING, y+yfield[0]+GUI_BACKPLATE_OBJECT_PADDING);
     deco->push_back(label);
+
+
+
+    /*Debug - manual membrane*/
+    field_ptr=new gui_sw_bool_field_t(
+        new task_notify_pack_t(task_queue_list[ACT_TASKID], ACT_NTCODE_UPDATE_MEMB_NO_COM),
+        act_membrane.mutex, &(act_membrane.enabled), screen,
+        LCD_WIDTH-GUI_SW_WIDTH-GUI_TILE_OBJECT_PADDING,
+        GUI_TILE_OBJECT_PADDING,
+        true);
+    selectable->push_back(field_ptr);
 }
 
 /*=======================================================================================================================================*/

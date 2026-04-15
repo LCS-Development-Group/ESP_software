@@ -13,8 +13,8 @@ inline lv_color_t GUI_COLOR_TILE_IN     =lv_color_hex(0x4D4D4D);
 
 inline lv_color_t GUI_COLOR_RH_INT      =lv_color_hex(0x1e90ff);//DodgerBlue
 inline lv_color_t GUI_COLOR_T_INT       =lv_color_hex(0xffa500);//Orange
-inline lv_color_t GUI_COLOR_RH_EXT      =lv_color_hex(0x6a5acd);//SlateBlue
-inline lv_color_t GUI_COLOR_T_EXT       =lv_color_hex(0xb22222);//fireBrick
+inline lv_color_t GUI_COLOR_RH_EXT      =lv_color_hex(0x6e6eff);//
+inline lv_color_t GUI_COLOR_T_EXT       =lv_color_hex(0xbb6000);//darker orange
 inline lv_color_t GUI_COLOR_SP          =lv_color_hex(0x32cd32);//LimeGreen
 
 inline lv_color_t GUI_COLOR_SW_KNOB     =lv_color_hex(0xE1E1E1);
@@ -28,6 +28,7 @@ inline lv_color_t GUI_COLOR_SW_OFF      =lv_color_hex(0x666666);
 
 #define GUI_LABEL_OBJ_PADDING               5
 #define GUI_TILE_OBJECT_PADDING             10
+#define GUI_LABEL_SPACE                     GUI_LABEL_OBJ_PADDING+GUI_TILE_OBJECT_PADDING+GUI_FONT14_HEIGHT
 #define GUI_BACKPLATE_OBJECT_PADDING        5
 #define GUI_TILE_CORNER_RADIUS              8
 #define GUI_SW_WIDTH                        40
@@ -39,7 +40,7 @@ inline lv_color_t GUI_COLOR_SW_OFF      =lv_color_hex(0x666666);
 
 #define GUI_MENU_ENTRY_NUM                  6
 #define GUI_MENU_ENTRY_SPACING_PX           40
-#define GUI_MENU_ENTRY_WIDTH_PX             120
+#define GUI_MENU_ENTRY_WIDTH_PX             160
 
 #define GUI_ENTER_BACK_EVENT                254
 #define GUI_ENTER_NO_EVENT                  255
@@ -152,6 +153,7 @@ class gui_float_field_t: public gui_generic_field_t
     float min;
 
 public:
+    /*version for selectable field*/
     gui_float_field_t(
         task_notify_pack_t *_ntpack, 
         SemaphoreHandle_t _mutex, 
@@ -166,6 +168,20 @@ public:
         uint8_t _float_prec,
         float _max,
         float _min
+    );
+
+    /*version for unselectable field - no edit*/
+    gui_float_field_t(
+        task_notify_pack_t *_ntpack, 
+        SemaphoreHandle_t _mutex, 
+        float *var_ptr,
+        lv_obj_t* parrent,
+        uint16_t offset_x,
+        uint16_t offset_y,
+        lv_color_t _def_color,
+        uint8_t indicator_size,
+        const char *_unit,
+        uint8_t _float_prec
     );
 
     float get_var() const {return *var;}
@@ -183,6 +199,7 @@ public:
     float get_min() const {return min;}
 private:
     void float_to_string();
+    void common_constructor(uint8_t indicator_size, lv_obj_t* parrent, uint16_t offset_x, uint16_t offset_y);
 };
 
 class gui_back_field_t: public gui_generic_field_t
@@ -337,7 +354,7 @@ public:
 //getters
     SemaphoreHandle_t get_mutex() const {return mutex;}
     uint8_t get_page_index() const {return page_index;}
-    void set_page_index(uint8_t index) {if(index<page_list.size()) page_index=index;}
+    void set_page_index(uint8_t index);
 
 private:
     void show_list();

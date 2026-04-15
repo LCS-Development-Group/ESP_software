@@ -53,13 +53,13 @@ gui_controller_t::gui_controller_t()
     lv_obj_set_style_bg_color(screen, GUI_COLOR_PAGE_BG, 0);
 
     //info headers
-    uint8_t pos=(LCD_WIDTH-GUI_MENU_ENTRY_WIDTH_PX)/2+GUI_MENU_ENTRY_WIDTH_PX;
+    //uint8_t pos=(LCD_WIDTH-GUI_MENU_ENTRY_WIDTH_PX)/2+GUI_MENU_ENTRY_WIDTH_PX;
     header=lv_label_create(screen);
     lv_label_set_text(header, "Chamber " SETTING_CHAMBER_ID_STATIC);
     lv_obj_set_style_text_color(header, GUI_COLOR_TEXT, 0);
-     lv_obj_update_layout(header);
-    lv_obj_set_pos(header, pos-(lv_obj_get_width(header)/2), GUI_MENU_ENTRY_SPACING_PX);
-
+    lv_obj_update_layout(header);
+    //lv_obj_set_pos(header, pos-(lv_obj_get_width(header)/2), GUI_MENU_ENTRY_SPACING_PX);
+    lv_obj_align(header, LV_ALIGN_TOP_RIGHT, 0, 0);
 
     soft_ver=lv_label_create(screen);
     lv_label_set_text(soft_ver, "LCS " SETTING_SOFTWARE_VERSION);
@@ -202,4 +202,12 @@ void gui_controller_t::leave_page()
 void gui_controller_t::cmd_update_page()
 {
     page_list[page_index]->cmd_update_page();  
+}
+
+void gui_controller_t::set_page_index(uint8_t index) 
+{
+    lv_obj_remove_state(page_list[page_index]->get_menu_label_ptr(), LV_STATE_CHECKED);
+    if(index<page_list.size()) page_index=index;
+    else page_index=page_list.size()-1;
+    lv_obj_add_state(page_list[page_index]->get_menu_label_ptr(), LV_STATE_CHECKED);
 }

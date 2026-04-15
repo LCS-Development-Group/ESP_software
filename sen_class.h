@@ -20,6 +20,7 @@ public:
     bool get_is_initialized() const {return is_initialized;}
     bool get_proceed_when_fail() const {return proceed_when_fail;}
     SemaphoreHandle_t *get_mutex_ptr() {return &mutex;}
+    SemaphoreHandle_t get_mutex() {return mutex;}
 
     virtual void reset_variable()=0;
     virtual void reset_variable_without_mutex()=0;

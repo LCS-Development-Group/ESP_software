@@ -35,7 +35,11 @@ void task_regulator_main(void *args)
                 break;
 
             case REG_NTCODE_UPDATE_NO_COM:
-
+                if(update_reg())
+                {
+                    sendval=GUI_NTCODE_UPDATE_PAGE;
+                    xQueueSend(task_queue_list[GUI_TASKID], &sendval, 0);
+                }
                 break;
             
             

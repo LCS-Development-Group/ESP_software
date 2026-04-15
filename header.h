@@ -7,12 +7,13 @@
 
 #define SETTING_SOFTWARE_VERSION        "v2.0.0"
 #define SETTING_CHAMBER_ID_STATIC       "0"
-#define SETTING_GUI_START_FROM_PAGE     0// -1 for disabled; 0, 1, ... for page numbers
+#define SETTING_GUI_START_FROM_PAGE     1// -1 for disabled; 0, 1, ... for page numbers
 
 #define DEBUG_INVERT_LCD            true
 #define DEBUG_NVS_ERASE_ON_INIT     false
-#define DEBUG_COM_DISABLE_UART      true
-#define DEBUG_COM_DISABLE_READINGS  false
+
+#define DEBUG_COM_DISABLE_UART      false
+#define DEBUG_COM_DISABLE_READINGS  true
 
 extern bool DEBUG_BOOL;
 extern SemaphoreHandle_t DEBUG_BOOL_MUT;
@@ -192,6 +193,11 @@ extern t_reg_var regulator;
 
 #define REG_NTCODE_UPDATE           0
 #define REG_NTCODE_UPDATE_NO_COM    1
+
+#define REG_MAX_SP      100
+#define REG_MIN_SP      1
+#define REG_MAX_H       10
+#define REG_MIN_H       0.1
 
 /*======================================================================================*/
 /* Sensor                                                                               */
