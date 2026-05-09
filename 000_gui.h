@@ -1,5 +1,6 @@
 #pragma once
 #include "common_includes.h"
+#include "000_gui/gui_qr_code.h"
 /*class definitions in 000_gui/ directory*/
 
 /*global values (colors, sizes, etc)*/
@@ -336,6 +337,8 @@ class gui_controller_t
     uint8_t list_top;
     lv_obj_t *header;
     lv_obj_t *soft_ver;
+    lv_obj_t *qr_code;
+    lv_obj_t *qr_code_label;
 
     gui_editor_t *editor_ptr;
 

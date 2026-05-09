@@ -13,7 +13,7 @@ void gui_controller_t::fill_gui()
 {
     page_list.push_back(new gui_page_t("Main", screen, editor_ptr, gui_init_page_readings));
     page_list.push_back(new gui_page_t("Regulation", screen, editor_ptr, gui_init_page_regulation));
-    page_list.push_back(new gui_page_t("Starter", screen, editor_ptr, gui_init_page_placeholder));
+    page_list.push_back(new gui_page_t("Starter", screen, editor_ptr, gui_init_page_starter));
     page_list.push_back(new gui_page_t("Servo control", screen, editor_ptr, gui_init_page_servos));
     page_list.push_back(new gui_page_t("Settings", screen, editor_ptr, gui_init_page_misc_settings));
     page_list.push_back(new gui_page_t("Info", screen, editor_ptr, gui_init_page_placeholder));
@@ -377,13 +377,16 @@ void gui_init_page_regulation(std::vector <gui_generic_field_t*>* selectable,
 }
 
 /*=======================================================================================================================================*/
-
 void gui_init_page_starter(std::vector <gui_generic_field_t*>* selectable,
     std::vector <gui_generic_field_t*>* unselectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen)
 {
-
+    lv_obj_t* object=lv_label_create(screen);
+    lv_label_set_text(object, "test");
+    lv_obj_set_style_text_color(object, GUI_COLOR_TEXT, 0);
+    lv_obj_align(object, LV_ALIGN_BOTTOM_MID, 0, 0);
+    deco->push_back(object);
 }
 
 /*=======================================================================================================================================*/

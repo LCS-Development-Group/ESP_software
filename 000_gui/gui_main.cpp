@@ -33,8 +33,6 @@ void gui_setup_global_styles()
     lv_style_set_border_width(gui_style_bg_tile, 0);
 }
 
-
-
 gui_controller_t::gui_controller_t()
 {
     //vars
@@ -53,19 +51,26 @@ gui_controller_t::gui_controller_t()
     lv_obj_set_style_bg_color(screen, GUI_COLOR_PAGE_BG, 0);
 
     //info headers
-    //uint8_t pos=(LCD_WIDTH-GUI_MENU_ENTRY_WIDTH_PX)/2+GUI_MENU_ENTRY_WIDTH_PX;
+    qr_code=lv_image_create(screen);
+    lv_image_set_src(qr_code, &manual_link_QR_descr);
+    lv_obj_align(qr_code, LV_ALIGN_TOP_MID, GUI_MENU_ENTRY_WIDTH_PX/2, 2*GUI_MENU_ENTRY_SPACING_PX);
+    // lv_obj_set_style_outline_color(qr_code, GUI_COLOR_TILE_BG, 0);
+    // lv_obj_set_style_outline_width(qr_code, QR_CODE_BORDER_PX, 0);
+
+    qr_code_label=lv_label_create(screen);
+    lv_label_set_text(qr_code_label, "Manual:");
+    lv_obj_set_style_text_color(qr_code_label, GUI_COLOR_TEXT, 0);
+    lv_obj_align_to(qr_code_label, qr_code, LV_ALIGN_OUT_TOP_MID, 0, -GUI_LABEL_OBJ_PADDING);
+
     header=lv_label_create(screen);
     lv_label_set_text(header, "Chamber " SETTING_CHAMBER_ID_STATIC);
     lv_obj_set_style_text_color(header, GUI_COLOR_TEXT, 0);
-    lv_obj_update_layout(header);
-    //lv_obj_set_pos(header, pos-(lv_obj_get_width(header)/2), GUI_MENU_ENTRY_SPACING_PX);
-    lv_obj_align(header, LV_ALIGN_TOP_RIGHT, 0, 0);
+    lv_obj_align_to(header, qr_code, LV_ALIGN_TOP_MID, 0, -2*GUI_MENU_ENTRY_SPACING_PX);
 
     soft_ver=lv_label_create(screen);
     lv_label_set_text(soft_ver, "LCS " SETTING_SOFTWARE_VERSION);
     lv_obj_set_style_text_color(soft_ver, GUI_COLOR_TEXT, 0);
     lv_obj_set_align(soft_ver, LV_ALIGN_BOTTOM_RIGHT);
-
 
     //finally
     this->fill_gui();

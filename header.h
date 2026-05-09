@@ -7,7 +7,7 @@
 
 #define SETTING_SOFTWARE_VERSION        "v2.0.0"
 #define SETTING_CHAMBER_ID_STATIC       "0"
-#define SETTING_GUI_START_FROM_PAGE     1// -1 for disabled; 0, 1, ... for page numbers
+#define SETTING_GUI_START_FROM_PAGE     2// -1 for disabled; 0, 1, ... for page numbers (indexes)
 
 #define DEBUG_INVERT_LCD            true
 #define DEBUG_NVS_ERASE_ON_INIT     false
