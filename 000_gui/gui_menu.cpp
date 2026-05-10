@@ -382,7 +382,21 @@ void gui_init_page_starter(std::vector <gui_generic_field_t*>* selectable,
     std::vector <lv_obj_t *>* deco,
     lv_obj_t* screen)
 {
-    lv_obj_t* object=lv_label_create(screen);
+    lv_obj_t* object;
+    gui_generic_field_t* field;
+
+    field=new gui_trigger_field_t(
+        new task_notify_pack_t(task_queue_list[ACT_TASKID], ACT_NTCODE_STEPPER_MANUAL_POS), 
+        screen, 20, 60, "+10");
+    selectable->push_back(field);
+
+    field=new gui_trigger_field_t(
+        new task_notify_pack_t(task_queue_list[ACT_TASKID], ACT_NTCODE_STEPPER_MANUAL_NEG), 
+        screen, 20, 90, "-10");
+    selectable->push_back(field);
+
+
+    object=lv_label_create(screen);
     lv_label_set_text(object, "test");
     lv_obj_set_style_text_color(object, GUI_COLOR_TEXT, 0);
     lv_obj_align(object, LV_ALIGN_BOTTOM_MID, 0, 0);

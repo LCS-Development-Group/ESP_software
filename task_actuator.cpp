@@ -46,6 +46,14 @@ void task_actuator_main(void *args)
                     update_servo(3);
                     break;
 
+                case ACT_NTCODE_STEPPER_MANUAL_POS:
+                    ESP_LOGI("ACT", "stepper pos");
+                    break;
+
+                case ACT_NTCODE_STEPPER_MANUAL_NEG:
+                    ESP_LOGI("ACT", "stepper neg");
+                    break;
+
                 default:
                     //ESP_LOGW("ACT", "Woken by unknown ntcode: %d", ntcode);
                     break;

@@ -169,6 +169,8 @@ extern t_servo servos[ACT_SERV_NUMOF];
 #define ACT_NTCODE_UPDATE_SERV3             3
 #define ACT_NTCODE_UPDATE_MEMB              4
 #define ACT_NTCODE_UPDATE_MEMB_NO_COM       5
+#define ACT_NTCODE_STEPPER_MANUAL_POS       6
+#define ACT_NTCODE_STEPPER_MANUAL_NEG       7
 
 void act_init();
 

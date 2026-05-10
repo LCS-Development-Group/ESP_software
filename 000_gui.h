@@ -57,10 +57,15 @@ inline lv_color_t GUI_COLOR_SW_OFF      =lv_color_hex(0x666666);
 extern lv_style_t *gui_style_menu_def;
 extern lv_style_t *gui_style_menu_sel;
 extern lv_style_t *gui_style_bg_tile;
+
+extern lv_style_t *gui_style_btn_def;
+extern lv_style_t *gui_style_btn_sel;
+extern lv_style_t *gui_style_btn_inv;
+
 void gui_setup_global_styles();
 extern char gui_char_buf[16];//this bad
 
-enum gui_field_type_t{SW_BOOL, SW_POS, FLOAT, INT16, TEXT, BACK_BTN, JUMP_BTN};
+enum gui_field_type_t{SW_BOOL, SW_POS, FLOAT, INT16, TEXT, BACK_BTN, JUMP_BTN, TRIGGER_BTN};
 struct task_notify_pack_t
 {
     QueueHandle_t task_queue;
@@ -139,6 +144,23 @@ public:
     void update_state() override {}// ? why is it an empty override?
 };
 
+#define GUI_TRIGGER_DELAY_MS 100
+class gui_trigger_field_t: public gui_generic_field_t
+{
+    public:
+    gui_trigger_field_t(
+        task_notify_pack_t *_ntpack, 
+        lv_obj_t* parrent,
+        uint16_t offset_x,
+        uint16_t offset_y,
+        const char* _text
+    );
+
+    void trigger();
+    void select_field() override;
+    void unselect_field() override;
+};
+
 class gui_float_field_t: public gui_generic_field_t
 {
     char gui_char_buf[16];
@@ -202,7 +224,6 @@ private:
     void float_to_string();
     void common_constructor(uint8_t indicator_size, lv_obj_t* parrent, uint16_t offset_x, uint16_t offset_y);
 };
-
 class gui_back_field_t: public gui_generic_field_t
 {
     lv_obj_t *button;

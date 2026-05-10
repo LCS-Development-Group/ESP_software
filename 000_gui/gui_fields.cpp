@@ -198,3 +198,40 @@ gui_jump_field_t::gui_jump_field_t(lv_obj_t* parrent, uint8_t _jump_idx)
     lv_obj_update_layout(button);
     lv_obj_align(button, LV_ALIGN_TOP_RIGHT, 0, 0);
 }
+
+//===============================================
+// trigger button
+//===============================================
+gui_trigger_field_t::gui_trigger_field_t(
+    task_notify_pack_t *_ntpack, 
+    lv_obj_t* parrent,
+    uint16_t offset_x,
+    uint16_t offset_y,
+    const char* _text
+):gui_generic_field_t(gui_field_type_t::TRIGGER_BTN, _ntpack, NULL)
+{
+    indicator=lv_label_create(parrent);
+    lv_label_set_text(indicator, _text);
+
+    lv_obj_add_style(indicator, gui_style_btn_def, LV_STATE_DEFAULT); //nothing
+    lv_obj_add_style(indicator, gui_style_btn_sel, LV_STATE_CHECKED); //selected
+
+    //fixed size
+    lv_obj_update_layout(indicator);
+    lv_obj_set_size(indicator, lv_obj_get_width(indicator), lv_obj_get_height(indicator));
+    lv_obj_align(indicator, LV_ALIGN_TOP_LEFT, offset_x, offset_y);
+}
+
+void gui_trigger_field_t::trigger()
+{
+    this->send_ntcode();
+}
+
+void gui_trigger_field_t::select_field()
+{
+    lv_obj_add_state(indicator, LV_STATE_CHECKED);
+}
+void gui_trigger_field_t::unselect_field()
+{
+    lv_obj_remove_state(indicator, LV_STATE_CHECKED);
+}

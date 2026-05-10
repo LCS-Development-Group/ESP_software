@@ -126,6 +126,12 @@ uint8_t gui_page_t::cmd_enter()
             case gui_field_type_t::INT16:       break;
             case gui_field_type_t::SW_POS:      break;
             case gui_field_type_t::TEXT:        break;
+            case gui_field_type_t::TRIGGER_BTN:{
+                gui_trigger_field_t *temp=static_cast<gui_trigger_field_t*>(selectable[field_index]);
+                temp->trigger();
+                break;
+            }
+
             default:
                 break;
         }
