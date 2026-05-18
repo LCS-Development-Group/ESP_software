@@ -8,24 +8,37 @@ protected:
     uint8_t port;
     uint8_t addr;
     SemaphoreHandle_t mutex;
+    bool is_present;
     bool is_initialized;
     bool proceed_when_fail;
-
+    uint8_t failed_reads;
 
 public:
     t_sensor(uint8_t _port, uint8_t _addr, bool _proceed_when_fail);
 
     uint8_t get_port() const {return port;}
     uint8_t get_addr() const {return addr;}
+
+    bool get_is_present() const {return is_present;}
+    void set_is_present(bool _is_present) {is_present=_is_present;}
+    
     bool get_is_initialized() const {return is_initialized;}
+    void set_is_initialized(bool _is_initialized) {is_initialized=_is_initialized;}
+    
     bool get_proceed_when_fail() const {return proceed_when_fail;}
+
     SemaphoreHandle_t *get_mutex_ptr() {return &mutex;}
     SemaphoreHandle_t get_mutex() {return mutex;}
+
+    //uint8_t get_failed_reads() const {return failed_reads;}
+    //void increment_failed_reads() {failed_reads++;}
+    //void reset_failed_reads() {failed_reads=0;}
 
     virtual void reset_variable()=0;
     virtual void reset_variable_without_mutex()=0;
     virtual void connection_initialize()=0;
     virtual void take_readings()=0;
+    virtual void init_device()=0;
 };
 
 class t_RHT_sensor: public t_sensor
@@ -52,6 +65,7 @@ public:
     void reset_variable_without_mutex() override;
     void connection_initialize() override;
     void take_readings() override;
+    void init_device() override;
 };
 
 class t_INA_sensor: public t_sensor
@@ -82,22 +96,5 @@ public:
     void reset_variable_without_mutex() override;
     void connection_initialize() override;
     void take_readings() override;
+    void init_device() override;
 };
-
-
-/*
-    Boilerplate INA
-Main (poprawne wywołanie)
-    Popraw COMM
-    Popraw REG
-    Popraw GUI
-
-TESTY
-
-cała INA
-
-TESTY
-
-reintegracja informacji o braku sensora przy włączaniu i informacja o rozłączeniu
-
-*/

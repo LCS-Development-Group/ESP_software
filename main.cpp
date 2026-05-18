@@ -108,6 +108,11 @@ void setup()
     init_queue(LCD_TASKID, LCD_QUEUE_DEPTH);
 
     misc_init();
+
+    sen_init();
+    probe_for_I2C_sensors();
+    vTaskDelay(pdMS_TO_TICKS(100));
+
     exp_init();
     init_nvs();
 
@@ -116,8 +121,9 @@ void setup()
     lcd_init();
     
     act_init();
-    sen_init();
+    sen_connect();
     vTaskDelay(pdMS_TO_TICKS(100));
+    
     reg_init();
     starter_init();
     com_init();

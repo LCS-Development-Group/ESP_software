@@ -44,22 +44,44 @@ void task_sensor_main(void *args)
 void sen_init()
 {
     RHT_int=new t_RHT_sensor(SEN_RHT_INT_PORT, SEN_RHT_INT_ADDR, SEN_RHT_INT_PROCEED_CONNFAIL, SEN_MIN_VAL, SEN_MIN_VAL);
-    RHT_int->connection_initialize();
 
     RHT_ext=new t_RHT_sensor(SEN_RHT_EXT_PORT, SEN_RHT_EXT_ADDR, SEN_RHT_EXT_PROCEED_CONNFAIL, SEN_MIN_VAL, SEN_MIN_VAL);
-    RHT_ext->connection_initialize();
-
+    
     CURSEN=new t_INA_sensor(SEN_CURSEN_PORT, SEN_CURSEN_ADDR, SEN_CURSEN_PROCEED_CONNFAIL, SEN_MIN_VAL, SEN_MIN_VAL, SEN_MIN_VAL);
-    CURSEN->connection_initialize();
 }
 
+void sen_connect()
+{
+    if(RHT_int->get_is_present()==true)
+    {
+        ESP_LOGI("SEN", "int present %d", RHT_int->get_is_present());
+        RHT_int->init_device();
+        RHT_int->connection_initialize();
+    }
+
+    if(RHT_ext->get_is_present()==true)
+    {
+        RHT_ext->init_device();
+        RHT_ext->connection_initialize();
+    }
+    
+    if(CURSEN->get_is_present()==true)
+    {
+        CURSEN->init_device();
+        CURSEN->connection_initialize();
+    }
+}
 
 //==================================================================================================================
 // t_sensor                                                                                               
 //==================================================================================================================
 
 t_sensor::t_sensor(uint8_t _port, uint8_t _addr, bool _proceed_when_fail)
-:port(_port), addr(_addr), proceed_when_fail(_proceed_when_fail){}
+:port(_port), addr(_addr), proceed_when_fail(_proceed_when_fail)
+{
+    is_initialized=false;
+    is_present=false;
+}
 
 //==================================================================================================================
 // RHT                                                                                              
@@ -74,13 +96,7 @@ t_RHT_sensor::t_RHT_sensor(uint8_t _port, uint8_t _addr, bool _proceed_when_fail
         ESP_LOGE("SEN", "t_RHT_sensor variable mutex creation error");
         exit(-1);
     }
-    
     reset_variable();
-
-    //dev descr. creation
-    dev=new sht3x_t();
-
-    ESP_ERROR_CHECK(sht3x_init_desc(dev, addr, static_cast<i2c_port_t>(port), i2c_bus[port].SDA_pin , i2c_bus[port].SCL_pin));
 }
 
 t_RHT_sensor::~t_RHT_sensor(){if(dev!=nullptr) delete dev;}
@@ -97,6 +113,12 @@ void  t_RHT_sensor::reset_variable_without_mutex()
 {
     RH=default_RH;
     T=default_T;
+}
+
+void t_RHT_sensor::init_device()
+{
+    dev=new sht3x_t();
+    ESP_ERROR_CHECK(sht3x_init_desc(dev, addr, static_cast<i2c_port_t>(port), i2c_bus[port].SDA_pin , i2c_bus[port].SCL_pin));
 }
 
 void t_RHT_sensor::connection_initialize()
@@ -127,10 +149,18 @@ void t_RHT_sensor::take_readings()
         if(err!=ESP_OK)
         {
             ESP_LOGW("SEN", "RHT [0x%02X at %d] failed to take readings (%s)", addr, port, esp_err_to_name(err));
-            reset_variable_without_mutex();
-            xEventGroupSetBits(main_event_group, SYSTEM_REBOOT_EVBIT);
-            ESP_LOGW("SEN", "REBOOT");
+            failed_reads++;
+            if(failed_reads>=SEN_READING_FAIL_LIM)
+            {
+               is_initialized=false; 
+               reset_variable_without_mutex();
+               if(SEN_MSG_ON_FAIL)
+               {
+                    handle_missing_sensors();
+               }
+            } 
         }
+        else failed_reads=0;
         xSemaphoreGive(i2c_bus[port].mutex);
         xSemaphoreGive(mutex);
     }
@@ -149,13 +179,7 @@ t_INA_sensor::t_INA_sensor(uint8_t _port, uint8_t _addr, bool _proceed_when_fail
         ESP_LOGE("SEN", "t_INA_sensor variable mutex creation error");
         exit(-1);
     }
-
-    
     reset_variable();
-
-    //dev descr. creation
-    dev=new ina219_t();
-    ESP_ERROR_CHECK(ina219_init_desc(dev, addr, static_cast<i2c_port_t>(port), i2c_bus[port].SDA_pin , i2c_bus[port].SCL_pin));
 }
 
 void t_INA_sensor::reset_variable()
@@ -172,6 +196,11 @@ void t_INA_sensor::reset_variable_without_mutex()
     current=default_current;
     voltage=default_voltage;
     power=default_power;
+}
+void t_INA_sensor::init_device()
+{
+    dev=new ina219_t();
+    ESP_ERROR_CHECK(ina219_init_desc(dev, addr, static_cast<i2c_port_t>(port), i2c_bus[port].SDA_pin , i2c_bus[port].SCL_pin)); 
 }
 
 void t_INA_sensor::connection_initialize()
@@ -209,9 +238,20 @@ void t_INA_sensor::take_readings()
         if(err!=ESP_OK)
         {
             ESP_LOGW("SEN", "CURSEN [0x%02X at %d] failed to take readings (%s)", addr, port, esp_err_to_name(err));
+            failed_reads++;
+            if(failed_reads>=SEN_READING_FAIL_LIM)
+            {
+               is_initialized=false; 
+               reset_variable_without_mutex();
+               if(SEN_MSG_ON_FAIL)
+               {
+                    handle_missing_sensors();
+               }
+            } 
         }
         else
         {
+            failed_reads=0;
             vTaskDelay(pdMS_TO_TICKS(SEN_CURSEN_WAIT_MS));
             ESP_ERROR_CHECK(ina219_get_bus_voltage(dev, &voltage));
             ESP_ERROR_CHECK(ina219_get_current(dev, &current));

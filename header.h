@@ -65,6 +65,7 @@ void init_queue(uint8_t taskid, uint8_t depth);
 void unstuck_i2c_bus(uint8_t port);//possibly deprecated
 void system_gentle_reboot();
 void handle_missing_sensors();
+void probe_for_I2C_sensors(); //true means something is missing
 
 #define TP0_PIN     GPIO_EXP_NUM_B3
 #define TP1_PIN     GPIO_EXP_NUM_B2
@@ -206,12 +207,17 @@ extern t_reg_var regulator;
 /*======================================================================================*/
 void task_sensor_main(void *args);
 void sen_init();
+void sen_connect();
+
+#define SEN_PROCEED_DELAY_S     10
+#define SEN_READING_FAIL_LIM    3
+#define SEN_MSG_ON_FAIL         true
 
 /*SHT35 internal*/
 extern t_RHT_sensor *RHT_int;
 #define SEN_RHT_INT_ADDR                0x44
 #define SEN_RHT_INT_PORT                I2C0_PORT
-#define SEN_RHT_INT_PROCEED_CONNFAIL    true //readings critical to the system (lack thereof = not much works)
+#define SEN_RHT_INT_PROCEED_CONNFAIL    false //false - readings critical to the system (lack thereof = not much works)
 
 /*SHT35 external*/
 extern t_RHT_sensor *RHT_ext;
@@ -380,6 +386,7 @@ void enc_pnct_init();
 void task_gui_main(void *args);
 
 extern gui_controller_t *gui;
+extern lv_display_t *display;
 
 void gui_init();
 
